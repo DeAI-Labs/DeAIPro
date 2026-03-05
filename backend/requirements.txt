@@ -1,7 +1,39 @@
+# Core FastAPI & Server
 fastapi
 uvicorn
-pydantic
 gunicorn
+pydantic
+
+# Authentication & Security
 firebase-admin
+slowapi
+python-jose[cryptography]
+
+# HTTP & Async
 httpx
+
+# Data & Environment
 python-dotenv
+requests
+beautifulsoup4
+
+# Bittensor SDK
+bittensor
+
+# Database
+pymongo
+motor
+
+# Logging & Monitoring
+structlog
+sentry-sdk
+
+# Testing
+pytest
+pytest-asyncio
+pytest-cov
+respx
+
+# Development
+flake8
+mypy

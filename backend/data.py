@@ -230,7 +230,7 @@ SubnetState {
 
 <div class="lesson-section">
 <h3>Consensus Mechanisms: Yuma Consensus Deep Dive</h3>
-<p><strong>Yuma Consensus</strong> represents Bittensor's novel approach to decentralized quality assessment. Unlike traditional blockchain consensus (which validates transactions), Yuma validates <em>intelligence</em>—a fundamentally subjective and multidimensional quantity.</p>
+<p><strong>Yuma Consensus</strong> represents Bittensor's novel approach to decentralized quality assessment. Unlike traditional blockchain consensus (which validates transactions), Yuma validates <em>intelligence</em> - a fundamentally subjective and multidimensional quantity.</p>
 
 <h4>The Consensus Challenge</h4>
 <p>Evaluating AI output quality faces several challenges:</p>
@@ -267,7 +267,7 @@ where:
         "content": """
 <div class="lesson-section">
 <h3>Mining: The Production Layer of Decentralized AI</h3>
-<p>Miners in Bittensor serve as the <strong>productive capacity</strong> of the network—they deploy AI models, allocate compute resources, and respond to queries in exchange for TAO emissions. Understanding mining economics and optimization is essential for both operators and investors.</p>
+<p>Miners in Bittensor serve as the <strong>productive capacity</strong> of the network - they deploy AI models, allocate compute resources, and respond to queries in exchange for TAO emissions. Understanding mining economics and optimization is essential for both operators and investors.</p>
 
 <h4>Miner Architecture</h4>
 <p>A production-grade mining operation consists of several components:</p>
