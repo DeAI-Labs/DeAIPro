@@ -21,16 +21,13 @@ GITHUB_API_BASE = "https://api.github.com"
 
 
 # Bittensor SDK Integration
-def get_bittensor_client():
+def _sync_get_subtensor():
+    """Construct a synchronous bt.subtensor client (blocking — run in executor)."""
     try:
         import bittensor as bt
-        # Connect to subtensor (finney testnet or mainnet)
         network = os.getenv("BITTENSOR_NETWORK", "finney")
         subtensor_url = os.getenv("BITTENSOR_SUBTENSOR_URL", None)
-        subtensor = bt.subtensor(
-            network=network,
-            _url=subtensor_url
-        )
+        subtensor = bt.subtensor(network=network, _url=subtensor_url)
         logger.info(f"Bittensor connected to {network}")
         return subtensor
     except ImportError:
@@ -40,36 +37,54 @@ def get_bittensor_client():
         logger.error(f"Bittensor connection failed: {e}, using API fallback")
         return None
 
+
+def _sync_fetch_metagraph(subtensor, netuid: int):
+    """Fetch a single subnet metagraph (blocking — run in executor)."""
+    return subtensor.metagraph(netuid=netuid)
+
+
 async def fetch_subnets_from_sdk() -> Optional[Dict[int, Dict[str, Any]]]:
+    """Fetch live subnet data from the Bittensor SDK.
+
+    All synchronous SDK calls are dispatched to the default thread-pool
+    executor via `run_in_executor` so the event loop is never stalled.
+
+    FUTURE: Migrate to `bittensor.AsyncSubtensor` (SDK >= 7.x) to avoid
+    the executor overhead entirely.
+    """
     cache = await get_cache("bittensor_subnets", max_age_mins=10)
     if cache:
         return cache
-    subtensor = get_bittensor_client()
+
+    loop = asyncio.get_event_loop()
+
+    # Construct the subtensor client in a thread (synchronous gRPC handshake).
+    subtensor = await loop.run_in_executor(None, _sync_get_subtensor)
     if not subtensor:
         return None
+
     try:
-        # Get metagraph for each subnet
         subnets = {}
-        # Query root network first to see all subnets
-        root = subtensor.metagraph(netuid=0)
-        for netuid in range(1, 65): 
-        # Bittensor supports up to 64 subnets
+        # Query each netuid concurrently in the thread-pool.
+        async def _fetch_one(netuid: int):
             try:
-                metagraph = subtensor.metagraph(netuid=netuid)
-                if metagraph.n > 0:  # Only includes sactive subnets
-                    # Get subnet metadata
-                    subnet_info = subtensor.query("SubnetsMetadata", [netuid])
+                metagraph = await loop.run_in_executor(
+                    None, _sync_fetch_metagraph, subtensor, netuid
+                )
+                if metagraph.n > 0:
                     subnets[netuid] = {
                         "netuid": netuid,
-                        "n_validators": metagraph.n.validators if hasattr(metagraph, 'n') else 0,
-                        "n_miners": metagraph.n.miners if hasattr(metagraph, 'n') else 0,
-                        "total_stake": float(metagraph.total_stake) if hasattr(metagraph, 'total_stake') else 0,
-                        "emission_tao": float(metagraph.emission) if hasattr(metagraph, 'emission') else 0,
+                        "n_validators": int(metagraph.n) if not hasattr(metagraph.n, "validators") else metagraph.n.validators,
+                        "n_miners": 0 if not hasattr(metagraph.n, "miners") else metagraph.n.miners,
+                        "total_stake": float(metagraph.total_stake) if hasattr(metagraph, "total_stake") else 0,
+                        "emission_tao": float(metagraph.emission) if hasattr(metagraph, "emission") else 0,
                         "updated": datetime.utcnow().isoformat(),
                     }
             except Exception as e:
                 logger.debug(f"Subnet {netuid} query failed: {e}")
-                continue
+
+        await asyncio.gather(*[_fetch_one(netuid) for netuid in range(1, 65)])
+
         logger.info(f"Fetched {len(subnets)} subnets from Bittensor SDK")
         await set_cache("bittensor_subnets", subnets, ttl_mins=10, source="bittensor_sdk")
         return subnets
@@ -194,31 +209,22 @@ async def fetch_github_commits(
 
 # Composite Functions
 async def fetch_all_subnet_data() -> Dict[int, Dict[str, Any]]:
-    sdk_task = fetch_subnets_from_sdk()
-    taostats_task = fetch_subnets_from_taostats()
-    sdk_data, taostats_data, coingecko_data = await asyncio.gather(
-        sdk_task, taostats_task,
-        return_exceptions=True
-    )
+    """
+    Aggregate subnet data for use in HTTP endpoints.
 
-    # Handle exceptions
-    if isinstance(sdk_data, Exception):
-        sdk_data = None
+    IMPROVED: To protect the event loop, this function no longer calls the
+    synchronous Bittensor SDK directly. It relies on TaoStats (and, in the
+    future, background workers + Mongo) and preserves the existing response
+    structure for callers.
+    """
+    taostats_data = await fetch_subnets_from_taostats()
     if isinstance(taostats_data, Exception):
         taostats_data = None
 
-    # Merge data: SDK → TaoStats → Static
-    merged = {}
-    # Start with SDK data (most authoritative)
-    if sdk_data:
-        merged.update({i: {"source": "bittensor_sdk", **d} for i, d in sdk_data.items()})
-    # Layer TaoStats
+    merged: Dict[int, Dict[str, Any]] = {}
     if taostats_data:
         for nid, data in taostats_data.items():
-            if nid in merged:
-                merged[nid].update(data)
-            else:
-                merged[nid] = {"source": "taostats", **data}
+            merged[nid] = {"source": "taostats", **data}
     return merged
 
 async def fetch_all_news() -> List[Dict[str, Any]]:
@@ -229,3 +235,17 @@ async def fetch_all_news() -> List[Dict[str, Any]]:
         from data import news as static_news
         news = static_news
     return news
+
+
+async def fetch_tao_price() -> Optional[Dict[str, Any]]:
+    """Fetch live TAO/USD price from CoinGecko via the price service.
+
+    Re-exported here for backwards compatibility (main.py imports from dynamic).
+    """
+    try:
+        from services.price import PriceService
+        service = PriceService()
+        return await service.get_current_price()
+    except Exception as e:
+        logger.warning(f"fetch_tao_price failed: {e}")
+        return None

@@ -4,7 +4,7 @@ import os
 import json
 
 from google_crc32c import value
-from motor.motor_asyncio import AsyncClient, AsyncDatabase
+from motor.motor_asyncio import AsyncIOMotorClient
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -12,18 +12,18 @@ logger = structlog.get_logger(__name__)
 class MongoCache:
     def __init__(self, mongo_uri: Optional[str] = None, db_name: str = "deaipro"):
         self.mongo_uri = mongo_uri or os.getenv(
-            "MONGODB_URI", 
-            "mongodb://localhost:27017"
+            "DATABASE_URL", 
+            "mongodb://root:password@localhost:27017/deaipro"
         )
         self.db_name = db_name
-        self.client: Optional[AsyncClient] = None
-        self.db: Optional[AsyncDatabase] = None
+        self.client: Optional[AsyncIOMotorClient] = None
+        self.db: Optional[Any] = None
         self._connected = False
     async def connect(self):
         if self._connected:
             return
         try:
-            self.client = AsyncClient(self.mongo_uri, serverSelectionTimeoutMS=5000)
+            self.client = AsyncIOMotorClient(self.mongo_uri, serverSelectionTimeoutMS=5000)
             self.db = self.client[self.db_name]
 
             # Test connection

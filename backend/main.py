@@ -1,10 +1,10 @@
 from typing import Optional, List, Dict, Any
-from fastapi import FastAPI, Depends, HTTPException, status, Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import FastAPI, Depends, HTTPException, status, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 import firebase_admin
-from firebase_admin import credentials, auth
+from firebase_admin import credentials
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -14,11 +14,23 @@ import asyncio
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
+# FUTURE: Platform roadmap (backend)
+# - Integrate Bittensor Python SDK for on-chain subnet/owner/scoring data.
+# - Migrate all in-memory/static caching to MongoDB-backed collections.
+# - Add live news ingestion from TAO Daily and other ecosystem feeds.
+# - Expose GitHub subnet commits and activity as a dedicated endpoint.
+# - Port validator APY / yield modelling from TaoYield codebase.
+# - Support Bittensor wallet signature–based login in addition to Firebase.
+# - Enforce consistent rate limiting across all routes and WebSocket channels.
+# - Add a comprehensive automated test suite (unit + integration).
+
 # Import static fallback data
 from data import subnets as static_subnets, news as static_news, research as static_research, lessons as static_lessons
 
 # Import cache and dynamic data functions
 from cache import init_cache, close_cache, get_cache, set_cache
+from websocket_manager import price_ticker_manager
+from services.pdf import PDFReportGenerator
 from dynamic import (
     fetch_tao_price,
     fetch_subnet_tokens_from_coingecko,
@@ -88,51 +100,107 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Authentication
-security = HTTPBearer()
+# Authentication — canonical implementations live in dependencies/auth.py
+from dependencies.auth import (
+    CurrentUser,
+    get_current_user,
+    require_admin,
+    require_staff,
+    get_or_create_temp_access,
+)
 
-# Lifecycle Events
-async def startup_event():
-    logger.info("🚀 DeAIPro starting up...")
-    try:
-        await init_cache()
-        logger.info("✓ MongoDB cache initialized")
-    except Exception as e:
-        logger.error(f"⚠️ Cache initialization failed: {e}")
-@app.on_event("shutdown")
-async def shutdown_event():
-    logger.info("🛑 DeAIPro shutting down...")
-    await close_cache()
-
-# Auth Helpers and Dependencies
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    try:
-        user = auth.verify_id_token(credentials.credentials)
-        logger.debug("User verified", user_id=user.get("uid"))
-        return user
-    except Exception as e:
-        logger.warning(f"Token verification failed: {e}")
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid token: {e}")
-
-async def require_admin(user: dict = Depends(get_current_user)):
-    email = user.get("email", "").lower()
-    if not email.endswith("@deaistrategies.io"):
-        logger.warning(f"Admin access denied for {email}")
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required.")
-    logger.info(f"Admin action by {email}")
-    return user
-
+# Optional-user helper for public endpoints that optionally accept a token
 async def get_optional_user(request: Request):
+    """Return a CurrentUser if a valid Bearer token is present, else None."""
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
         return None
     token = auth_header.split(" ", 1)[1]
+    from dependencies.auth import verify_token
     try:
-        user = auth.verify_id_token(token)
-        logger.debug("Optional user verified", user_id=user.get("uid"))
-        return user
+        decoded = await verify_token(token)
+        if not decoded:
+            return None
+        return decoded
     except Exception:
         return None
+
+# Lifecycle Events
+@app.on_event("startup")
+async def startup_event():
+    logger.info("🚀 DeAIPro starting up...")
+    try:
+        # Initialize database connection
+        from dependencies.db import db
+        await db.connect()
+        logger.info("✓ MongoDB connection established")
+    except Exception as e:
+        logger.error(f"⚠️ Database initialization failed: {e}")
+        raise
+
+    # IMPROVED: Initialize Mongo-backed cache (best effort, non-fatal).
+    try:
+        await init_cache()
+        logger.info("✓ Cache layer initialized")
+    except Exception as e:
+        logger.warning(f"⚠️ Cache initialization failed; continuing without cache: {e}")
+
+    try:
+        # Initialize and start scheduler
+        from workers import init_scheduler, start_scheduler
+        init_scheduler()
+        await start_scheduler()
+        logger.info("✓ Background scheduler initialized and started")
+    except Exception as e:
+        logger.error(f"⚠️ Scheduler initialization failed: {e}")
+        # Don't raise - scheduler is optional for basic functionality
+
+    # Phase 4: Verify WeasyPrint system libraries are present.
+    # This catches missing libcairo/libpango on bare-metal or broken CI images
+    # at startup rather than silently crashing during the first PDF request.
+    try:
+        import asyncio as _asyncio
+        loop = _asyncio.get_event_loop()
+        def _check_weasyprint():
+            import weasyprint
+            weasyprint.HTML(string="<html><body>ok</body></html>").write_pdf()
+        await loop.run_in_executor(None, _check_weasyprint)
+        logger.info("✓ WeasyPrint and system PDF libraries verified")
+    except Exception as e:
+        logger.warning(
+            f"⚠️ WeasyPrint system dependency check FAILED: {e}. "
+            "Install libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0. "
+            "PDF report endpoints will error until this is resolved."
+        )
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("🛑 DeAIPro shutting down...")
+    try:
+        # Stop scheduler
+        from workers import stop_scheduler
+        await stop_scheduler()
+        logger.info("✓ Scheduler stopped")
+    except Exception as e:
+        logger.warning(f"Scheduler shutdown warning: {e}")
+
+    try:
+        # Close database connection
+        from dependencies.db import db
+        await db.disconnect()
+        logger.info("✓ Database connection closed")
+    except Exception as e:
+        logger.warning(f"Database shutdown warning: {e}")
+
+    # IMPROVED: Shut down cache (if it was initialized).
+    try:
+        await close_cache()
+        logger.info("✓ Cache layer closed")
+    except Exception as e:
+        logger.warning(f"Cache shutdown warning: {e}")
+
+
 
 # Pydantic Models
 class AccessRequest(BaseModel):
@@ -271,6 +339,33 @@ async def get_historical_tao(request: Request, days: int = 30):
     cached = await get_cache(cache_key, max_age_mins=60)
     if cached:
         return cached
+    return []
+
+
+# Fear & Greed sentiment index
+@app.get("/api/market/sentiment")
+@limiter.limit("30/minute")
+async def get_market_sentiment(request: Request):
+    """Return the current Fear & Greed Index for the TAO ecosystem.
+
+    Scores 0 (Extreme Fear) to 100 (Extreme Greed) based on:
+      - Price Volatility     (25 %)
+      - Market Momentum      (25 %)
+      - Volume Momentum      (25 %)
+      - GitHub Dev Activity  (25 %)
+    """
+    cache_key = "market_sentiment"
+    cached = await get_cache(cache_key, max_age_mins=60)
+    if cached:
+        return cached
+    try:
+        from services.sentiment import FearGreedEngine
+        result = await FearGreedEngine.compute()
+        await set_cache(cache_key, result, ttl_mins=60, source="fear_greed_engine")
+        return result
+    except Exception as e:
+        logger.error(f"Sentiment endpoint error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to compute sentiment index")
 
 # Request Access Authentication
 @app.post("/api/request-access")
@@ -340,3 +435,149 @@ async def admin_status(admin: dict = Depends(require_admin)):
     except Exception as e:
         logger.error(f"Admin status check failed: {e}")
         raise HTTPException(status_code=500, detail="Failed to get status")
+
+
+# ============================================================================
+# Reports: PDF Generation
+# ============================================================================
+
+@app.get("/api/reports/market")
+async def get_market_report(request: Request, user: CurrentUser = Depends(get_current_user)):
+    """Generate a market report PDF (authenticated users only)."""
+    try:
+        # Fetch current market data
+        stats = await fetch_all_subnet_data()
+        tao_price = await fetch_tao_price()
+
+        if not stats:
+            raise HTTPException(status_code=500, detail="Failed to fetch market data")
+
+        # Generate PDF
+        pdf_data = PDFReportGenerator.generate_market_report(
+            tao_price=tao_price,
+            market_cap=stats.get("market_cap", 0),
+            volume_24h=stats.get("volume_24h", 0),
+            active_subnets=stats.get("active_subnets", 0),
+            subnets_data=stats.get("subnets", []),
+        )
+
+        logger.info("Market report generated", user_id=user.uid)
+
+        # StreamingResponse is correct for BytesIO objects; FileResponse expects a path.
+        pdf_data.seek(0)
+        filename = f"DeAIPro_Market_Report_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.pdf"
+        return StreamingResponse(
+            pdf_data,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Market report generation failed: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate report")
+
+
+@app.get("/api/reports/subnet/{subnet_id}")
+async def get_subnet_report(
+    subnet_id: int,
+    request: Request,
+    user: CurrentUser = Depends(get_current_user),
+):
+    """Generate a detailed subnet report PDF (authenticated users only)."""
+    try:
+        # Fetch all subnets and find the requested one
+        all_subnets = await fetch_all_subnet_data()
+
+        if not all_subnets:
+            raise HTTPException(status_code=404, detail="Subnet not found")
+
+        # all_subnets is Dict[int, dict] from fetch_all_subnet_data()
+        subnet = all_subnets.get(subnet_id)
+        if not subnet:
+            raise HTTPException(status_code=404, detail=f"Subnet {subnet_id} not found")
+
+        # Fix: fetch_github_commits expects (owner, repo), not a full URL.
+        # Parse the github_url to extract owner/repo.
+        github_url = subnet.get("github_url", "")
+        github_commits_count = 0
+        if github_url and "github.com/" in github_url:
+            try:
+                parts = github_url.rstrip("/").split("github.com/")[1].split("/")
+                if len(parts) >= 2:
+                    commits_list = await fetch_github_commits(parts[0], parts[1])
+                    github_commits_count = len(commits_list) if commits_list else 0
+            except Exception as gh_err:
+                logger.warning(f"GitHub fetch failed for subnet {subnet_id}: {gh_err}")
+
+        # Generate PDF
+        pdf_data = PDFReportGenerator.generate_subnet_report(
+            subnet_name=subnet.get("name", "Unknown"),
+            subnet_id=subnet_id,
+            market_cap=subnet.get("market_cap_millions", 0),
+            apy=subnet.get("apy", 0),
+            validators_count=subnet.get("validator_count", 0),
+            miners_count=subnet.get("miner_count", 0),
+            github_commits=github_commits_count,
+        )
+
+        logger.info(f"Subnet report generated", subnet_id=subnet_id, user_id=user.uid)
+
+        # StreamingResponse is correct for BytesIO objects; FileResponse expects a path.
+        pdf_data.seek(0)
+        name = subnet.get("name", str(subnet_id))
+        filename = f"DeAIPro_Subnet_{name}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.pdf"
+        return StreamingResponse(
+            pdf_data,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Subnet report generation failed: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate report")
+
+
+# ============================================================================
+# WebSocket: Real-time Price Ticker
+# ============================================================================
+
+@app.websocket("/ws/price-ticker")
+async def websocket_price_ticker(websocket: WebSocket):
+    """WebSocket endpoint for real-time TAO price updates.
+    
+    Clients connect and receive price updates every 30 seconds.
+    """
+    await price_ticker_manager.connect(websocket)
+    
+    try:
+        # Send initial price to client
+        current_price = await fetch_tao_price()
+        await websocket.send_json({
+            "type": "price_update",
+            "tao_price": current_price,
+            "timestamp": datetime.utcnow().isoformat(),
+        })
+        
+        # Keep connection alive and send periodic updates
+        while True:
+            try:
+                # Wait for any message from client (e.g., ping/keepalive)
+                # This will raise WebSocketDisconnect when client closes
+                await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+            except asyncio.TimeoutError:
+                # Send price update every 30 seconds
+                current_price = await fetch_tao_price()
+                await price_ticker_manager.broadcast_price_update(
+                    current_price,
+                    datetime.utcnow().isoformat()
+                )
+            except WebSocketDisconnect:
+                await price_ticker_manager.disconnect(websocket)
+                logger.info("WebSocket price ticker client disconnected")
+                break
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+        await price_ticker_manager.disconnect(websocket)
+
