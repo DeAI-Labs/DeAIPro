@@ -1,0 +1,88 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: deaipro_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: deaipro
+    ports:
+      - "${MONGODB_PORT:-27017}:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - deaipro_network
+    healthcheck:
+      test: ['CMD', 'mongosh', 'localhost:27017/test', '-u', 'root', '-p', 'password']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: deaipro_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mongodb://${MONGODB_USER:-root}:${MONGODB_PASSWORD:-password}@mongodb:27017/deaipro
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      TAOSTATS_API_KEY: ${TAOSTATS_API_KEY}
+      TAOSTATS_API_URL: ${TAOSTATS_API_URL:-https://api.taostats.io}
+      TAOMARKETCAP_API_URL: ${TAOMARKETCAP_API_URL:-https://api.taomarketcap.com}
+      SENTRY_DSN_BACKEND: ${SENTRY_DSN_BACKEND}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app
+      - /app/__pycache__
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - deaipro_network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/api/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: deaipro_frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8000
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN}
+      NEXT_PUBLIC_ENVIRONMENT: ${ENVIRONMENT:-development}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - deaipro_network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: npm run dev
+
+volumes:
+  mongo_data:
+    driver: local
+
+networks:
+  deaipro_network:
+    driver: bridge

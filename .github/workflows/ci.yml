@@ -1,0 +1,254 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: deai-labs/deaipro/backend
+  FRONTEND_IMAGE: deai-labs/deaipro/frontend
+
+jobs:
+  # ============================================================================
+  # Backend: Lint, Type Check, Test
+  # ============================================================================
+  backend-quality:
+    name: Backend Quality Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Format check (Black)
+        run: black --check app config middleware
+
+      - name: Lint (Flake8)
+        run: flake8 app config middleware
+
+      - name: Type check (Mypy)
+        run: mypy app config middleware
+
+      - name: Sort imports (isort)
+        run: isort --check-only app config middleware
+
+  # Backend Tests
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: backend-quality
+    defaults:
+      run:
+        working-directory: ./backend
+
+    services:
+      mongodb:
+        image: mongo:7.0
+        env:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: test_password
+        options: >-
+          --health-cmd mongosh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: mongodb://root:test_password@localhost:27017/deaipro_test
+      ENVIRONMENT: testing
+      DEBUG: 'false'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest --cov=app --cov-report=xml
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+          fail_ci_if_error: false
+
+  # ============================================================================
+  # Frontend: Lint, Type Check, Build
+  # ============================================================================
+  frontend-quality:
+    name: Frontend Quality Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint || true  # Don't fail on lint warnings
+
+      - name: Type check
+        run: npm run type-check || true
+
+  # Frontend Build
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    needs: frontend-quality
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.example.com
+
+  # ============================================================================
+  # Docker Build
+  # ============================================================================
+  docker-build:
+    name: Docker Images Build
+    runs-on: ubuntu-latest
+    needs: [backend-quality, frontend-build]
+    if: github.event_name == 'push'
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (Backend)
+        id: meta-backend
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=sha
+            type=semver,pattern={{version}}
+
+      - name: Build and push Backend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}:buildcache,mode=max
+
+      - name: Extract metadata (Frontend)
+        id: meta-frontend
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=sha
+            type=semver,pattern={{version}}
+
+      - name: Build and push Frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.dev
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
+
+  # ============================================================================
+  # Deployment (Phase 2+)
+  # ============================================================================
+  # Deploy jobs will be added in Phase 2
+  # - Deploy to staging (on develop branch)
+  # - Deploy to production (on main branch, requires approval)
+
+  # ============================================================================
+  # Status Check
+  # ============================================================================
+  ci-status:
+    name: CI Status
+    runs-on: ubuntu-latest
+    needs: [backend-quality, backend-test, frontend-quality, frontend-build]
+    if: always()
+
+    steps:
+      - name: Check CI Status
+        run: |
+          if [[ "${{ needs.backend-quality.result }}" == "failure" || \
+                "${{ needs.backend-test.result }}" == "failure" || \
+                "${{ needs.frontend-quality.result }}" == "failure" || \
+                "${{ needs.frontend-build.result }}" == "failure" ]]; then
+            echo "❌ CI checks failed"
+            exit 1
+          else
+            echo "✅ All CI checks passed"
+          fi
