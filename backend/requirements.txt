@@ -23,8 +23,8 @@ beautifulsoup4>=4.12.0
 bittensor>=5.0.0
 
 # Database
+motor>=3.3.0
 pymongo>=4.6.0
-motor==2.5.1
 beanie>=1.24.0
 
 # Background Tasks & Scheduling
