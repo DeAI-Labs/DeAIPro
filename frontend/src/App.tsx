@@ -7,7 +7,7 @@ import {
   isSignInWithEmailLink,
   signInWithEmailLink,
 } from "firebase/auth";
-import DeAIDashboard from "./DeAIDashboard";
+import Dashboard from "./Dashboard";
 
 const SignInModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [email, setEmail] = useState("");
@@ -90,7 +90,7 @@ const AppContent: React.FC = () => {
     return <div className="flex items-center justify-center h-screen bg-gray-900"><div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" /></div>;
   }
 
-  if (state.user) return <DeAIDashboard />;
+  if (state.user) return <Dashboard />;
 
   return (
     <>

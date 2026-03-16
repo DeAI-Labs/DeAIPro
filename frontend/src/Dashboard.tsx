@@ -7,7 +7,7 @@ import { auth } from "./firebase";
 // Chart.js is loaded dynamically on mount; all state lives in the injected JS.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const DeAIDashboard: React.FC = () => {
+const Dashboard: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartJsLoaded = useRef(false);
 
@@ -741,7 +741,7 @@ const DeAIDashboard: React.FC = () => {
   );
 };
 
-export default DeAIDashboard;
+export default Dashboard;
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 const DASHBOARD_CSS = `
