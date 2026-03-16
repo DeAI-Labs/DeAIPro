@@ -2219,203 +2219,13 @@ const DASHBOARD_HTML = `
       </section>
     </div>
 
-  </main>
-</div>
-
-
     <!-- SIGNALS VIEW -->
-    <div id="signals-view" class="view">
-      <section class="sec" style="background:transparent;border:none;padding:0">
-        <div style="margin-bottom:32px">
-          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:8px">Institutional Signals</div>
-          <div style="font-size:14px;color:var(--mute)">Medium to long-term allocation recommendations based on fundamental analysis</div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px">
-          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--green)">
-            <div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">CONVICTION BUYS</div>
-            <div style="font-size:32px;font-weight:700;color:var(--green);font-family:'IBM Plex Mono',monospace">4</div>
-            <div style="font-size:11px;color:var(--txt2);margin-top:4px">High confidence allocations</div>
-          </div>
-          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--cyan)">
-            <div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">ACCUMULATE</div>
-            <div style="font-size:32px;font-weight:700;color:var(--cyan);font-family:'IBM Plex Mono',monospace">6</div>
-            <div style="font-size:11px;color:var(--txt2);margin-top:4px">Build positions on weakness</div>
-          </div>
-          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--amber)">
-            <div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">HOLD</div>
-            <div style="font-size:32px;font-weight:700;color:var(--amber);font-family:'IBM Plex Mono',monospace">12</div>
-            <div style="font-size:11px;color:var(--txt2);margin-top:4px">Maintain current exposure</div>
-          </div>
-          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--rose)">
-            <div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">REDUCE</div>
-            <div style="font-size:32px;font-weight:700;color:var(--rose);font-family:'IBM Plex Mono',monospace">2</div>
-            <div style="font-size:11px;color:var(--txt2);margin-top:4px">Trim overweight positions</div>
-          </div>
-        </div>
-        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px;margin-bottom:24px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
-            <div>
-              <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700">Conviction Allocations</div>
-              <div style="font-size:12px;color:var(--mute);margin-top:4px">12-month investment horizon · Rebalanced quarterly</div>
-            </div>
-            <div style="padding:6px 12px;background:var(--bg3);border-radius:6px;font-size:10px;color:var(--mute)">Updated: Feb 23, 2026</div>
-          </div>
-          <table style="width:100%;border-collapse:collapse">
-            <thead><tr style="border-bottom:1px solid var(--bdr)">
-              <th style="text-align:left;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">SUBNET</th>
-              <th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">SIGNAL</th>
-              <th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">TARGET WT</th>
-              <th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">SHARPE</th>
-              <th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">FACTORS</th>
-              <th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">HORIZON</th>
-              <th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">UPSIDE</th>
-            </tr></thead>
-            <tbody id="signalsTable"></tbody>
-          </table>
-          <div style="margin-top:12px;font-size:11px;color:var(--mute);text-align:center">Click any row to expand entry/exit strategies</div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
-          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px">
-            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px"><span style="color:var(--green)">●</span> Bull Case Thesis</div>
-            <div style="font-size:13px;color:var(--txt2);line-height:1.8">
-              <p style="margin-bottom:12px"><strong style="color:var(--txt)">Compute Dominance:</strong> Inference and compute subnets (SN64, SN51, SN4) capture increasing share of AI workloads. Post-halving emission compression favors established subnets with proven utility.</p>
-              <p style="margin-bottom:12px"><strong style="color:var(--txt)">Institutional Catalyst:</strong> ETF approvals (Grayscale GTAO filing) could drive $500M+ inflows into TAO ecosystem.</p>
-              <p><strong style="color:var(--txt)">Network Effects:</strong> Code quality improvements (+18% QoQ) and validator competition indicate maturing ecosystem.</p>
-            </div>
-          </div>
-          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px">
-            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px"><span style="color:var(--rose)">●</span> Risk Factors</div>
-            <div style="font-size:13px;color:var(--txt2);line-height:1.8">
-              <p style="margin-bottom:12px"><strong style="color:var(--txt)">Concentration Risk:</strong> Top 10 subnets capture 62% of emissions. Regulatory action against any major subnet could cascade.</p>
-              <p style="margin-bottom:12px"><strong style="color:var(--txt)">TAO Beta:</strong> All subnet tokens exhibit high correlation to TAO (avg β=0.85). Macro drawdowns affect entire ecosystem.</p>
-              <p><strong style="color:var(--txt)">Technology Risk:</strong> Rapid AI advancement could obsolete current subnet architectures.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- RESEARCH VIEW -->
-    <div id="research-view" class="view">
-      <section class="sec">
-        <div class="sec-hd"><div><div class="sec-t">Latest Research & Reports</div><div class="sec-sub">In-depth analysis and market insights</div></div></div>
-        <div id="resG" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px"></div>
-      </section>
-    </div>
-
-    <!-- GLOSSARY VIEW -->
-    <div id="glossary-view" class="view">
-      <section class="sec">
-        <div class="sec-hd"><div><div class="sec-t">Investment Glossary</div><div class="sec-sub">Definitions and formulas for all quantitative metrics</div></div></div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px">
-          <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
-            <div style="font-size:14px;font-weight:700;color:var(--cyan);margin-bottom:16px">Valuation Metrics</div>
-            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Alpha Price (α)</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Subnet token price in TAO. Lower alpha with high emissions = undervalued.</div></div>
-            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">α/EM Ratio</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Alpha Price ÷ Emission Share %. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">α/EM = Alpha / Emission%</span></div></div>
-            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">P/E Ratio</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Market Cap / Annual Emission Value. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">P/E = MC / (Daily TAO × 365 × Price)</span></div></div>
-            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">TANAV</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">TAO-Adjusted Net Asset Value. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">TANAV = (Staked × Price) + PV(Emissions)</span></div></div>
-            <div style="padding:12px 0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">DCF Model</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Present value of future emissions. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">DCF = Σ(Em × (1+g)^t / (1+r)^t)</span></div></div>
-          </div>
-          <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
-            <div style="font-size:14px;font-weight:700;color:var(--rose);margin-bottom:16px">Risk Metrics</div>
-            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Sharpe Ratio</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Risk-adjusted return. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">Sharpe = (Return - Rf) / σ</span>. &gt;1.0 good.</div></div>
-            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Sortino Ratio</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Penalizes only downside volatility. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">Sortino = (Return - Rf) / σ_down</span></div></div>
-            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">VaR (95%)</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Max expected 1-day loss at 95% confidence. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">VaR = σ × 1.65 / √252</span></div></div>
-            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Max Drawdown</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Largest peak-to-trough decline. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">MDD = (Trough - Peak) / Peak</span></div></div>
-            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">TAO Beta (β)</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Sensitivity to TAO price movements. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">β = Cov(Rp,Rtao) / Var(Rtao)</span></div></div>
-            <div style="padding:12px 0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Staking APY</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Annual yield from delegating TAO. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">APY = (Daily Em × 365) / Staked</span></div></div>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- REPORTS VIEW -->
-    <div id="reports-view" class="view">
-      <section class="sec" style="background:transparent;border:none;padding:0">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:40px">
-          <div>
-            <div style="font-size:10px;color:var(--mute);letter-spacing:0.2em;margin-bottom:16px">INSTITUTIONAL REPORT GENERATOR</div>
-            <h1 style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;line-height:1.1;margin-bottom:20px">Publish-ready research in <span style="color:var(--green)">seconds.</span></h1>
-            <p style="font-size:14px;color:var(--txt2);line-height:1.7;margin-bottom:32px">Our AI engine synthesizes on-chain data, subnet metrics, valuation models, and macro context into comprehensive LP-grade research documents — on demand.</p>
-            <div style="display:flex;flex-direction:column;gap:20px">
-              <div style="display:flex;gap:16px;align-items:flex-start">
-                <div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--cyan);flex-shrink:0">RVT</div>
-                <div><div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Valuation Models (RVT, P/E)</div><div style="font-size:12px;color:var(--txt2)">Relative Value to Token and Price-to-Emissions ratios across all subnets.</div></div>
-              </div>
-              <div style="display:flex;gap:16px;align-items:flex-start">
-                <div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--violet);flex-shrink:0">β</div>
-                <div><div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Sharpe & Beta Calculations</div><div style="font-size:12px;color:var(--txt2)">Risk-adjusted return metrics benchmarked against TAO index.</div></div>
-              </div>
-              <div style="display:flex;gap:16px;align-items:flex-start">
-                <div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green);flex-shrink:0">QC</div>
-                <div><div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Code Quality Metrics</div><div style="font-size:12px;color:var(--txt2)">Automated validator and miner code quality scoring.</div></div>
-              </div>
-            </div>
-          </div>
-          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-              <div style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--txt)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="font-size:13px;font-weight:600">Institutional Report</span></div>
-              <span style="font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:var(--green);border-radius:50%"></span>GENERATED</span>
-            </div>
-            <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px">Bittensor Subnet Intelligence<br/>Q1 2026 — Risk Score Analysis</h2>
-            <div style="font-size:11px;color:var(--mute);margin-bottom:20px">FEB 22, 2026 · Confidential — Institutional</div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
-              <div style="padding:14px;border-left:2px solid var(--bdr)"><div style="font-size:9px;color:var(--mute);margin-bottom:6px">SHARPE</div><div style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace">2.18</div><div style="font-size:10px;color:var(--green)">▲ 0.14 MoM</div></div>
-              <div style="padding:14px;border-left:2px solid var(--bdr)"><div style="font-size:9px;color:var(--mute);margin-bottom:6px">AVG APY</div><div style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace">24.8%</div><div style="font-size:10px;color:var(--green)">▲ 3.2%</div></div>
-              <div style="padding:14px;border-left:2px solid var(--bdr)"><div style="font-size:9px;color:var(--mute);margin-bottom:6px">RISK VOL</div><div style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace">0.42</div><div style="font-size:10px;color:var(--rose)">▼ 0.06</div></div>
-            </div>
-            <div style="font-size:12px;color:var(--txt2);line-height:1.7;margin-bottom:20px"><strong style="color:var(--txt)">Executive Summary:</strong> Q1 2026 marks a structural inflection in Bittensor subnet maturity. SN22 and SN1 demonstrate superior risk-adjusted returns, with RVT multiples compressing toward fair value...</div>
-            <div style="display:flex;gap:12px">
-              <button class="btn btn-p" onclick="window.exportReportPDF()">EXPORT PDF</button>
-              <button class="btn btn-g" onclick="window.shareReport()">SHARE</button>
-              <button class="btn btn-g" onclick="window.regenerateReport()">REGENERATE</button>
-            </div>
-          </div>
-        </div>
-        <details style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px">
-          <summary style="padding:20px;cursor:pointer;font-family:'Syne',sans-serif;font-size:14px;font-weight:700">Advanced Report Configuration</summary>
-          <div style="padding:0 20px 20px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
-            <div>
-              <div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Report Type</label><select id="rpt-type" class="calc-in" style="width:100%"><option>Quarterly Holdings Report (10-Q)</option><option>Annual Investment Summary (10-K)</option><option>Position Mark-to-Market</option><option>Risk & Exposure Analysis</option></select></div>
-              <div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Reporting Period</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="date" class="calc-in" value="2026-01-01"><input type="date" class="calc-in" value="2026-03-17"></div></div>
-              <div><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Entity Name</label><input type="text" class="calc-in" placeholder="e.g. Acme Digital Holdings LLC" style="width:100%"></div>
-            </div>
-            <div>
-              <div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Total TAO Holdings</label><input type="number" class="calc-in" placeholder="10000" style="width:100%"></div>
-              <div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Cost Basis (USD)</label><input type="number" class="calc-in" placeholder="1500000" style="width:100%"></div>
-              <div><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Include Sources</label><div style="display:flex;flex-wrap:wrap;gap:8px"><label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);padding:4px 8px;background:var(--bg3);border-radius:4px"><input type="checkbox" checked> Dashboard Metrics</label><label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);padding:4px 8px;background:var(--bg3);border-radius:4px"><input type="checkbox" checked> On-chain Data</label><label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);padding:4px 8px;background:var(--bg3);border-radius:4px"><input type="checkbox" checked> GitHub Activity</label></div></div>
-            </div>
-          </div>
-        </details>
-      </section>
-    </div>
-
-
-
-<!-- Research Modal -->
-<div id="researchModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)" class="modal">
-  <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;width:90%;max-width:800px;max-height:85vh;overflow-y:auto;position:relative">
-    <div style="padding:24px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:flex-start">
-      <div>
-        <div style="display:inline-block;padding:4px 10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:12px;font-size:10px;font-weight:600;color:var(--green);margin-bottom:8px;text-transform:uppercase" id="researchCat">Research</div>
-        <div style="font-size:22px;font-weight:700;margin-bottom:8px" id="researchTitle">Loading...</div>
-        <div style="font-size:12px;color:var(--mute)" id="researchDate">Date</div>
-      </div>
-      <div onclick="window.closeResearch()" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--mute)">×</div>
-    </div>
-    <div style="padding:24px;font-size:14px;color:var(--txt2);line-height:1.7" id="researchContent"></div>
-  </div>
-</div>
-
-
     <div id="signals-view" class="view">
 <section class="sec" style="background:transparent;border:none;padding:0">
 <div style="margin-bottom:32px">
 <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:8px">Institutional Signals</div>
 <div style="font-size:14px;color:var(--mute)">Medium to long-term allocation recommendations based on fundamental analysis</div>
 </div>
-
-<!-- Signal Summary -->
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px">
 <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--green)">
 <div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">CONVICTION BUYS</div>
@@ -2438,8 +2248,6 @@ const DASHBOARD_HTML = `
 <div style="font-size:11px;color:var(--txt2);margin-top:4px">Trim overweight positions</div>
 </div>
 </div>
-
-<!-- Conviction Picks -->
 <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px;margin-bottom:24px">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
 <div>
@@ -2448,26 +2256,20 @@ const DASHBOARD_HTML = `
 </div>
 <div style="padding:6px 12px;background:var(--bg3);border-radius:6px;font-size:10px;color:var(--mute)">Updated: Feb 23, 2026</div>
 </div>
-
 <table style="width:100%;border-collapse:collapse">
-<thead>
-<tr style="border-bottom:1px solid var(--bdr)">
+<thead><tr style="border-bottom:1px solid var(--bdr)">
 <th style="text-align:left;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">SUBNET</th>
 <th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">SIGNAL</th>
 <th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">TARGET WT</th>
 <th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">SHARPE</th>
-<th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">FACTORS <span class="metric-info" style="display:inline-flex;width:12px;height:12px;font-size:8px;vertical-align:middle">?<div class="metric-tooltip" style="width:200px">V=Value M=Momentum Q=Quality S=Size Vol=Low Volatility</div></span></th>
+<th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">FACTORS</th>
 <th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">HORIZON</th>
 <th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">UPSIDE</th>
-</tr>
-</thead>
-<tbody id="signalsTable">
-</tbody>
+</tr></thead>
+<tbody id="signalsTable"></tbody>
 </table>
 <div style="margin-top:12px;font-size:11px;color:var(--mute);text-align:center">Click any row to expand entry/exit strategies and factor breakdown</div>
 </div>
-
-<!-- Investment Thesis -->
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
 <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px">
 <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
@@ -2493,11 +2295,12 @@ const DASHBOARD_HTML = `
 </section>
 </div>
 
+    <!-- RESEARCH VIEW -->
     <div id="research-view" class="view">
 <section class="sec">
 <div class="sec-hd">
 <div>
-<div class="sec-t">Latest Research & Reports</div>
+<div class="sec-t">Latest Research &amp; Reports</div>
 <div class="sec-sub">In-depth analysis and market insights</div>
 </div>
 </div>
@@ -2505,6 +2308,7 @@ const DASHBOARD_HTML = `
 </section>
 </div>
 
+    <!-- GLOSSARY VIEW -->
     <div id="glossary-view" class="view">
 <section class="sec">
 <div class="sec-hd">
@@ -2513,9 +2317,7 @@ const DASHBOARD_HTML = `
 <div class="sec-sub">Definitions and formulas for all quantitative metrics and valuation models</div>
 </div>
 </div>
-
 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px">
-<!-- Valuation Metrics -->
 <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
 <div style="font-size:14px;font-weight:700;color:var(--cyan);margin-bottom:16px;display:flex;align-items:center;gap:8px">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -2528,46 +2330,40 @@ Valuation Metrics
 <div class="gloss-item"><div class="gloss-term">EYS (Emission Yield Spread)</div><div class="gloss-def">Difference between subnet APY and network average APY. Positive = above-market yield. <span class="gloss-formula">EYS = Subnet APY - Network Avg APY</span></div></div>
 <div class="gloss-item"><div class="gloss-term">DCF Model</div><div class="gloss-def">Discounted Cash Flow. Present value of future emissions using growth and discount rates. <span class="gloss-formula">DCF = Σ(Emission × (1+g)^t / (1+r)^t)</span></div></div>
 </div>
-
-<!-- Risk Metrics -->
 <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
 <div style="font-size:14px;font-weight:700;color:var(--rose);margin-bottom:16px;display:flex;align-items:center;gap:8px">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
 Risk Metrics
 </div>
-<div class="gloss-item"><div class="gloss-term">Sharpe Ratio</div><div class="gloss-def">Risk-adjusted return. Excess return per unit of total volatility. <span class="gloss-formula">Sharpe = (Return - Rf) / σ</span>. >1.0 good, >2.0 excellent.</div></div>
+<div class="gloss-item"><div class="gloss-term">Sharpe Ratio</div><div class="gloss-def">Risk-adjusted return. Excess return per unit of total volatility. <span class="gloss-formula">Sharpe = (Return - Rf) / σ</span>. &gt;1.0 good, &gt;2.0 excellent.</div></div>
 <div class="gloss-item"><div class="gloss-term">Sortino Ratio</div><div class="gloss-def">Like Sharpe but only penalizes downside volatility. <span class="gloss-formula">Sortino = (Return - Rf) / σ_downside</span>. Higher = better downside protection.</div></div>
 <div class="gloss-item"><div class="gloss-term">Calmar Ratio</div><div class="gloss-def">Return per unit of maximum drawdown. <span class="gloss-formula">Calmar = Annual Return / Max Drawdown</span>. Higher = better recovery potential.</div></div>
-<div class="gloss-item"><div class="gloss-term">Omega Ratio</div><div class="gloss-def">Probability-weighted ratio of gains vs losses. <span class="gloss-formula">Ω = ∫(1-F(r))dr / ∫F(r)dr</span>. >1.0 = more upside than downside.</div></div>
+<div class="gloss-item"><div class="gloss-term">Omega Ratio</div><div class="gloss-def">Probability-weighted ratio of gains vs losses. <span class="gloss-formula">Ω = ∫(1-F(r))dr / ∫F(r)dr</span>. &gt;1.0 = more upside than downside.</div></div>
 <div class="gloss-item"><div class="gloss-term">VaR (95%)</div><div class="gloss-def">Value at Risk. Maximum expected 1-day loss at 95% confidence. 5% chance of exceeding this loss. <span class="gloss-formula">VaR = σ × 1.65 × √(1/252) × Portfolio</span></div></div>
-<div class="gloss-item"><div class="gloss-term">CVaR / Expected Shortfall</div><div class="gloss-def">Average loss when VaR is exceeded. Better captures tail risk than VaR alone. <span class="gloss-formula">CVaR = E[Loss | Loss > VaR]</span></div></div>
+<div class="gloss-item"><div class="gloss-term">CVaR / Expected Shortfall</div><div class="gloss-def">Average loss when VaR is exceeded. Better captures tail risk than VaR alone. <span class="gloss-formula">CVaR = E[Loss | Loss &gt; VaR]</span></div></div>
 <div class="gloss-item"><div class="gloss-term">Max Drawdown</div><div class="gloss-def">Largest peak-to-trough decline. Key metric for fund managers and risk limits. <span class="gloss-formula">MDD = (Trough - Peak) / Peak</span></div></div>
 <div class="gloss-item"><div class="gloss-term">Information Ratio</div><div class="gloss-def">Active return per unit of tracking error vs benchmark. <span class="gloss-formula">IR = (Rp - Rb) / Tracking Error</span>. Measures consistency of alpha.</div></div>
 </div>
-
-<!-- Portfolio Metrics -->
 <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
 <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:16px;display:flex;align-items:center;gap:8px">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
 Portfolio Metrics
 </div>
-<div class="gloss-item"><div class="gloss-term">TAO Beta (β)</div><div class="gloss-def">Portfolio sensitivity to TAO price movements. β=1.0 moves 1:1 with TAO. <span class="gloss-formula">β = Cov(Rp, Rtao) / Var(Rtao)</span>. <1 = defensive.</div></div>
+<div class="gloss-item"><div class="gloss-term">TAO Beta (β)</div><div class="gloss-def">Portfolio sensitivity to TAO price movements. β=1.0 moves 1:1 with TAO. <span class="gloss-formula">β = Cov(Rp, Rtao) / Var(Rtao)</span>. &lt;1 = defensive.</div></div>
 <div class="gloss-item"><div class="gloss-term">Jensen's Alpha</div><div class="gloss-def">Excess return above CAPM expected return. Measures selection skill. <span class="gloss-formula">α = Rp - [Rf + β(Rm - Rf)]</span></div></div>
 <div class="gloss-item"><div class="gloss-term">Treynor Ratio</div><div class="gloss-def">Excess return per unit of systematic (beta) risk. <span class="gloss-formula">Treynor = (Rp - Rf) / β</span></div></div>
 <div class="gloss-item"><div class="gloss-term">Efficient Frontier</div><div class="gloss-def">Set of optimal portfolios offering highest return for each risk level. Portfolios below the frontier are suboptimal.</div></div>
 <div class="gloss-item"><div class="gloss-term">Risk Parity</div><div class="gloss-def">Allocation strategy where each position contributes equal risk to portfolio. <span class="gloss-formula">w_i × σ_i = w_j × σ_j for all i,j</span></div></div>
 </div>
-
-<!-- TAO Flow Metrics -->
 <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
 <div style="font-size:14px;font-weight:700;color:var(--amber);margin-bottom:16px;display:flex;align-items:center;gap:8px">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-TAO Flow & Yield
+TAO Flow &amp; Yield
 </div>
 <div class="gloss-item"><div class="gloss-term">Emission Share (%)</div><div class="gloss-def">Subnet's percentage of total daily TAO emissions. Determined by root network weights. Higher = more rewards distributed.</div></div>
 <div class="gloss-item"><div class="gloss-term">Staking APY</div><div class="gloss-def">Annual percentage yield from delegating TAO to subnet validators. <span class="gloss-formula">APY = (Daily Emissions × 365) / Staked TAO</span></div></div>
 <div class="gloss-item"><div class="gloss-term">TVL (Total Value Locked)</div><div class="gloss-def">Total TAO staked to subnet validators. Higher TVL = more confidence but potentially lower APY.</div></div>
-<div class="gloss-item"><div class="gloss-term">Emission Yield Ratio (EYR)</div><div class="gloss-def">Market Cap / Annual Emission Value. <span class="gloss-formula">EYR = MC / (Emissions × 365 × TAO Price)</span>. <1.0 = undervalued, >2.0 = premium.</div></div>
+<div class="gloss-item"><div class="gloss-term">Emission Yield Ratio (EYR)</div><div class="gloss-def">Market Cap / Annual Emission Value. <span class="gloss-formula">EYR = MC / (Emissions × 365 × TAO Price)</span>. &lt;1.0 = undervalued, &gt;2.0 = premium.</div></div>
 <div class="gloss-item"><div class="gloss-term">Daily TAO Flow</div><div class="gloss-def">Net TAO moving into/out of subnet staking. Positive = accumulation, negative = distribution.</div></div>
 <div class="gloss-item"><div class="gloss-term">Impermanent Loss (IL)</div><div class="gloss-def">Loss vs holding TAO when subnet alpha price diverges. <span class="gloss-formula">IL = 2√(price ratio)/(1+price ratio) - 1</span></div></div>
 </div>
@@ -2575,81 +2371,46 @@ TAO Flow & Yield
 </section>
 </div>
 
+    <!-- REPORTS VIEW -->
     <div id="reports-view" class="view">
 <section class="sec" style="background:transparent;border:none;padding:0">
-
-<!-- Hero Section -->
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:40px">
 <div>
 <div style="font-size:10px;color:var(--mute);letter-spacing:0.2em;margin-bottom:16px">INSTITUTIONAL REPORT GENERATOR</div>
 <h1 style="font-family:'Syne',sans-serif;font-size:42px;font-weight:800;line-height:1.1;margin-bottom:20px">Publish-ready research in <span style="color:var(--green)">seconds.</span></h1>
 <p style="font-size:14px;color:var(--txt2);line-height:1.7;margin-bottom:32px">Our AI engine synthesizes on-chain data, subnet metrics, valuation models, and macro context into comprehensive LP-grade research documents — on demand.</p>
-
-<!-- Feature List -->
 <div style="display:flex;flex-direction:column;gap:20px">
 <div style="display:flex;gap:16px;align-items:flex-start">
 <div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--cyan);flex-shrink:0">RVT</div>
-<div>
-<div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Valuation Models (RVT, P/E)</div>
-<div style="font-size:12px;color:var(--txt2)">Relative Value to Token and Price-to-Emissions ratios across all subnets in real time.</div>
-</div>
+<div><div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Valuation Models (RVT, P/E)</div><div style="font-size:12px;color:var(--txt2)">Relative Value to Token and Price-to-Emissions ratios across all subnets in real time.</div></div>
 </div>
 <div style="display:flex;gap:16px;align-items:flex-start">
 <div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--violet);flex-shrink:0">β</div>
-<div>
-<div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Sharpe & Beta Calculations</div>
-<div style="font-size:12px;color:var(--txt2)">Risk-adjusted return metrics benchmarked against TAO index and broader DeFi baselines.</div>
-</div>
+<div><div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Sharpe &amp; Beta Calculations</div><div style="font-size:12px;color:var(--txt2)">Risk-adjusted return metrics benchmarked against TAO index and broader DeFi baselines.</div></div>
 </div>
 <div style="display:flex;gap:16px;align-items:flex-start">
 <div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green);flex-shrink:0">QC</div>
-<div>
-<div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Code Quality Metrics</div>
-<div style="font-size:12px;color:var(--txt2)">Automated validator and miner code quality scoring — a proprietary signal no other platform offers.</div>
+<div><div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Code Quality Metrics</div><div style="font-size:12px;color:var(--txt2)">Automated validator and miner code quality scoring — a proprietary signal no other platform offers.</div></div>
 </div>
 </div>
 </div>
-</div>
-
-<!-- Generated Report Preview -->
 <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-<div style="display:flex;align-items:center;gap:8px">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--txt)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-<span style="font-size:13px;font-weight:600">Institutional Report</span>
-</div>
+<div style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--txt)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="font-size:13px;font-weight:600">Institutional Report</span></div>
 <span style="font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:var(--green);border-radius:50%"></span>GENERATED 0:32s AGO</span>
 </div>
-
 <div style="margin-bottom:24px">
 <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px">Bittensor Subnet Intelligence<br>Q1 2026 — Risk Score Analysis</h2>
 <div style="font-size:11px;color:var(--mute)">FEB 22, 2026 · Confidential — Institutional</div>
 </div>
-
-<!-- Metrics Row -->
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
-<div style="padding:16px;border-left:2px solid var(--bdr)">
-<div style="font-size:9px;color:var(--mute);letter-spacing:0.1em;margin-bottom:6px">SHARPE</div>
-<div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace">2.18</div>
-<div style="font-size:10px;color:var(--green)">▲ 0.14 MoM</div>
+<div style="padding:16px;border-left:2px solid var(--bdr)"><div style="font-size:9px;color:var(--mute);letter-spacing:0.1em;margin-bottom:6px">SHARPE</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace">2.18</div><div style="font-size:10px;color:var(--green)">▲ 0.14 MoM</div></div>
+<div style="padding:16px;border-left:2px solid var(--bdr)"><div style="font-size:9px;color:var(--mute);letter-spacing:0.1em;margin-bottom:6px">AVG APY</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace">24.8%</div><div style="font-size:10px;color:var(--green)">▲ 3.2%</div></div>
+<div style="padding:16px;border-left:2px solid var(--bdr)"><div style="font-size:9px;color:var(--mute);letter-spacing:0.1em;margin-bottom:6px">RISK VOL</div><div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace">0.42</div><div style="font-size:10px;color:var(--rose)">▼ 0.06</div></div>
 </div>
-<div style="padding:16px;border-left:2px solid var(--bdr)">
-<div style="font-size:9px;color:var(--mute);letter-spacing:0.1em;margin-bottom:6px">AVG APY</div>
-<div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace">24.8%</div>
-<div style="font-size:10px;color:var(--green)">▲ 3.2%</div>
-</div>
-<div style="padding:16px;border-left:2px solid var(--bdr)">
-<div style="font-size:9px;color:var(--mute);letter-spacing:0.1em;margin-bottom:6px">RISK VOL</div>
-<div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace">0.42</div>
-<div style="font-size:10px;color:var(--rose)">▼ 0.06</div>
-</div>
-</div>
-
 <div style="font-size:12px;color:var(--txt2);line-height:1.7;margin-bottom:20px">
 <strong style="color:var(--txt)">Executive Summary:</strong> Q1 2026 marks a structural inflection in Bittensor subnet maturity. SN22 Audio and SN1 Prediction demonstrate superior risk-adjusted returns, with RVT multiples compressing toward fair value. <strong style="color:var(--txt)">Code quality metrics</strong> improved 18% QoQ, suggesting validator competition is intensifying across the network...
 </div>
-
-<!-- Action Buttons -->
 <div style="display:flex;gap:12px">
 <button class="btn btn-p" onclick="window.exportReportPDF()">EXPORT PDF</button>
 <button class="btn btn-g" onclick="window.shareReport()">SHARE</button>
@@ -2657,67 +2418,31 @@ TAO Flow & Yield
 </div>
 </div>
 </div>
-
-<!-- Report Configuration (Collapsible) -->
 <details style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;margin-bottom:24px">
 <summary style="padding:20px;cursor:pointer;font-family:'Syne',sans-serif;font-size:14px;font-weight:700">Advanced Report Configuration</summary>
 <div style="padding:0 20px 20px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
 <div>
-<div style="margin-bottom:16px">
-<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Report Type</label>
-<select id="rpt-type" class="calc-in" style="width:100%">
-<option value="quarterly">Quarterly Holdings Report (10-Q)</option>
-<option value="annual">Annual Investment Summary (10-K)</option>
-<option value="position">Position Mark-to-Market</option>
-<option value="risk">Risk & Exposure Analysis</option>
-<option value="strategy">Subnet Allocation Strategy</option>
-</select>
-</div>
-<div style="margin-bottom:16px">
-<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Reporting Period</label>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-<input type="date" id="rpt-start" class="calc-in" value="2026-01-01">
-<input type="date" id="rpt-end" class="calc-in" value="2026-02-22">
-</div>
+<div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Report Type</label><select id="rpt-type" class="calc-in" style="width:100%"><option value="quarterly">Quarterly Holdings Report (10-Q)</option><option value="annual">Annual Investment Summary (10-K)</option><option value="position">Position Mark-to-Market</option><option value="risk">Risk &amp; Exposure Analysis</option><option value="strategy">Subnet Allocation Strategy</option></select></div>
+<div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Reporting Period</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="date" id="rpt-start" class="calc-in" value="2026-01-01"><input type="date" id="rpt-end" class="calc-in" value="2026-02-22"></div></div>
+<div><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Entity Name</label><input type="text" id="rpt-entity" class="calc-in" placeholder="e.g., Acme Digital Holdings LLC" style="width:100%"></div>
 </div>
 <div>
-<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Entity Name</label>
-<input type="text" id="rpt-entity" class="calc-in" placeholder="e.g., Acme Digital Holdings LLC" style="width:100%">
-</div>
-</div>
-<div>
-<div style="margin-bottom:16px">
-<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Total TAO Holdings</label>
-<input type="number" id="rpt-tao" class="calc-in" placeholder="10000" style="width:100%">
-</div>
-<div style="margin-bottom:16px">
-<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Cost Basis (USD)</label>
-<input type="number" id="rpt-basis" class="calc-in" placeholder="1500000" style="width:100%">
-</div>
-<div>
-<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Include Data Sources</label>
-<div style="display:flex;flex-wrap:wrap;gap:8px">
-<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px">
-<input type="checkbox" checked> Dashboard Metrics
-</label>
-<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px">
-<input type="checkbox" checked> On-chain Data
-</label>
-<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px">
-<input type="checkbox" checked> X.com Sentiment
-</label>
-<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px">
-<input type="checkbox" checked> GitHub Activity
-</label>
-</div>
-</div>
+<div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Total TAO Holdings</label><input type="number" id="rpt-tao" class="calc-in" placeholder="10000" style="width:100%"></div>
+<div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Cost Basis (USD)</label><input type="number" id="rpt-basis" class="calc-in" placeholder="1500000" style="width:100%"></div>
+<div><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Include Data Sources</label><div style="display:flex;flex-wrap:wrap;gap:8px">
+<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px"><input type="checkbox" checked> Dashboard Metrics</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px"><input type="checkbox" checked> On-chain Data</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px"><input type="checkbox" checked> X.com Sentiment</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px"><input type="checkbox" checked> GitHub Activity</label>
+</div></div>
 </div>
 </div>
 </details>
-
 </section>
 </div>
 
+  </main>
+</div>
 <!-- LESSON MODAL -->
 <div id="lessonModal" class="lesson-m">
 <div class="lesson-box">
