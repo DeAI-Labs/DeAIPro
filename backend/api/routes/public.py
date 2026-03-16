@@ -75,8 +75,8 @@ async def get_subnets(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     category: Optional[str] = None,
-    sort_by: str = Query("market_cap_millions", regex="^(market_cap_millions|apy|validators_count|updated_at)$"),
-    sort_order: str = Query("desc", regex="^(asc|desc)$"),
+    sort_by: str = Query("market_cap_millions", pattern="^(market_cap_millions|apy|validators_count|updated_at)$"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$"),
 ):
     """Get all active subnets with optional filtering and sorting"""
     try:
