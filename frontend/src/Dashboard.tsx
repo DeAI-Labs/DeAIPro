@@ -135,6 +135,8 @@ const Dashboard: React.FC = () => {
       if (v==="onchain") initOnChainCharts();
       if (v==="portfoliopro") runOptimization();
       if (v==="portfolio") { initSubnetSelector(); updatePortfolioAnalytics(); }
+      if (v==="research") renderRes();
+      if (v==="signals") renderSignals();
     };
 
     // ─── Price & KPIs ─────────────────────────────────────────────────────────
@@ -701,6 +703,663 @@ const Dashboard: React.FC = () => {
     g.shareReport = () => alert("Share feature: copy this URL and send it to your recipient.");
     g.regenerateReport = () => alert("Report regenerated with latest data.");
 
+    // ─── Research ─────────────────────────────────────────────────────────────
+    const research = [
+      {i:"📈",c:"Market Analysis",t:"Q1 2026 Subnet Performance Review",ex:"Comprehensive analysis of subnet emissions, valuations, and market trends across 58 active subnets.",d:"Feb 12, 2026",
+       content:`<h2>Q1 2026 Subnet Performance Review</h2><p><strong>Executive Summary:</strong> The first quarter of 2026 has been transformative. Total network valuation reached $1.28B with daily emissions stabilizing at 3,600 TAO post-halving.</p><h3>Key Findings</h3><ul><li><strong>Market Cap Growth:</strong> Total subnet market cap increased 34% QoQ</li><li><strong>Emission Distribution:</strong> Top 10 subnets capture 62% of daily emissions</li><li><strong>Alpha Compression:</strong> Average alpha/emissions ratio fell to 0.38 from 0.42</li></ul><h3>Category Performance</h3><p><strong>Inference (40% of market cap):</strong> Text Prompting maintains dominance with $127M market cap. Category average P/E of 1.92x reflects strong fundamental demand.</p><p><strong>Compute (22%):</strong> Cortex.t leads with $98M valuation. GPU shortages drove valuations up 28% QoQ.</p><p><strong>Q2 Outlook:</strong> Watch for TAO halving event, potential SEC clarity on decentralized AI networks, and enterprise subnet launches targeting Fortune 500 adoption.</p>`},
+      {i:"🔬",c:"Technical",t:"Understanding Yuma Consensus Mechanism",ex:"Deep dive into the revolutionary consensus algorithm that powers Bittensor's validation system.",d:"Feb 8, 2026",
+       content:`<h2>Understanding Yuma Consensus</h2><p>Yuma Consensus represents Bittensor's novel approach to decentralized quality assessment. Unlike traditional blockchain consensus, Yuma validates intelligence — rewarding participants based on the quality and utility of their AI outputs.</p><h3>Core Mechanism</h3><ol><li><strong>Query Distribution:</strong> Validators send identical queries to multiple miners simultaneously</li><li><strong>Response Collection:</strong> Miners return best AI-generated responses within time limits</li><li><strong>Comparative Scoring:</strong> Validators evaluate responses against each other</li><li><strong>Weight Assignment:</strong> High-performing miners receive increased weight in emission distribution</li></ol><h3>Mathematical Foundation</h3><p>The consensus uses a modified PageRank: <code>W(i) = (1-d) + d * Σ(W(j) * S(j,i) / C(j))</code> where d=0.85 damping factor, S(j,i) = validator j score for miner i.</p><h3>Attack Resistance</h3><p>Sybil attacks are economically prohibitive — creating fake validators requires proportional TAO stake. Collusion is detected through outlier analysis.</p>`},
+      {i:"💡",c:"Strategy",t:"Optimal Validator Staking Strategies",ex:"Data-driven insights on maximizing returns through intelligent validator selection and portfolio management.",d:"Feb 5, 2026",
+       content:`<h2>Optimal Validator Staking Strategies</h2><p>With 2,847 active validators across 58 subnets, validator selection has become increasingly complex. This guide provides quantitative frameworks for optimizing staking allocation.</p><h3>Strategy 1: Index Staking</h3><p>Replicate overall network performance by staking proportionally to subnet market caps. Expected Return: 24-28% APY with network-average volatility.</p><h3>Strategy 2: Value Investing</h3><p>Overweight undervalued subnets with strong fundamentals. Selection criteria: Alpha/Emissions ratio &lt;0.25, Fundamental score &gt;70, GitHub activity in top quartile. Expected Return: 32-42% APY.</p><h3>Strategy 3: Yield Optimization</h3><p>Dynamically allocate to highest-yield opportunities, rebalancing weekly when yield delta exceeds 5 percentage points. Expected Return: 35-50% APY.</p><h3>Risk Management</h3><ul><li>No more than 25% in single subnet</li><li>No more than 40% in single category</li><li>Maintain exposure to 8+ subnets minimum</li></ul>`},
+      {i:"🌐",c:"Ecosystem",t:"The Rise of Decentralized AI Networks",ex:"How Bittensor is pioneering a new paradigm for machine learning infrastructure and democratizing AI.",d:"Feb 1, 2026",
+       content:`<h2>The Rise of Decentralized AI Networks</h2><p>The artificial intelligence industry stands at an inflection point. While centralized AI labs have achieved remarkable breakthroughs, their concentration of power raises profound questions about access, control, and the future of human-AI interaction.</p><h3>The Centralization Problem</h3><p>Today's AI landscape is dominated by a handful of corporations. This concentration creates systemic risks: access control, censorship, data privacy concerns, and innovation bottlenecks.</p><h3>The Bittensor Solution</h3><p>Bittensor pioneers decentralized AI through economic incentives — permissionless participation, market-driven quality, composable intelligence across specialized subnets, and transparent on-chain economics.</p><h3>Ecosystem Growth</h3><p>From 5 subnets in 2021 to 58+ today, total network valuation surpassed $1B in 2025. Enterprise adoption is accelerating with Fortune 500 pilots across compute and inference categories.</p><h3>Future Scenarios</h3><p><strong>Base Case (45%):</strong> Decentralized AI captures 10-20% market share in specialized applications. <strong>Bull Case (40%):</strong> Bittensor becomes infrastructure layer for the AI economy, similar to Ethereum for DeFi.</p>`},
+    ];
+
+    const renderRes = () => {
+      const container = document.getElementById("resG");
+      if (!container) return;
+      container.innerHTML = research.map((r, idx) => `
+        <a href="#" class="res-c" onclick="window.openResearch(${idx});return false;">
+          <div class="res-img">${r.i}</div>
+          <div class="res-cnt">
+            <div class="res-cat">${r.c}</div>
+            <h3 class="res-t">${r.t}</h3>
+            <p class="res-ex">${r.ex}</p>
+            <div class="res-meta"><span>DeAI Research</span><span>${r.d}</span></div>
+          </div>
+        </a>`).join("");
+    };
+
+    g.openResearch = (idx: number) => {
+      const r = research[idx];
+      if (!r) return;
+      const modal = document.getElementById("researchModal");
+      const cat = document.getElementById("researchCat");
+      const title = document.getElementById("researchTitle");
+      const date = document.getElementById("researchDate");
+      const content_el = document.getElementById("researchContent");
+      if (cat) cat.textContent = r.c;
+      if (title) title.textContent = r.t;
+      if (date) date.textContent = r.d;
+      if (content_el) content_el.innerHTML = r.content;
+      if (modal) modal.classList.add("open");
+    };
+    g.closeResearch = () => document.getElementById("researchModal")?.classList.remove("open");
+
+    // ─── Signals ──────────────────────────────────────────────────────────────
+    const renderSignals = () => {
+      const signals = [
+        {subnet:"Chutes",id:64,signal:"BUY",weight:"22%",sharpe:1.42,factors:{value:82,momentum:88,quality:92,size:95,volatility:78},thesis:"Dominant compute position, institutional adoption catalyst",horizon:"12-18M",entry:"Scale in 3 tranches: 40% now, 30% on -10% dip, 30% on -20% dip",exit:"Take 25% profit at +50%, trail stop at 20% below highs",targetPrice:0.15,currentPrice:0.102},
+        {subnet:"Lium",id:51,signal:"BUY",weight:"15%",sharpe:1.38,factors:{value:78,momentum:82,quality:88,size:90,volatility:75},thesis:"Strong emission share, undervalued vs compute peers",horizon:"12M",entry:"DCA weekly over 4 weeks",exit:"Hold to target, stop loss at -30%",targetPrice:0.11,currentPrice:0.076},
+        {subnet:"Gradients",id:56,signal:"BUY",weight:"12%",sharpe:1.35,factors:{value:85,momentum:92,quality:78,size:82,volatility:68},thesis:"Training category leader, momentum accelerating",horizon:"6-12M",entry:"Enter on next -5% pullback",exit:"Partial at +40%, remainder at +80%",targetPrice:0.25,currentPrice:0.164},
+        {subnet:"Ridges",id:62,signal:"ACCUMULATE",weight:"10%",sharpe:1.31,factors:{value:72,momentum:75,quality:90,size:85,volatility:82},thesis:"Code quality moat, enterprise pipeline growing",horizon:"12-24M",entry:"Add on weakness below 0.06",exit:"Long-term hold, review quarterly",targetPrice:0.10,currentPrice:0.065},
+        {subnet:"Targon",id:4,signal:"ACCUMULATE",weight:"10%",sharpe:1.28,factors:{value:68,momentum:65,quality:85,size:88,volatility:88},thesis:"Stable compute infrastructure, low volatility play",horizon:"12M",entry:"Layer in over 8 weeks",exit:"Reduce at +30% or if Sharpe drops below 1.0",targetPrice:0.07,currentPrice:0.052},
+        {subnet:"Nineteen",id:19,signal:"HOLD",weight:"8%",sharpe:1.18,factors:{value:62,momentum:55,quality:81,size:82,volatility:72},thesis:"Fair value, monitor emission share trends",horizon:"6M review",entry:"No new buys at current levels",exit:"Trim if momentum turns negative for 30d",targetPrice:0.065,currentPrice:0.059},
+        {subnet:"Text Prompting",id:1,signal:"HOLD",weight:"8%",sharpe:1.15,factors:{value:58,momentum:42,quality:86,size:92,volatility:85},thesis:"Legacy positioning, stable yield",horizon:"Indefinite",entry:"Hold current position",exit:"Reduce 50% if loses top-10 emission share",targetPrice:0.055,currentPrice:0.051},
+        {subnet:"Vanta",id:8,signal:"ACCUMULATE",weight:"8%",sharpe:1.25,factors:{value:75,momentum:48,quality:82,size:78,volatility:80},thesis:"Finance category diversification, low correlation to compute",horizon:"12M",entry:"Add 2% allocation on each -15% drawdown",exit:"Hold for portfolio diversification benefit",targetPrice:0.06,currentPrice:0.044},
+        {subnet:"FileTAO",id:21,signal:"HOLD",weight:"5%",sharpe:1.05,factors:{value:55,momentum:38,quality:74,size:72,volatility:68},thesis:"Storage narrative optionality",horizon:"6M",entry:"Maintain position, no adds",exit:"Exit if storage competition intensifies",targetPrice:0.045,currentPrice:0.039},
+        {subnet:"Dataverse",id:13,signal:"REDUCE",weight:"2%",sharpe:0.85,factors:{value:42,momentum:28,quality:70,size:65,volatility:55},thesis:"Declining emission share, fundamental deterioration",horizon:"EXIT",entry:"No new positions",exit:"Sell 50% now, remainder over 2 weeks",targetPrice:0.025,currentPrice:0.035},
+      ];
+
+      const sc: Record<string,any> = {
+        BUY:{bg:"rgba(0,255,153,0.15)",border:"rgba(0,255,153,0.4)",color:"#00ff99"},
+        ACCUMULATE:{bg:"rgba(0,240,255,0.15)",border:"rgba(0,240,255,0.4)",color:"#00f0ff"},
+        HOLD:{bg:"rgba(255,214,10,0.15)",border:"rgba(255,214,10,0.4)",color:"#ffd60a"},
+        REDUCE:{bg:"rgba(255,45,85,0.15)",border:"rgba(255,45,85,0.4)",color:"#ff2d55"},
+      };
+
+      const factorBar = (v: number) => `<span style="width:6px;height:18px;background:${v>70?"var(--green)":v>50?"var(--amber)":"var(--rose)"};border-radius:2px;display:inline-block"></span>`;
+      const calcScore = (f: any) => Math.round(f.value*0.25+f.momentum*0.2+f.quality*0.25+f.size*0.15+f.volatility*0.15);
+
+      const table = document.getElementById("signalsTable");
+      if (!table) return;
+
+      table.innerHTML = signals.map(s => {
+        const c = sc[s.signal];
+        const upside = (((s.targetPrice - s.currentPrice) / s.currentPrice) * 100).toFixed(0);
+        const upsideColor = parseFloat(upside) > 0 ? "var(--green)" : "var(--rose)";
+        return `
+          <tr style="border-bottom:1px solid var(--bdr);cursor:pointer" onclick="this.nextElementSibling.classList.toggle('show')">
+            <td style="padding:14px 8px"><div style="font-weight:600">${s.subnet}</div><div style="font-size:10px;color:var(--mute)">SN${s.id}</div></td>
+            <td style="padding:14px 8px;text-align:center"><span style="padding:4px 12px;background:${c.bg};border:1px solid ${c.border};border-radius:4px;font-size:11px;font-weight:700;color:${c.color}">${s.signal}</span></td>
+            <td style="padding:14px 8px;text-align:right;font-weight:600;color:var(--cyan)">${s.weight}</td>
+            <td style="padding:14px 8px;text-align:right;font-family:'IBM Plex Mono',monospace">${s.sharpe.toFixed(2)}</td>
+            <td style="padding:14px 8px;text-align:center"><div style="display:flex;gap:3px;justify-content:center">${factorBar(s.factors.value)}${factorBar(s.factors.momentum)}${factorBar(s.factors.quality)}${factorBar(s.factors.size)}${factorBar(s.factors.volatility)}</div><div style="font-size:9px;color:var(--mute);margin-top:2px">${calcScore(s.factors)}/100</div></td>
+            <td style="padding:14px 8px;text-align:center"><span style="padding:3px 8px;background:var(--bg4);border-radius:4px;font-size:10px;font-weight:600;color:${s.horizon==="EXIT"?"var(--rose)":"var(--txt)"}">${s.horizon}</span></td>
+            <td style="padding:14px 8px;text-align:right;font-weight:600;color:${upsideColor}">${parseFloat(upside)>0?"+":""}${upside}%</td>
+          </tr>
+          <tr class="signal-detail" style="background:var(--bg4)">
+            <td colspan="7" style="padding:16px 24px">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+                <div><div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">INVESTMENT THESIS</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">${s.thesis}</div></div>
+                <div><div style="font-size:10px;color:var(--green);letter-spacing:0.1em;margin-bottom:8px">↓ ENTRY</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">${s.entry}</div><div style="margin-top:8px;font-size:11px;color:var(--mute)">Current: <span style="color:var(--cyan)">${s.currentPrice}τ</span></div></div>
+                <div><div style="font-size:10px;color:var(--rose);letter-spacing:0.1em;margin-bottom:8px">↑ EXIT</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">${s.exit}</div><div style="margin-top:8px;font-size:11px;color:var(--mute)">Target: <span style="color:var(--green)">${s.targetPrice}τ</span></div></div>
+              </div>
+            </td>
+          </tr>`;
+      }).join("");
+    };
+
+
+    // ─── Research data & functions ─────────────────────────────────────────────
+    const research=[
+{i:'📈',c:'Market Analysis',t:'Q1 2026 Subnet Performance Review',ex:'Comprehensive analysis of subnet emissions, valuations, and market trends across 58 active subnets.',d:'Feb 12, 2026',
+content:`<h2>Q1 2026 Subnet Performance Review</h2>
+<p><strong>Executive Summary:</strong> The first quarter of 2026 has been transformative for the Bittensor ecosystem, with total network valuation reaching $1.28B and daily emissions stabilizing at 3,600 TAO. Our analysis reveals significant shifts in subnet competitive dynamics and valuation metrics.</p>
+
+<h3>Key Findings</h3>
+<ul>
+<li><strong>Market Cap Growth:</strong> Total subnet market capitalization increased 34% QoQ, driven primarily by inference and compute categories</li>
+<li><strong>Emission Distribution:</strong> Top 10 subnets now capture 62% of daily emissions, up from 58% in Q4 2025</li>
+<li><strong>Alpha Compression:</strong> Average alpha/emissions ratio fell to 0.38 from 0.42, indicating improved capital efficiency</li>
+<li><strong>New Entrants:</strong> 8 new subnets launched in Q1, with 5 achieving meaningful market cap within 30 days</li>
+</ul>
+
+<h3>Category Performance</h3>
+<p><strong>Inference (40% of market cap):</strong> Text Prompting (SN1) maintains dominance with $127M market cap, but faces increasing competition from specialized models like Vision (SN19) and Datura (SN22). Category average P/E ratio of 1.92x reflects strong fundamental demand.</p>
+
+<p><strong>Compute (22% of market cap):</strong> Cortex.t (SN18) leads with $98M valuation, benefiting from enterprise adoption. GPU shortages have driven up compute subnet valuations by 28% QoQ despite flat emissions growth.</p>
+
+<p><strong>Storage (15% of market cap):</strong> FileTAO (SN21) emerged as category leader, capitalizing on decentralized storage demand. Storage subnets show lowest alpha ratios (0.21 avg), suggesting undervaluation relative to utility.</p>
+
+<h3>Valuation Trends</h3>
+<p>The market is maturing rapidly, with correlation between subnet fundamentals and market cap strengthening (R² = 0.76, up from 0.63 in Q4). Key drivers:</p>
+<ul>
+<li>GitHub activity now explains 32% of valuation variance (up from 24%)</li>
+<li>Validator count correlation with market cap increased to 0.81</li>
+<li>Test coverage emerged as significant factor for institutional validators</li>
+</ul>
+
+<h3>Q2 Outlook</h3>
+<p>We project continued consolidation among top performers, with 3-5 subnet closures likely among lower-tier projects. Watch for: TAO halving event in late Q2, potential regulatory clarity from SEC on decentralized AI networks, and launch of enterprise-focused subnets targeting Fortune 500 adoption.</p>
+
+<p><strong>Investment Thesis:</strong> Focus on subnets with <0.25 alpha ratios, >75 fundamental scores, and strong GitHub momentum. Avoid overvalued inference plays with >2.0x P/E ratios unless unique technical moats exist.</p>`
+},
+{i:'🔬',c:'Technical',t:'Understanding Yuma Consensus Mechanism',ex:'Deep dive into the revolutionary consensus algorithm that powers Bittensor\'s validation system.',d:'Feb 8, 2026',
+content:`<h2>Understanding Yuma Consensus: The Engine of Decentralized AI</h2>
+<p><strong>Introduction:</strong> Yuma Consensus represents a paradigm shift in how decentralized networks coordinate and validate contributions. Unlike Proof of Work or Proof of Stake, Yuma implements "Proof of Intelligence" - rewarding participants based on the quality and utility of their AI outputs.</p>
+
+<h3>Core Mechanism</h3>
+<p>Yuma operates through a continuous evaluation cycle:</p>
+<ol>
+<li><strong>Query Distribution:</strong> Validators send identical queries to multiple miners simultaneously</li>
+<li><strong>Response Collection:</strong> Miners return their best AI-generated responses within time limits</li>
+<li><strong>Comparative Scoring:</strong> Validators evaluate responses against each other and ground truth where available</li>
+<li><strong>Weight Assignment:</strong> High-performing miners receive increased weight in emission distribution</li>
+<li><strong>Consensus Formation:</strong> Network aggregates validator assessments to determine final miner rankings</li>
+</ol>
+
+<h3>Mathematical Foundation</h3>
+<p>The consensus mechanism uses a modified PageRank algorithm where miner weights W are computed as:</p>
+<p><code>W(i) = (1-d) + d * Σ(W(j) * S(j,i) / C(j))</code></p>
+<p>Where:</p>
+<ul>
+<li>d = damping factor (0.85)</li>
+<li>S(j,i) = score given by validator j to miner i</li>
+<li>C(j) = sum of all scores given by validator j</li>
+</ul>
+
+<h3>Attack Resistance</h3>
+<p><strong>Sybil Attacks:</strong> Yuma resists Sybil attacks through stake-weighted validator influence. Creating multiple fake validators requires proportional TAO stake, making attacks economically prohibitive.</p>
+
+<p><strong>Collusion:</strong> The consensus algorithm detects validator collusion through outlier analysis. Validators consistently scoring poorly-performing miners highly face automatic weight reduction.</p>
+
+<p><strong>Response Copying:</strong> Time-based challenges and response diversity requirements prevent miners from simply copying each other's outputs.</p>
+
+<h3>Subnet-Specific Adaptations</h3>
+<p>Each subnet can customize Yuma parameters:</p>
+<ul>
+<li><strong>Scoring Functions:</strong> Text generation might prioritize coherence and factual accuracy, while image generation emphasizes aesthetic quality and prompt adherence</li>
+<li><strong>Time Windows:</strong> Compute-intensive tasks allow longer response times; low-latency applications require sub-second responses</li>
+<li><strong>Ground Truth Integration:</strong> Some subnets incorporate objective validation datasets; others rely purely on comparative ranking</li>
+</ul>
+
+<h3>Performance Characteristics</h3>
+<p>Yuma achieves remarkable efficiency:</p>
+<ul>
+<li>Consensus finality in <30 seconds for most subnets</li>
+<li>Handles 100,000+ miner evaluations per day network-wide</li>
+<li>Byzantine fault tolerance up to 33% malicious validators</li>
+<li>Sub-linear scaling of validation overhead as network grows</li>
+</ul>
+
+<h3>Implications for AI Development</h3>
+<p>Yuma Consensus fundamentally changes AI economics:</p>
+<ul>
+<li><strong>Continuous Improvement:</strong> Miners must constantly enhance models to maintain rankings</li>
+<li><strong>Market-Driven Optimization:</strong> The most valuable AI capabilities naturally receive the most resources</li>
+<li><strong>Democratized Validation:</strong> Anyone with TAO can become a validator and influence network direction</li>
+<li><strong>Permissionless Innovation:</strong> New mining strategies can be deployed instantly without approval</li>
+</ul>
+
+<h3>Future Developments</h3>
+<p>The Bittensor core team is exploring enhancements:</p>
+<ul>
+<li>Zero-knowledge proofs for private AI validation</li>
+<li>Cross-subnet consensus for multi-modal tasks</li>
+<li>Adaptive consensus parameters that automatically tune based on network conditions</li>
+<li>Integration with formal verification systems for safety-critical applications</li>
+</ul>
+
+<p><strong>Conclusion:</strong> Yuma Consensus represents the most sophisticated mechanism yet developed for coordinating decentralized intelligence. Its elegance lies in aligning individual incentives with collective intelligence improvement, creating a flywheel effect that continuously enhances network capabilities.</p>`
+},
+{i:'💡',c:'Strategy',t:'Optimal Validator Staking Strategies',ex:'Data-driven insights on maximizing returns through intelligent validator selection and portfolio management.',d:'Feb 5, 2026',
+content:`<h2>Optimal Validator Staking Strategies: Maximizing Risk-Adjusted Returns</h2>
+<p><strong>Overview:</strong> With 2,847 active validators across 58 subnets, validator selection has become increasingly complex. This guide provides quantitative frameworks for optimizing staking allocation to maximize returns while managing risk.</p>
+
+<h3>Understanding Validator Economics</h3>
+<p>Validators earn 18% of subnet emissions, distributed proportionally to stake weight. A 10,000 TAO stake in a subnet earning 100 TAO/day yields approximately 0.18 TAO/day or 65.7 TAO/year.</p>
+
+<p><strong>Key Metrics:</strong></p>
+<ul>
+<li><strong>APY (Annual Percentage Yield):</strong> (Daily Emissions * 365 * 0.18 * TAO Price) / (Your Stake * TAO Price)</li>
+<li><strong>Capital Efficiency:</strong> Emissions per TAO staked - higher is better</li>
+<li><strong>Volatility:</strong> Standard deviation of daily emissions over 30 days</li>
+<li><strong>Stake Concentration:</strong> Your stake as % of total subnet stake</li>
+</ul>
+
+<h3>Strategy 1: Index Staking</h3>
+<p><strong>Concept:</strong> Replicate overall network performance by staking proportionally to subnet market caps.</p>
+
+<p><strong>Allocation Example (100,000 TAO):</strong></p>
+<ul>
+<li>Text Prompting (SN1): 15,000 TAO (15%)</li>
+<li>Cortex.t (SN18): 11,600 TAO (11.6%)</li>
+<li>FileTAO (SN21): 9,000 TAO (9%)</li>
+<li>Remaining: Distributed across top 20 by market cap</li>
+</ul>
+
+<p><strong>Expected Return:</strong> 24-28% APY with network-average volatility</p>
+<p><strong>Pros:</strong> Diversified, low maintenance, tracks network growth</p>
+<p><strong>Cons:</strong> No alpha generation, includes overvalued subnets</p>
+
+<h3>Strategy 2: Value Investing</h3>
+<p><strong>Concept:</strong> Overweight undervalued subnets with strong fundamentals.</p>
+
+<p><strong>Selection Criteria:</strong></p>
+<ul>
+<li>Alpha/Emissions ratio <0.25</li>
+<li>Fundamental score >70</li>
+<li>GitHub activity in top quartile</li>
+<li>Validator count >40 (sufficient liquidity)</li>
+</ul>
+
+<p><strong>Allocation Example (100,000 TAO):</strong></p>
+<ul>
+<li>Storage subnets (low alpha): 30,000 TAO</li>
+<li>Emerging infrastructure plays: 25,000 TAO</li>
+<li>Quality AI services with <1.5x P/E: 25,000 TAO</li>
+<li>Cash reserve for opportunities: 20,000 TAO</li>
+</ul>
+
+<p><strong>Expected Return:</strong> 32-42% APY with higher volatility</p>
+<p><strong>Pros:</strong> Potential for significant alpha</p>
+<p><strong>Cons:</strong> Requires active monitoring, concentration risk</p>
+
+<h3>Strategy 3: Yield Optimization</h3>
+<p><strong>Concept:</strong> Dynamically allocate to highest-yield opportunities, rebalancing weekly.</p>
+
+<p><strong>Process:</strong></p>
+<ol>
+<li>Calculate projected APY for all subnets</li>
+<li>Filter for minimum liquidity (>30 validators)</li>
+<li>Allocate to top 10 by risk-adjusted yield</li>
+<li>Rebalance when yield delta exceeds 5 percentage points</li>
+</ol>
+
+<p><strong>Expected Return:</strong> 35-50% APY with moderate-high volatility</p>
+<p><strong>Pros:</strong> Maximizes yield capture</p>
+<p><strong>Cons:</strong> High transaction costs, requires automation</p>
+
+<h3>Strategy 4: Market Neutral</h3>
+<p><strong>Concept:</strong> Pair long positions in undervalued subnets with short exposure to overvalued ones.</p>
+
+<p><strong>Implementation:</strong></p>
+<ul>
+<li>Long stake: 60,000 TAO in <0.25 alpha subnets</li>
+<li>Synthetic short: Sell futures/options on >0.5 alpha subnets</li>
+<li>Market hedge: 40,000 TAO in top 5 by market cap</li>
+</ul>
+
+<p><strong>Expected Return:</strong> 18-25% APY with low correlation to TAO price</p>
+<p><strong>Pros:</strong> Protected against market downturns</p>
+<p><strong>Cons:</strong> Requires derivatives access, complex execution</p>
+
+<h3>Risk Management</h3>
+<p><strong>Diversification Rules:</strong></p>
+<ul>
+<li>No more than 25% in single subnet</li>
+<li>No more than 40% in single category</li>
+<li>Maintain exposure to 8+ subnets minimum</li>
+<li>Reserve 10-20% for opportunistic deployment</li>
+</ul>
+
+<p><strong>Monitoring Triggers:</strong></p>
+<ul>
+<li>Emission decline >20% over 7 days → Reduce stake</li>
+<li>Validator exodus (>30% departure) → Exit position</li>
+<li>GitHub activity stalled (no commits 30 days) → Review fundamentals</li>
+<li>P/E expansion >2.5x → Consider profit-taking</li>
+</ul>
+
+<h3>Advanced Techniques</h3>
+<p><strong>Stake Concentration Arbitrage:</strong> Small validators can achieve higher returns in less-staked subnets due to proportional distribution mechanics. Target subnets where you can achieve >1% stake share.</p>
+
+<p><strong>Emission Cycle Timing:</strong> Some subnets show predictable emission patterns. Stake before high-emission periods, reduce during low-emission periods.</p>
+
+<p><strong>Validator Reputation:</strong> Stake with validators maintaining >95% uptime and consistent scoring accuracy. Poor validators risk slashing penalties.</p>
+
+<h3>Tax Optimization</h3>
+<p>Validator rewards are taxable income in most jurisdictions:</p>
+<ul>
+<li>Track daily emission receipts at fair market value</li>
+<li>Consider entity structure (LLC, corporation) for large operations</li>
+<li>Offset gains with operational expenses</li>
+<li>Use long-term holding strategy (>1 year) where possible</li>
+</ul>
+
+<h3>Conclusion</h3>
+<p>Optimal validator strategy depends on risk tolerance, capital size, and time commitment. Small validators should focus on value investing in underappreciated subnets. Large validators benefit from index-plus strategies with selective overweights. All validators should implement strict risk management and maintain diversification.</p>
+
+<p><strong>Recommended Reading:</strong> "Staking Economics in Proof-of-Stake Networks" by Placeholder VC, "Validator Yield Optimization" by Chorus One Research</p>`
+},
+{i:'🌐',c:'Ecosystem',t:'The Rise of Decentralized AI Networks',ex:'How Bittensor is pioneering a new paradigm for machine learning infrastructure and democratizing AI.',d:'Feb 1, 2026',
+content:`<h2>The Rise of Decentralized AI Networks: A Paradigm Shift</h2>
+<p><strong>Introduction:</strong> The artificial intelligence industry stands at an inflection point. While centralized AI labs have achieved remarkable breakthroughs, their concentration of power raises profound questions about access, control, and the future of human-AI interaction. Decentralized AI networks like Bittensor offer a compelling alternative.</p>
+
+<h3>The Centralization Problem</h3>
+<p>Today's AI landscape is dominated by a handful of corporations:</p>
+<ul>
+<li><strong>OpenAI:</strong> $80B+ valuation, controlling ChatGPT and GPT-4</li>
+<li><strong>Anthropic:</strong> $18B+ valuation, developing Claude</li>
+<li><strong>Google:</strong> Gemini family and vast infrastructure</li>
+<li><strong>Meta:</strong> LLaMA models and research</li>
+</ul>
+
+<p>This concentration creates systemic risks:</p>
+<ul>
+<li><strong>Access Control:</strong> Centralized entities can restrict or terminate access arbitrarily</li>
+<li><strong>Censorship:</strong> Content filtering decisions made by unelected corporations</li>
+<li><strong>Data Privacy:</strong> User interactions harvested for model improvement</li>
+<li><strong>Innovation Bottlenecks:</strong> Progress limited by corporate priorities and risk tolerance</li>
+<li><strong>Economic Extraction:</strong> Value flows to shareholders, not contributors</li>
+</ul>
+
+<h3>The Bittensor Solution</h3>
+<p>Bittensor pioneers decentralized AI through economic incentives:</p>
+
+<p><strong>1. Permissionless Participation</strong><br>
+Anyone can contribute computing resources and earn TAO tokens proportional to contribution quality. No approval required, no geographic restrictions, no corporate gatekeeping.</p>
+
+<p><strong>2. Market-Driven Quality</strong><br>
+Unlike centralized labs where quality is dictated top-down, Bittensor uses market dynamics. High-quality AI outputs earn more rewards, creating natural selection toward excellence.</p>
+
+<p><strong>3. Composable Intelligence</strong><br>
+Subnets specialize in different capabilities (text, images, code, reasoning). Applications can compose multiple subnets, creating capabilities beyond any single provider.</p>
+
+<p><strong>4. Transparent Economics</strong><br>
+All emissions, rewards, and valuations are on-chain. No hidden subsidies, no accounting tricks, no opaque pricing.</p>
+
+<h3>Ecosystem Growth Trajectory</h3>
+<p><strong>2021-2022: Foundation</strong></p>
+<ul>
+<li>Mainnet launch with proof-of-concept subnets</li>
+<li>Core protocol development and testing</li>
+<li>Early adopter community formation</li>
+</ul>
+
+<p><strong>2023: Proliferation</strong></p>
+<ul>
+<li>Subnet count grows from 5 to 32</li>
+<li>Total market cap reaches $200M</li>
+<li>First enterprise pilots with Fortune 500 companies</li>
+</ul>
+
+<p><strong>2024: Maturation</strong></p>
+<ul>
+<li>Quality subnets achieve parity with centralized alternatives</li>
+<li>Developer tooling and APIs reach production-grade</li>
+<li>Institutional validators enter ecosystem</li>
+</ul>
+
+<p><strong>2025: Acceleration</strong></p>
+<ul>
+<li>Network valuation surpasses $1B</li>
+<li>50+ active subnets spanning all major AI categories</li>
+<li>Decentralized AI becomes viable alternative for mainstream applications</li>
+</ul>
+
+<p><strong>2026 and Beyond: Dominance?</strong></p>
+<ul>
+<li>Projected: 100+ subnets by end of 2026</li>
+<li>Theoretical: Decentralized AI could capture 15-30% of total AI compute market by 2028</li>
+<li>Potential: Network effects create self-reinforcing growth cycle</li>
+</ul>
+
+<h3>Technical Advantages</h3>
+<p><strong>Resilience:</strong> No single point of failure. If miners in one subnet fail, others continue operating. Compare this to centralized APIs that experience complete outages.</p>
+
+<p><strong>Geographic Distribution:</strong> Miners span 50+ countries, reducing latency for global users and providing natural redundancy.</p>
+
+<p><strong>Specialized Optimization:</strong> Subnets can optimize for specific use cases (low latency, high accuracy, cost efficiency) rather than compromising for general applicability.</p>
+
+<p><strong>Continuous Improvement:</strong> Market competition drives constant model updates. Centralized labs update quarterly; Bittensor miners update daily.</p>
+
+<h3>Economic Implications</h3>
+<p>Decentralized AI fundamentally changes value distribution:</p>
+
+<p><strong>Traditional AI Economics:</strong></p>
+<ul>
+<li>Researchers: Salaries capped by corporate budgets</li>
+<li>Infrastructure providers: Markup on compute costs</li>
+<li>Application developers: Revenue sharing with platform</li>
+<li>End users: Pay full retail prices</li>
+<li>Shareholders: Capture majority of value</li>
+</ul>
+
+<p><strong>Bittensor Economics:</strong></p>
+<ul>
+<li>Miners: Direct token rewards for quality output</li>
+<li>Validators: Stake rewards for network security</li>
+<li>Developers: Lower costs from competitive market</li>
+<li>Users: Reduced prices from disintermediation</li>
+<li>Token holders: Value accrues through network growth</li>
+</ul>
+
+<p>This redistribution isn't trivial. In traditional AI, researchers might earn $200K-500K annually while companies generate $10M+ in value from their work. In Bittensor, top miners can earn equivalent or greater amounts, directly capturing the value they create.</p>
+
+<h3>Challenges and Critiques</h3>
+<p><strong>Quality Consistency:</strong> Decentralized systems face challenges maintaining uniform quality. Yuma Consensus addresses this but requires ongoing refinement.</p>
+
+<p><strong>Latency:</strong> Adding network hops for validation introduces latency vs. direct API calls. Most subnets now achieve <1s response times, acceptable for many applications but slower than optimized centralized services.</p>
+
+<p><strong>User Experience:</strong> Using decentralized AI requires understanding wallets, tokens, and subnets. Abstraction layers are improving but still lag centralized alternatives.</p>
+
+<p><strong>Regulatory Uncertainty:</strong> Governments haven't clearly defined how decentralized AI networks fit into existing regulatory frameworks for both AI and securities.</p>
+
+<h3>Future Scenarios</h3>
+<p><strong>Optimistic (40% probability):</strong> Decentralized AI achieves technical parity with centralized alternatives by 2027. Cost advantages and censorship resistance drive mainstream adoption. Bittensor becomes infrastructure layer for AI economy, similar to how Ethereum became infrastructure for DeFi.</p>
+
+<p><strong>Base Case (45% probability):</strong> Decentralized AI captures 10-20% market share in specialized applications where its advantages (censorship resistance, cost, privacy) matter most. Coexists with centralized providers serving different market segments.</p>
+
+<p><strong>Pessimistic (15% probability):</strong> Technical challenges or regulatory obstacles prevent mainstream adoption. Decentralized AI remains niche technology for crypto-native applications and privacy advocates.</p>
+
+<h3>Implications for Builders</h3>
+<p>If you're building AI applications:</p>
+<ul>
+<li><strong>Prototype with centralized APIs:</strong> Faster development cycle, better documentation</li>
+<li><strong>Evaluate decentralized alternatives:</strong> Lower costs, no rate limits, no vendor lock-in</li>
+<li><strong>Hybrid approach:</strong> Use Bittensor for commodity tasks, centralized for specialized needs</li>
+<li><strong>Contribute back:</strong> Run miners or validators to earn tokens while supporting ecosystem</li>
+</ul>
+
+<h3>Conclusion</h3>
+<p>Decentralized AI networks represent a fundamental reimagining of how we develop, deploy, and benefit from artificial intelligence. While centralized providers will remain dominant in the near term, the architectural and economic advantages of decentralization suggest an inevitable transition. The question isn't whether decentralized AI will matter, but how quickly it will scale and which networks will capture value.</p>
+
+<p>Bittensor's 3-year head start, robust technical foundation, and growing ecosystem position it as the likely winner in this emerging category. For developers, investors, and users, engaging with Bittensor now means participating in what may become the infrastructure layer for the AI economy.</p>
+
+<p><strong>Further Reading:</strong> "Decentralizing AI: Opportunities and Challenges" by Berkeley AI Research, "The Economics of Decentralized Intelligence" by Electric Capital, Bittensor Whitepaper v2.0</p>`
+}
+];
+
+    function renderRes(){document.getElementById('resG').innerHTML=research.map((r,idx)=>'<a href="#" class="res-c" onclick="openResearch('+idx+');return false;"><div class="res-img">'+r.i+'</div><div class="res-cnt"><div class="res-cat">'+r.c+'</div><h3 class="res-t">'+r.t+'</h3><p class="res-ex">'+r.ex+'</p><div class="res-meta"><span>DeAI Research</span><span>'+r.d+'</span></div></div></a>').join('');}
+    g.renderRes = renderRes;
+
+    const openResearchFn = (idx: number) => {
+const r=research[idx];
+if(!r)return;
+document.getElementById('researchCat').textContent=r.c;
+document.getElementById('researchTitle').textContent=r.t;
+document.getElementById('researchDate').textContent=r.d;
+document.getElementById('researchContent').innerHTML=r.content;
+document.getElementById('researchModal').classList.add('open');
+}
+    g.openResearch = openResearchFn;
+    g.closeResearch = () => document.getElementById('researchModal')?.classList.remove('open');
+    g.closeLesson = () => document.getElementById('lessonModal')?.classList.remove('open');
+
+    // ─── Signals ──────────────────────────────────────────────────────────────
+    const renderSignals = () => {
+    // Enhanced signals with factor scores and execution strategies
+    const signals = [
+        { 
+            subnet: 'Chutes', id: 64, signal: 'BUY', weight: '22%', sharpe: 1.42,
+            factors: { value: 82, momentum: 88, quality: 92, size: 95, volatility: 78 },
+            thesis: 'Dominant compute position, institutional adoption catalyst',
+            horizon: '12-18M', 
+            entry: 'Scale in 3 tranches: 40% now, 30% on -10% dip, 30% on -20% dip',
+            exit: 'Take 25% profit at +50%, trail stop at 20% below highs',
+            targetPrice: 0.15, currentPrice: 0.102
+        },
+        { 
+            subnet: 'Lium', id: 51, signal: 'BUY', weight: '15%', sharpe: 1.38,
+            factors: { value: 78, momentum: 82, quality: 88, size: 90, volatility: 75 },
+            thesis: 'Strong emission share, undervalued vs compute peers',
+            horizon: '12M',
+            entry: 'DCA weekly over 4 weeks',
+            exit: 'Hold to target, stop loss at -30%',
+            targetPrice: 0.11, currentPrice: 0.076
+        },
+        { 
+            subnet: 'Gradients', id: 56, signal: 'BUY', weight: '12%', sharpe: 1.35,
+            factors: { value: 85, momentum: 92, quality: 78, size: 82, volatility: 68 },
+            thesis: 'Training category leader, momentum accelerating',
+            horizon: '6-12M',
+            entry: 'Enter on next -5% pullback or breakout above 0.18',
+            exit: 'Partial at +40%, remainder at +80%',
+            targetPrice: 0.25, currentPrice: 0.164
+        },
+        { 
+            subnet: 'Ridges', id: 62, signal: 'ACCUMULATE', weight: '10%', sharpe: 1.31,
+            factors: { value: 72, momentum: 75, quality: 90, size: 85, volatility: 82 },
+            thesis: 'Code quality moat, enterprise pipeline growing',
+            horizon: '12-24M',
+            entry: 'Add on weakness below 0.06',
+            exit: 'Long-term hold, review quarterly',
+            targetPrice: 0.10, currentPrice: 0.065
+        },
+        { 
+            subnet: 'Targon', id: 4, signal: 'ACCUMULATE', weight: '10%', sharpe: 1.28,
+            factors: { value: 68, momentum: 65, quality: 85, size: 88, volatility: 88 },
+            thesis: 'Stable compute infrastructure, low volatility play',
+            horizon: '12M',
+            entry: 'Layer in over 8 weeks',
+            exit: 'Reduce at +30% or if Sharpe drops below 1.0',
+            targetPrice: 0.07, currentPrice: 0.052
+        },
+        { 
+            subnet: 'Nineteen', id: 19, signal: 'HOLD', weight: '8%', sharpe: 1.18,
+            factors: { value: 62, momentum: 55, quality: 81, size: 82, volatility: 72 },
+            thesis: 'Fair value, monitor emission share trends',
+            horizon: '6M review',
+            entry: 'No new buys at current levels',
+            exit: 'Trim if momentum turns negative for 30d',
+            targetPrice: 0.065, currentPrice: 0.059
+        },
+        { 
+            subnet: 'Text Prompting', id: 1, signal: 'HOLD', weight: '8%', sharpe: 1.15,
+            factors: { value: 58, momentum: 42, quality: 86, size: 92, volatility: 85 },
+            thesis: 'Legacy positioning, stable yield',
+            horizon: 'Indefinite',
+            entry: 'Hold current position',
+            exit: 'Reduce 50% if loses top-10 emission share',
+            targetPrice: 0.055, currentPrice: 0.051
+        },
+        { 
+            subnet: 'Vanta', id: 8, signal: 'ACCUMULATE', weight: '8%', sharpe: 1.25,
+            factors: { value: 75, momentum: 48, quality: 82, size: 78, volatility: 80 },
+            thesis: 'Finance category diversification, low correlation to compute',
+            horizon: '12M',
+            entry: 'Add 2% allocation on each -15% drawdown',
+            exit: 'Hold for portfolio diversification benefit',
+            targetPrice: 0.06, currentPrice: 0.044
+        },
+        { 
+            subnet: 'FileTAO', id: 21, signal: 'HOLD', weight: '5%', sharpe: 1.05,
+            factors: { value: 55, momentum: 38, quality: 74, size: 72, volatility: 68 },
+            thesis: 'Storage narrative optionality',
+            horizon: '6M',
+            entry: 'Maintain position, no adds',
+            exit: 'Exit if storage competition intensifies',
+            targetPrice: 0.045, currentPrice: 0.039
+        },
+        { 
+            subnet: 'Dataverse', id: 13, signal: 'REDUCE', weight: '2%', sharpe: 0.85,
+            factors: { value: 42, momentum: 28, quality: 70, size: 65, volatility: 55 },
+            thesis: 'Declining emission share, fundamental deterioration',
+            horizon: 'EXIT',
+            entry: 'No new positions',
+            exit: 'Sell 50% now, remainder over 2 weeks',
+            targetPrice: 0.025, currentPrice: 0.035
+        }
+    ];
+    
+    const signalColors = {
+        'BUY': { bg: 'rgba(0,255,153,0.15)', border: 'rgba(0,255,153,0.4)', color: '#00ff99' },
+        'ACCUMULATE': { bg: 'rgba(0,240,255,0.15)', border: 'rgba(0,240,255,0.4)', color: '#00f0ff' },
+        'HOLD': { bg: 'rgba(255,214,10,0.15)', border: 'rgba(255,214,10,0.4)', color: '#ffd60a' },
+        'REDUCE': { bg: 'rgba(255,45,85,0.15)', border: 'rgba(255,45,85,0.4)', color: '#ff2d55' }
+    };
+    
+    // Calculate composite factor score
+    const calcFactorScore = (f) => Math.round((f.value * 0.25 + f.momentum * 0.2 + f.quality * 0.25 + f.size * 0.15 + f.volatility * 0.15));
+    
+    let html = '';
+    signals.forEach((s: any) => {
+        const sc = signalColors[s.signal];
+        const factorScore = calcFactorScore(s.factors);
+        const upside = ((s.targetPrice - s.currentPrice) / s.currentPrice * 100).toFixed(0);
+        
+        html += `<tr style="border-bottom:1px solid var(--bdr);cursor:pointer" onclick="this.nextElementSibling.classList.toggle('show')">
+            <td style="padding:14px 8px">
+                <div style="font-weight:600">${s.subnet}</div>
+                <div style="font-size:10px;color:var(--mute)">SN${s.id}</div>
+            </td>
+            <td style="padding:14px 8px;text-align:center">
+                <span style="padding:4px 12px;background:${sc.bg};border:1px solid ${sc.border};border-radius:4px;font-size:11px;font-weight:700;color:${sc.color}">${s.signal}</span>
+            </td>
+            <td style="padding:14px 8px;text-align:right;font-weight:600;color:var(--cyan)">${s.weight}</td>
+            <td style="padding:14px 8px;text-align:right;font-family:'IBM Plex Mono',monospace">${s.sharpe.toFixed(2)}</td>
+            <td style="padding:14px 8px;text-align:center">
+                <div style="display:flex;gap:3px;justify-content:center" title="V:${s.factors.value} M:${s.factors.momentum} Q:${s.factors.quality} S:${s.factors.size} Vol:${s.factors.volatility}">
+                    <span style="width:6px;height:18px;background:${s.factors.value > 70 ? 'var(--green)' : s.factors.value > 50 ? 'var(--amber)' : 'var(--rose)'};border-radius:2px" title="Value: ${s.factors.value}"></span>
+                    <span style="width:6px;height:18px;background:${s.factors.momentum > 70 ? 'var(--green)' : s.factors.momentum > 50 ? 'var(--amber)' : 'var(--rose)'};border-radius:2px" title="Momentum: ${s.factors.momentum}"></span>
+                    <span style="width:6px;height:18px;background:${s.factors.quality > 70 ? 'var(--green)' : s.factors.quality > 50 ? 'var(--amber)' : 'var(--rose)'};border-radius:2px" title="Quality: ${s.factors.quality}"></span>
+                    <span style="width:6px;height:18px;background:${s.factors.size > 70 ? 'var(--green)' : s.factors.size > 50 ? 'var(--amber)' : 'var(--rose)'};border-radius:2px" title="Size: ${s.factors.size}"></span>
+                    <span style="width:6px;height:18px;background:${s.factors.volatility > 70 ? 'var(--green)' : s.factors.volatility > 50 ? 'var(--amber)' : 'var(--rose)'};border-radius:2px" title="Low Vol: ${s.factors.volatility}"></span>
+                </div>
+                <div style="font-size:9px;color:var(--mute);margin-top:2px">${factorScore}/100</div>
+            </td>
+            <td style="padding:14px 8px;text-align:center">
+                <span style="padding:3px 8px;background:var(--bg4);border-radius:4px;font-size:10px;font-weight:600;color:${s.horizon === 'EXIT' ? 'var(--rose)' : 'var(--txt)'}">${s.horizon}</span>
+            </td>
+            <td style="padding:14px 8px;text-align:right">
+                <span style="font-size:12px;font-weight:600;color:${parseFloat(upside) > 0 ? 'var(--green)' : 'var(--rose)'}">${upside > 0 ? '+' : ''}${upside}%</span>
+            </td>
+        </tr>
+        <tr class="signal-detail" style="display:none;background:var(--bg4)">
+            <td colspan="7" style="padding:16px 24px">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+                    <div>
+                        <div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">INVESTMENT THESIS</div>
+                        <div style="font-size:12px;color:var(--txt2);line-height:1.6">${s.thesis}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:10px;color:var(--green);letter-spacing:0.1em;margin-bottom:8px">↓ ENTRY STRATEGY</div>
+                        <div style="font-size:12px;color:var(--txt2);line-height:1.6">${s.entry}</div>
+                        <div style="margin-top:8px;font-size:11px">
+                            <span style="color:var(--mute)">Current:</span> 
+                            <span style="color:var(--cyan);font-family:'IBM Plex Mono',monospace">${s.currentPrice}τ</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:10px;color:var(--rose);letter-spacing:0.1em;margin-bottom:8px">↑ EXIT STRATEGY</div>
+                        <div style="font-size:12px;color:var(--txt2);line-height:1.6">${s.exit}</div>
+                        <div style="margin-top:8px;font-size:11px">
+                            <span style="color:var(--mute)">Target:</span> 
+                            <span style="color:var(--green);font-family:'IBM Plex Mono',monospace">${s.targetPrice}τ</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bdr)">
+                    <div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">FACTOR BREAKDOWN</div>
+                    <div style="display:flex;gap:24px">
+                        <div style="flex:1"><span style="font-size:11px;color:var(--mute)">Value</span><div style="height:4px;background:var(--bg5);border-radius:2px;margin-top:4px"><div style="height:100%;width:${s.factors.value}%;background:var(--cyan);border-radius:2px"></div></div></div>
+                        <div style="flex:1"><span style="font-size:11px;color:var(--mute)">Momentum</span><div style="height:4px;background:var(--bg5);border-radius:2px;margin-top:4px"><div style="height:100%;width:${s.factors.momentum}%;background:var(--green);border-radius:2px"></div></div></div>
+                        <div style="flex:1"><span style="font-size:11px;color:var(--mute)">Quality</span><div style="height:4px;background:var(--bg5);border-radius:2px;margin-top:4px"><div style="height:100%;width:${s.factors.quality}%;background:var(--violet);border-radius:2px"></div></div></div>
+                        <div style="flex:1"><span style="font-size:11px;color:var(--mute)">Size</span><div style="height:4px;background:var(--bg5);border-radius:2px;margin-top:4px"><div style="height:100%;width:${s.factors.size}%;background:var(--amber);border-radius:2px"></div></div></div>
+                        <div style="flex:1"><span style="font-size:11px;color:var(--mute)">Low Vol</span><div style="height:4px;background:var(--bg5);border-radius:2px;margin-top:4px"><div style="height:100%;width:${s.factors.volatility}%;background:var(--rose);border-radius:2px"></div></div></div>
+                    </div>
+                </div>
+            </td>
+        </tr>`;
+    });
+    
+    const signalsTable = document.getElementById('signalsTable');
+    if (signalsTable) signalsTable.innerHTML = html;
+}
+    g.renderSignals = renderSignals;
+
     // ─── Sort menu close on outside click ─────────────────────────────────────
     document.addEventListener("click",(e)=>{
       if(!(e.target as Element)?.closest(".srt")) document.getElementById("srtM")?.classList.remove("open");
@@ -717,6 +1376,8 @@ const Dashboard: React.FC = () => {
     renderPills();
     renderList();
     renderNews();
+    renderRes();
+    renderSignals();
     renderTopPerformers();
     initCharts();
     initTicker();
@@ -764,6 +1425,21 @@ const DASHBOARD_CSS = `
 #deai-dashboard-root ::-webkit-scrollbar{width:6px;height:6px}
 #deai-dashboard-root ::-webkit-scrollbar-track{background:var(--bg2)}
 #deai-dashboard-root ::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px}
+#deai-dashboard-root .gloss-item{padding:12px 0;border-bottom:1px solid var(--bdr)}
+#deai-dashboard-root .gloss-item:last-child{border-bottom:none}
+#deai-dashboard-root .gloss-term{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px}
+#deai-dashboard-root .gloss-def{font-size:12px;color:var(--txt2);line-height:1.6}
+#deai-dashboard-root .res-c{display:flex;gap:16px;background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:16px;text-decoration:none;transition:all 0.2s;margin-bottom:12px;cursor:pointer}
+#deai-dashboard-root .res-c:hover{background:var(--bg4)}
+#deai-dashboard-root .res-img{width:100px;height:80px;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:32px}
+#deai-dashboard-root .res-cnt{flex:1}
+#deai-dashboard-root .res-cat{display:inline-block;padding:4px 10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:12px;font-size:10px;font-weight:600;color:var(--green);margin-bottom:8px;text-transform:uppercase}
+#deai-dashboard-root .res-t{font-size:15px;font-weight:600;color:var(--txt);margin-bottom:6px}
+#deai-dashboard-root .res-ex{font-size:12px;color:var(--txt2);margin-bottom:8px;line-height:1.5}
+#deai-dashboard-root .res-meta{display:flex;gap:12px;font-size:11px;color:var(--mute)}
+#deai-dashboard-root .signal-detail{display:none}
+#deai-dashboard-root .signal-detail.show{display:table-row!important}
+
 #deai-dashboard-root .subnet-icon{width:40px;height:40px;background:var(--grad);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#000;flex-shrink:0}
 #deai-dashboard-root .grade{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace}
 #deai-dashboard-root .grade-a{background:rgba(0,255,153,0.12);color:#00ff99;border:1px solid rgba(0,255,153,0.3)}
@@ -910,6 +1586,197 @@ const DASHBOARD_CSS = `
 #deai-dashboard-root .price-stat-l{font-size:10px;color:var(--mute);text-transform:uppercase;font-weight:600}
 #deai-dashboard-root .price-stat-v{font-size:16px;font-weight:700;color:var(--txt)}
 #deai-dashboard-root .chart-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--mute)}
+
+#deai-dashboard-root .lesson-m{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
+#deai-dashboard-root .lesson-m.open{display:flex}
+#deai-dashboard-root .lesson-box{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;width:90%;max-width:800px;max-height:85vh;overflow-y:auto;position:relative}
+#deai-dashboard-root .lesson-hdr{padding:24px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:flex-start}
+#deai-dashboard-root .lesson-hdr-l{flex:1}
+#deai-dashboard-root .lesson-tag{display:inline-block;padding:4px 10px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:12px;font-size:10px;font-weight:600;color:var(--violet);margin-bottom:8px;text-transform:uppercase}
+#deai-dashboard-root .lesson-t{font-size:22px;font-weight:700;margin-bottom:8px}
+#deai-dashboard-root .lesson-meta{font-size:12px;color:var(--mute)}
+#deai-dashboard-root .lesson-close{width:32px;height:32px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--mute);transition:all 0.2s}
+#deai-dashboard-root .lesson-close:hover{background:var(--bg4);color:var(--txt)}
+#deai-dashboard-root .lesson-cnt{padding:24px}
+#deai-dashboard-root .lesson-section{margin-bottom:24px}
+#deai-dashboard-root .lesson-section h3{font-size:18px;font-weight:700;margin-bottom:12px}
+#deai-dashboard-root .lesson-section h4{font-size:15px;font-weight:600;margin-bottom:8px;margin-top:16px;color:var(--cyan)}
+#deai-dashboard-root .lesson-section p{font-size:14px;line-height:1.7;color:var(--txt2);margin-bottom:12px}
+#deai-dashboard-root .lesson-section ul{margin-left:20px;margin-bottom:12px}
+#deai-dashboard-root .lesson-section li{font-size:14px;line-height:1.7;color:var(--txt2);margin-bottom:6px}
+#deai-dashboard-root .lesson-section ol{margin-left:20px;margin-bottom:12px}
+#deai-dashboard-root .lesson-section code{background:var(--bg4);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan)}
+#deai-dashboard-root .lesson-section .code-block{background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;color:var(--txt);overflow-x:auto;margin-bottom:12px}
+#deai-dashboard-root .lesson-cnt h2{font-size:24px;font-weight:700;margin-bottom:16px;color:var(--cyan)}
+#deai-dashboard-root .lesson-cnt h3{font-size:18px;font-weight:700;margin-bottom:12px;margin-top:24px}
+#deai-dashboard-root .lesson-cnt h4{font-size:15px;font-weight:600;margin-bottom:8px;margin-top:16px;color:var(--cyan)}
+#deai-dashboard-root .lesson-cnt p{font-size:14px;line-height:1.7;color:var(--txt2);margin-bottom:12px}
+#deai-dashboard-root .lesson-cnt ul{margin-left:20px;margin-bottom:12px}
+#deai-dashboard-root .lesson-cnt li{font-size:14px;line-height:1.7;color:var(--txt2);margin-bottom:6px}
+#deai-dashboard-root .lesson-cnt ol{margin-left:20px;margin-bottom:12px}
+#deai-dashboard-root .lesson-cnt strong{color:var(--txt);font-weight:600}
+#deai-dashboard-root .lesson-cnt code{background:var(--bg4);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan)}
+
+/* Institutional Tooltips */
+#deai-dashboard-root .tt{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;background:var(--bg4);border:1px solid var(--bdr);border-radius:50%;font-size:9px;color:var(--mute);cursor:help;position:relative}
+#deai-dashboard-root .tt:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--bg5);border:1px solid var(--bdr);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--txt2);white-space:nowrap;max-width:280px;white-space:normal;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.3);line-height:1.4}
+#deai-dashboard-root .tt:hover::before{content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--bdr);z-index:101}
+
+/* Allocation Bars */
+#deai-dashboard-root .alloc-bar{display:flex;align-items:center;gap:12px;padding:8px 0}
+#deai-dashboard-root .alloc-bar-name{width:100px;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#deai-dashboard-root .alloc-bar-track{flex:1;height:20px;background:var(--bg4);border-radius:4px;overflow:hidden;position:relative}
+#deai-dashboard-root .alloc-bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));border-radius:4px;transition:width 0.8s ease-out}
+#deai-dashboard-root .alloc-bar-pct{width:50px;text-align:right;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace}
+
+/* Risk Metric Cards */
+#deai-dashboard-root .risk-card{background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:14px;text-align:center}
+#deai-dashboard-root .risk-card-label{font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:4px}
+#deai-dashboard-root .risk-card-val{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace}
+#deai-dashboard-root .risk-card-sub{font-size:10px;margin-top:4px}
+#deai-dashboard-root .risk-card.good .risk-card-val{color:var(--green)}
+#deai-dashboard-root .risk-card.warn .risk-card-val{color:var(--amber)}
+#deai-dashboard-root .risk-card.bad .risk-card-val{color:var(--rose)}
+
+/* Correlation Matrix */
+#deai-dashboard-root .corr-cell{padding:6px;text-align:center;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;border:1px solid var(--bdr);cursor:default;transition:transform 0.1s}
+#deai-dashboard-root .corr-cell:hover{transform:scale(1.1);z-index:1;position:relative}
+#deai-dashboard-root .corr-cell.high{background:rgba(244,63,94,0.25);color:var(--rose)}
+#deai-dashboard-root .corr-cell.med{background:rgba(245,158,11,0.2);color:var(--amber)}
+#deai-dashboard-root .corr-cell.low{background:rgba(16,185,129,0.15);color:var(--green)}
+#deai-dashboard-root .corr-cell.diag{background:var(--bg5);color:var(--txt)}
+#deai-dashboard-root .corr-hdr{padding:6px;text-align:center;font-size:10px;font-weight:700;color:var(--mute);background:var(--bg4);border:1px solid var(--bdr)}
+
+/* Scenario Table */
+#deai-dashboard-root .scenario-row{display:grid;grid-template-columns:120px repeat(5,1fr);gap:1px;background:var(--bdr)}
+#deai-dashboard-root .scenario-cell{background:var(--bg3);padding:10px 8px;font-size:11px;text-align:center}
+#deai-dashboard-root .scenario-cell.header{background:var(--bg4);font-weight:700;color:var(--mute);text-transform:uppercase;font-size:10px}
+#deai-dashboard-root .scenario-cell.label{background:var(--bg4);font-weight:600;text-align:left;padding-left:12px}
+#deai-dashboard-root .scenario-cell.pos{color:var(--green)}
+#deai-dashboard-root .scenario-cell.neg{color:var(--rose)}
+
+/* Rebalancing Table */
+#deai-dashboard-root .rebal-row{display:grid;grid-template-columns:140px repeat(4,1fr) 80px;gap:1px;background:var(--bdr)}
+#deai-dashboard-root .rebal-row.highlight{border-left:3px solid var(--cyan)}
+#deai-dashboard-root .rebal-cell{background:var(--bg3);padding:10px 8px;font-size:11px}
+#deai-dashboard-root .rebal-cell.header{background:var(--bg4);font-weight:700;color:var(--mute);text-transform:uppercase;font-size:10px}
+#deai-dashboard-root .rebal-action{padding:4px 8px;border-radius:4px;font-size:10px;font-weight:700}
+#deai-dashboard-root .rebal-action.buy{background:rgba(16,185,129,0.15);color:var(--green)}
+#deai-dashboard-root .rebal-action.sell{background:rgba(244,63,94,0.15);color:var(--rose)}
+
+/* Monte Carlo Chart */
+#deai-dashboard-root .mc-path{stroke-width:1;fill:none;opacity:0.3}
+#deai-dashboard-root .mc-median{stroke-width:2;stroke-dasharray:5,3;fill:none}
+
+/* Attribution Bars */
+#deai-dashboard-root .attr-bar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+#deai-dashboard-root .attr-bar-label{width:100px;font-size:11px;text-align:right}
+#deai-dashboard-root .attr-bar-track{flex:1;height:16px;background:var(--bg4);border-radius:3px;position:relative;overflow:visible}
+#deai-dashboard-root .attr-bar-fill{position:absolute;top:0;height:100%;border-radius:3px;transition:width 0.6s ease-out}
+#deai-dashboard-root .attr-bar-fill.pos{background:linear-gradient(90deg,var(--green),var(--cyan));left:50%}
+#deai-dashboard-root .attr-bar-fill.neg{background:linear-gradient(90deg,var(--rose),var(--amber));right:50%}
+#deai-dashboard-root .attr-bar-val{width:60px;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace}
+
+/* Optimizer Controls */
+#deai-dashboard-root .opt-control{display:flex;flex-direction:column;gap:4px}
+#deai-dashboard-root .opt-control label{font-size:10px;color:var(--mute);text-transform:uppercase}
+#deai-dashboard-root .opt-control select, #deai-dashboard-root .opt-control input{padding:8px 10px;background:var(--bg4);border:1px solid var(--bdr);border-radius:6px;color:var(--txt);font-size:12px;font-family:inherit}
+#deai-dashboard-root .opt-control select:focus, #deai-dashboard-root .opt-control input:focus{outline:none;border-color:var(--cyan)}
+#deai-dashboard-root .opt-btn{padding:12px 24px;background:var(--grad);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s}
+#deai-dashboard-root .opt-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,0.3)}
+#deai-dashboard-root .opt-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+#deai-dashboard-root .opt-btn .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite}
+
+/* Projection Cards */
+#deai-dashboard-root .proj-card{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:16px;text-align:center}
+#deai-dashboard-root .proj-card-period{font-size:11px;color:var(--mute);text-transform:uppercase;margin-bottom:8px}
+#deai-dashboard-root .proj-card-val{font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--cyan)}
+#deai-dashboard-root .proj-card-chg{font-size:12px;font-weight:600;margin-top:4px}
+
+/* Glossary Styles */
+#deai-dashboard-root .gloss-item{padding:12px 0;border-bottom:1px solid var(--bdr)}
+#deai-dashboard-root .gloss-item:last-child{border-bottom:none}
+#deai-dashboard-root .gloss-term{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px}
+#deai-dashboard-root .gloss-def{font-size:12px;color:var(--txt2);line-height:1.6}
+#deai-dashboard-root .gloss-formula{display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);margin-top:4px}
+
+/* Metric with Icon */
+#deai-dashboard-root .metric-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:var(--bg4);border:1px solid var(--bdr);border-radius:50%;font-size:10px;color:var(--mute);cursor:help;margin-left:4px;position:relative;vertical-align:middle}
+#deai-dashboard-root .metric-icon:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--bg5);border:1px solid var(--bdr);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--txt2);white-space:normal;width:200px;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.3);line-height:1.4;font-weight:400}
+
+/* Thematic Sector Tabs */
+#deai-dashboard-root .thematic-tab{padding:6px 12px;background:var(--bg4);border:1px solid var(--bdr);border-radius:6px;font-size:11px;font-weight:500;color:var(--txt2);cursor:pointer;transition:all 0.2s;font-family:inherit}
+#deai-dashboard-root .thematic-tab:hover{background:var(--bg5);color:var(--txt);border-color:var(--bdr2)}
+#deai-dashboard-root .thematic-tab.act{background:var(--cyan);color:#000;border-color:var(--cyan);font-weight:600}
+
+/* Top Performers Cards */
+#deai-dashboard-root .top-perf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+#deai-dashboard-root @media(max-width:900px){.top-perf-grid{grid-template-columns:1fr}}
+#deai-dashboard-root .perf-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:0;overflow:hidden;transition:all 0.2s}
+#deai-dashboard-root .perf-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+#deai-dashboard-root .perf-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bdr)}
+#deai-dashboard-root .perf-card-rank{width:32px;height:32px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--mute)}
+#deai-dashboard-root .perf-card-info{display:flex;align-items:center;gap:12px;flex:1;margin-left:12px}
+#deai-dashboard-root .perf-card-icon{width:40px;height:40px;background:var(--bg3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--cyan)}
+#deai-dashboard-root .perf-card-name{font-size:14px;font-weight:600}
+#deai-dashboard-root .perf-card-id{font-size:11px;color:var(--mute)}
+#deai-dashboard-root .perf-card-change{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px}
+#deai-dashboard-root .perf-card-change.up{background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3)}
+#deai-dashboard-root .perf-card-change.dn{background:rgba(244,63,94,0.15);color:var(--rose);border:1px solid rgba(244,63,94,0.3)}
+#deai-dashboard-root .perf-card-body{padding:16px 20px}
+#deai-dashboard-root .perf-card-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#deai-dashboard-root .perf-card-stat{border-right:1px solid var(--bdr);padding-right:16px}
+#deai-dashboard-root .perf-card-stat:nth-child(2n){border-right:none;padding-right:0}
+#deai-dashboard-root .perf-card-stat-l{font-size:11px;color:var(--mute);text-transform:uppercase;margin-bottom:4px}
+#deai-dashboard-root .perf-card-stat-v{font-size:18px;font-weight:700;color:var(--txt)}
+#deai-dashboard-root .perf-card-stat-v span{font-size:14px;font-weight:400;color:var(--mute)}
+#deai-dashboard-root .perf-card-stat-sub{font-size:11px;color:var(--txt2);margin-top:2px}
+#deai-dashboard-root .perf-card-footer{padding:12px 20px;border-top:1px solid var(--bdr);text-align:center}
+#deai-dashboard-root .perf-card-link{color:var(--cyan);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;transition:all 0.2s}
+#deai-dashboard-root .perf-card-link:hover{color:var(--txt)}
+
+/* Subnet Price Chart in Expanded Row */
+#deai-dashboard-root .exp-chart-section{margin-top:20px;padding-top:20px;border-top:1px solid var(--bdr)}
+#deai-dashboard-root .exp-chart-container{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+#deai-dashboard-root @media(max-width:800px){.exp-chart-container{grid-template-columns:1fr}}
+#deai-dashboard-root .exp-chart-box{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:16px}
+#deai-dashboard-root .exp-chart-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+#deai-dashboard-root .exp-chart-title{font-size:13px;font-weight:600;color:var(--txt)}
+#deai-dashboard-root .exp-chart-pills{display:flex;gap:4px}
+#deai-dashboard-root .exp-chart-pill{padding:4px 8px;font-size:10px;background:var(--bg4);border:1px solid var(--bdr);border-radius:4px;cursor:pointer;color:var(--mute);transition:all 0.2s}
+#deai-dashboard-root .exp-chart-pill.act{background:var(--cyan);border-color:var(--cyan);color:#000}
+#deai-dashboard-root .exp-chart-canvas{height:120px}
+#deai-dashboard-root .exp-perf-box{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:16px}
+#deai-dashboard-root .exp-perf-title{font-size:12px;font-weight:600;color:var(--mute);text-transform:uppercase;margin-bottom:12px}
+#deai-dashboard-root .exp-perf-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)}
+#deai-dashboard-root .exp-perf-item:last-child{border-bottom:none}
+#deai-dashboard-root .exp-perf-label{font-size:12px;color:var(--txt2)}
+#deai-dashboard-root .exp-perf-value{font-size:13px;font-weight:600}
+#deai-dashboard-root .exp-signal{display:inline-block;padding:4px 10px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase}
+#deai-dashboard-root .exp-signal.out{background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3)}
+#deai-dashboard-root .exp-signal.under{background:rgba(244,63,94,0.15);color:var(--rose);border:1px solid rgba(244,63,94,0.3)}
+#deai-dashboard-root .gloss-item{padding:12px 0;border-bottom:1px solid var(--bdr)}
+#deai-dashboard-root .gloss-item:last-child{border-bottom:none}
+#deai-dashboard-root .gloss-term{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px}
+#deai-dashboard-root .gloss-def{font-size:12px;color:var(--txt2);line-height:1.6}
+#deai-dashboard-root .gloss-formula{display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);margin-top:4px}
+#deai-dashboard-root .news-g, #deai-dashboard-root .res-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+#deai-dashboard-root .news-c{display:block;background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:16px;text-decoration:none;transition:all 0.2s}
+#deai-dashboard-root .news-c:hover{background:var(--bg4);transform:translateY(-2px)}
+#deai-dashboard-root .news-tag{display:inline-block;padding:4px 10px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);border-radius:12px;font-size:10px;font-weight:600;color:var(--cyan);margin-bottom:10px;text-transform:uppercase}
+#deai-dashboard-root .news-t{font-size:15px;font-weight:600;color:var(--txt);margin-bottom:8px;line-height:1.4}
+#deai-dashboard-root .news-meta{display:flex;gap:8px;font-size:11px;color:var(--mute)}
+
+#deai-dashboard-root .res-c{display:flex;gap:16px;background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:16px;text-decoration:none;transition:all 0.2s;margin-bottom:12px}
+#deai-dashboard-root .res-c:hover{background:var(--bg4);transform:translateX(2px)}
+#deai-dashboard-root .res-img{width:160px;height:100px;background:var(--bg4);border:1px solid var(--bdr);border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:36px}
+#deai-dashboard-root .res-cnt{flex:1}
+#deai-dashboard-root .res-cat{display:inline-block;padding:4px 10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:12px;font-size:10px;font-weight:600;color:var(--green);margin-bottom:8px;text-transform:uppercase}
+#deai-dashboard-root .res-t{font-size:16px;font-weight:600;color:var(--txt);margin-bottom:6px}
+#deai-dashboard-root .res-ex{font-size:13px;color:var(--txt2);margin-bottom:10px;line-height:1.5}
+#deai-dashboard-root .res-meta{display:flex;gap:12px;font-size:11px;color:var(--mute)}
+#deai-dashboard-root .signal-detail{display:none}
+#deai-dashboard-root .signal-detail.show{display:table-row!important}
 `;
 
 // ─── HTML ─────────────────────────────────────────────────────────────────────
@@ -978,9 +1845,28 @@ const DASHBOARD_HTML = `
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         On-Chain Analytics
       </a>
+      <a class="nav-i" data-v="signals" onclick="window.showView('signals')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Signals
+      </a>
       <a class="nav-i" data-v="intelligence" onclick="window.showView('intelligence')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         Intelligence Feed
+      </a>
+      <a class="nav-i" data-v="reports" onclick="window.showView('reports')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Report Generator
+      </a>
+    </nav>
+    <nav class="nav-s">
+      <div class="nav-hd">Resources</div>
+      <a class="nav-i" data-v="research" onclick="window.showView('research')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Research
+      </a>
+      <a class="nav-i" data-v="glossary" onclick="window.showView('glossary')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Glossary
       </a>
     </nav>
     <div style="margin-top:auto;padding:12px;background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(139,92,246,0.1));border:1px solid rgba(59,130,246,0.2);border-radius:8px;font-size:11px">
@@ -1334,6 +2220,536 @@ const DASHBOARD_HTML = `
     </div>
 
   </main>
+</div>
+
+
+    <!-- SIGNALS VIEW -->
+    <div id="signals-view" class="view">
+      <section class="sec" style="background:transparent;border:none;padding:0">
+        <div style="margin-bottom:32px">
+          <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:8px">Institutional Signals</div>
+          <div style="font-size:14px;color:var(--mute)">Medium to long-term allocation recommendations based on fundamental analysis</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px">
+          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--green)">
+            <div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">CONVICTION BUYS</div>
+            <div style="font-size:32px;font-weight:700;color:var(--green);font-family:'IBM Plex Mono',monospace">4</div>
+            <div style="font-size:11px;color:var(--txt2);margin-top:4px">High confidence allocations</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--cyan)">
+            <div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">ACCUMULATE</div>
+            <div style="font-size:32px;font-weight:700;color:var(--cyan);font-family:'IBM Plex Mono',monospace">6</div>
+            <div style="font-size:11px;color:var(--txt2);margin-top:4px">Build positions on weakness</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--amber)">
+            <div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">HOLD</div>
+            <div style="font-size:32px;font-weight:700;color:var(--amber);font-family:'IBM Plex Mono',monospace">12</div>
+            <div style="font-size:11px;color:var(--txt2);margin-top:4px">Maintain current exposure</div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--rose)">
+            <div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">REDUCE</div>
+            <div style="font-size:32px;font-weight:700;color:var(--rose);font-family:'IBM Plex Mono',monospace">2</div>
+            <div style="font-size:11px;color:var(--txt2);margin-top:4px">Trim overweight positions</div>
+          </div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px;margin-bottom:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+            <div>
+              <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700">Conviction Allocations</div>
+              <div style="font-size:12px;color:var(--mute);margin-top:4px">12-month investment horizon · Rebalanced quarterly</div>
+            </div>
+            <div style="padding:6px 12px;background:var(--bg3);border-radius:6px;font-size:10px;color:var(--mute)">Updated: Feb 23, 2026</div>
+          </div>
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr style="border-bottom:1px solid var(--bdr)">
+              <th style="text-align:left;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">SUBNET</th>
+              <th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">SIGNAL</th>
+              <th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">TARGET WT</th>
+              <th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">SHARPE</th>
+              <th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">FACTORS</th>
+              <th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">HORIZON</th>
+              <th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600">UPSIDE</th>
+            </tr></thead>
+            <tbody id="signalsTable"></tbody>
+          </table>
+          <div style="margin-top:12px;font-size:11px;color:var(--mute);text-align:center">Click any row to expand entry/exit strategies</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px">
+            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px"><span style="color:var(--green)">●</span> Bull Case Thesis</div>
+            <div style="font-size:13px;color:var(--txt2);line-height:1.8">
+              <p style="margin-bottom:12px"><strong style="color:var(--txt)">Compute Dominance:</strong> Inference and compute subnets (SN64, SN51, SN4) capture increasing share of AI workloads. Post-halving emission compression favors established subnets with proven utility.</p>
+              <p style="margin-bottom:12px"><strong style="color:var(--txt)">Institutional Catalyst:</strong> ETF approvals (Grayscale GTAO filing) could drive $500M+ inflows into TAO ecosystem.</p>
+              <p><strong style="color:var(--txt)">Network Effects:</strong> Code quality improvements (+18% QoQ) and validator competition indicate maturing ecosystem.</p>
+            </div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px">
+            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px"><span style="color:var(--rose)">●</span> Risk Factors</div>
+            <div style="font-size:13px;color:var(--txt2);line-height:1.8">
+              <p style="margin-bottom:12px"><strong style="color:var(--txt)">Concentration Risk:</strong> Top 10 subnets capture 62% of emissions. Regulatory action against any major subnet could cascade.</p>
+              <p style="margin-bottom:12px"><strong style="color:var(--txt)">TAO Beta:</strong> All subnet tokens exhibit high correlation to TAO (avg β=0.85). Macro drawdowns affect entire ecosystem.</p>
+              <p><strong style="color:var(--txt)">Technology Risk:</strong> Rapid AI advancement could obsolete current subnet architectures.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- RESEARCH VIEW -->
+    <div id="research-view" class="view">
+      <section class="sec">
+        <div class="sec-hd"><div><div class="sec-t">Latest Research & Reports</div><div class="sec-sub">In-depth analysis and market insights</div></div></div>
+        <div id="resG" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px"></div>
+      </section>
+    </div>
+
+    <!-- GLOSSARY VIEW -->
+    <div id="glossary-view" class="view">
+      <section class="sec">
+        <div class="sec-hd"><div><div class="sec-t">Investment Glossary</div><div class="sec-sub">Definitions and formulas for all quantitative metrics</div></div></div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px">
+          <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
+            <div style="font-size:14px;font-weight:700;color:var(--cyan);margin-bottom:16px">Valuation Metrics</div>
+            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Alpha Price (α)</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Subnet token price in TAO. Lower alpha with high emissions = undervalued.</div></div>
+            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">α/EM Ratio</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Alpha Price ÷ Emission Share %. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">α/EM = Alpha / Emission%</span></div></div>
+            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">P/E Ratio</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Market Cap / Annual Emission Value. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">P/E = MC / (Daily TAO × 365 × Price)</span></div></div>
+            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">TANAV</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">TAO-Adjusted Net Asset Value. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">TANAV = (Staked × Price) + PV(Emissions)</span></div></div>
+            <div style="padding:12px 0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">DCF Model</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Present value of future emissions. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">DCF = Σ(Em × (1+g)^t / (1+r)^t)</span></div></div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
+            <div style="font-size:14px;font-weight:700;color:var(--rose);margin-bottom:16px">Risk Metrics</div>
+            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Sharpe Ratio</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Risk-adjusted return. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">Sharpe = (Return - Rf) / σ</span>. &gt;1.0 good.</div></div>
+            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Sortino Ratio</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Penalizes only downside volatility. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">Sortino = (Return - Rf) / σ_down</span></div></div>
+            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">VaR (95%)</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Max expected 1-day loss at 95% confidence. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">VaR = σ × 1.65 / √252</span></div></div>
+            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Max Drawdown</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Largest peak-to-trough decline. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">MDD = (Trough - Peak) / Peak</span></div></div>
+            <div style="padding:12px 0;border-bottom:1px solid var(--bdr)"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">TAO Beta (β)</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Sensitivity to TAO price movements. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">β = Cov(Rp,Rtao) / Var(Rtao)</span></div></div>
+            <div style="padding:12px 0"><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Staking APY</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">Annual yield from delegating TAO. <span style="display:inline-block;background:var(--bg4);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan)">APY = (Daily Em × 365) / Staked</span></div></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- REPORTS VIEW -->
+    <div id="reports-view" class="view">
+      <section class="sec" style="background:transparent;border:none;padding:0">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:40px">
+          <div>
+            <div style="font-size:10px;color:var(--mute);letter-spacing:0.2em;margin-bottom:16px">INSTITUTIONAL REPORT GENERATOR</div>
+            <h1 style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;line-height:1.1;margin-bottom:20px">Publish-ready research in <span style="color:var(--green)">seconds.</span></h1>
+            <p style="font-size:14px;color:var(--txt2);line-height:1.7;margin-bottom:32px">Our AI engine synthesizes on-chain data, subnet metrics, valuation models, and macro context into comprehensive LP-grade research documents — on demand.</p>
+            <div style="display:flex;flex-direction:column;gap:20px">
+              <div style="display:flex;gap:16px;align-items:flex-start">
+                <div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--cyan);flex-shrink:0">RVT</div>
+                <div><div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Valuation Models (RVT, P/E)</div><div style="font-size:12px;color:var(--txt2)">Relative Value to Token and Price-to-Emissions ratios across all subnets.</div></div>
+              </div>
+              <div style="display:flex;gap:16px;align-items:flex-start">
+                <div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--violet);flex-shrink:0">β</div>
+                <div><div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Sharpe & Beta Calculations</div><div style="font-size:12px;color:var(--txt2)">Risk-adjusted return metrics benchmarked against TAO index.</div></div>
+              </div>
+              <div style="display:flex;gap:16px;align-items:flex-start">
+                <div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green);flex-shrink:0">QC</div>
+                <div><div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Code Quality Metrics</div><div style="font-size:12px;color:var(--txt2)">Automated validator and miner code quality scoring.</div></div>
+              </div>
+            </div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+              <div style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--txt)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="font-size:13px;font-weight:600">Institutional Report</span></div>
+              <span style="font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:var(--green);border-radius:50%"></span>GENERATED</span>
+            </div>
+            <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px">Bittensor Subnet Intelligence<br/>Q1 2026 — Risk Score Analysis</h2>
+            <div style="font-size:11px;color:var(--mute);margin-bottom:20px">FEB 22, 2026 · Confidential — Institutional</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
+              <div style="padding:14px;border-left:2px solid var(--bdr)"><div style="font-size:9px;color:var(--mute);margin-bottom:6px">SHARPE</div><div style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace">2.18</div><div style="font-size:10px;color:var(--green)">▲ 0.14 MoM</div></div>
+              <div style="padding:14px;border-left:2px solid var(--bdr)"><div style="font-size:9px;color:var(--mute);margin-bottom:6px">AVG APY</div><div style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace">24.8%</div><div style="font-size:10px;color:var(--green)">▲ 3.2%</div></div>
+              <div style="padding:14px;border-left:2px solid var(--bdr)"><div style="font-size:9px;color:var(--mute);margin-bottom:6px">RISK VOL</div><div style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace">0.42</div><div style="font-size:10px;color:var(--rose)">▼ 0.06</div></div>
+            </div>
+            <div style="font-size:12px;color:var(--txt2);line-height:1.7;margin-bottom:20px"><strong style="color:var(--txt)">Executive Summary:</strong> Q1 2026 marks a structural inflection in Bittensor subnet maturity. SN22 and SN1 demonstrate superior risk-adjusted returns, with RVT multiples compressing toward fair value...</div>
+            <div style="display:flex;gap:12px">
+              <button class="btn btn-p" onclick="window.exportReportPDF()">EXPORT PDF</button>
+              <button class="btn btn-g" onclick="window.shareReport()">SHARE</button>
+              <button class="btn btn-g" onclick="window.regenerateReport()">REGENERATE</button>
+            </div>
+          </div>
+        </div>
+        <details style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px">
+          <summary style="padding:20px;cursor:pointer;font-family:'Syne',sans-serif;font-size:14px;font-weight:700">Advanced Report Configuration</summary>
+          <div style="padding:0 20px 20px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+            <div>
+              <div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Report Type</label><select id="rpt-type" class="calc-in" style="width:100%"><option>Quarterly Holdings Report (10-Q)</option><option>Annual Investment Summary (10-K)</option><option>Position Mark-to-Market</option><option>Risk & Exposure Analysis</option></select></div>
+              <div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Reporting Period</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="date" class="calc-in" value="2026-01-01"><input type="date" class="calc-in" value="2026-03-17"></div></div>
+              <div><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Entity Name</label><input type="text" class="calc-in" placeholder="e.g. Acme Digital Holdings LLC" style="width:100%"></div>
+            </div>
+            <div>
+              <div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Total TAO Holdings</label><input type="number" class="calc-in" placeholder="10000" style="width:100%"></div>
+              <div style="margin-bottom:16px"><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Cost Basis (USD)</label><input type="number" class="calc-in" placeholder="1500000" style="width:100%"></div>
+              <div><label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Include Sources</label><div style="display:flex;flex-wrap:wrap;gap:8px"><label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);padding:4px 8px;background:var(--bg3);border-radius:4px"><input type="checkbox" checked> Dashboard Metrics</label><label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);padding:4px 8px;background:var(--bg3);border-radius:4px"><input type="checkbox" checked> On-chain Data</label><label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);padding:4px 8px;background:var(--bg3);border-radius:4px"><input type="checkbox" checked> GitHub Activity</label></div></div>
+            </div>
+          </div>
+        </details>
+      </section>
+    </div>
+
+
+
+<!-- Research Modal -->
+<div id="researchModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)" class="modal">
+  <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;width:90%;max-width:800px;max-height:85vh;overflow-y:auto;position:relative">
+    <div style="padding:24px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div style="display:inline-block;padding:4px 10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:12px;font-size:10px;font-weight:600;color:var(--green);margin-bottom:8px;text-transform:uppercase" id="researchCat">Research</div>
+        <div style="font-size:22px;font-weight:700;margin-bottom:8px" id="researchTitle">Loading...</div>
+        <div style="font-size:12px;color:var(--mute)" id="researchDate">Date</div>
+      </div>
+      <div onclick="window.closeResearch()" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--mute)">×</div>
+    </div>
+    <div style="padding:24px;font-size:14px;color:var(--txt2);line-height:1.7" id="researchContent"></div>
+  </div>
+</div>
+
+
+    <div id="signals-view" class="view">
+<section class="sec" style="background:transparent;border:none;padding:0">
+<div style="margin-bottom:32px">
+<div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:8px">Institutional Signals</div>
+<div style="font-size:14px;color:var(--mute)">Medium to long-term allocation recommendations based on fundamental analysis</div>
+</div>
+
+<!-- Signal Summary -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px">
+<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--green)">
+<div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">CONVICTION BUYS</div>
+<div style="font-size:32px;font-weight:700;color:var(--green);font-family:'IBM Plex Mono',monospace">4</div>
+<div style="font-size:11px;color:var(--txt2);margin-top:4px">High confidence allocations</div>
+</div>
+<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--cyan)">
+<div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">ACCUMULATE</div>
+<div style="font-size:32px;font-weight:700;color:var(--cyan);font-family:'IBM Plex Mono',monospace">6</div>
+<div style="font-size:11px;color:var(--txt2);margin-top:4px">Build positions on weakness</div>
+</div>
+<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--amber)">
+<div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">HOLD</div>
+<div style="font-size:32px;font-weight:700;color:var(--amber);font-family:'IBM Plex Mono',monospace">12</div>
+<div style="font-size:11px;color:var(--txt2);margin-top:4px">Maintain current exposure</div>
+</div>
+<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:20px;border-top:3px solid var(--rose)">
+<div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">REDUCE</div>
+<div style="font-size:32px;font-weight:700;color:var(--rose);font-family:'IBM Plex Mono',monospace">2</div>
+<div style="font-size:11px;color:var(--txt2);margin-top:4px">Trim overweight positions</div>
+</div>
+</div>
+
+<!-- Conviction Picks -->
+<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px;margin-bottom:24px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+<div>
+<div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700">Conviction Allocations</div>
+<div style="font-size:12px;color:var(--mute);margin-top:4px">12-month investment horizon · Rebalanced quarterly</div>
+</div>
+<div style="padding:6px 12px;background:var(--bg3);border-radius:6px;font-size:10px;color:var(--mute)">Updated: Feb 23, 2026</div>
+</div>
+
+<table style="width:100%;border-collapse:collapse">
+<thead>
+<tr style="border-bottom:1px solid var(--bdr)">
+<th style="text-align:left;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">SUBNET</th>
+<th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">SIGNAL</th>
+<th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">TARGET WT</th>
+<th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">SHARPE</th>
+<th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">FACTORS <span class="metric-info" style="display:inline-flex;width:12px;height:12px;font-size:8px;vertical-align:middle">?<div class="metric-tooltip" style="width:200px">V=Value M=Momentum Q=Quality S=Size Vol=Low Volatility</div></span></th>
+<th style="text-align:center;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">HORIZON</th>
+<th style="text-align:right;padding:12px 8px;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:0.1em">UPSIDE</th>
+</tr>
+</thead>
+<tbody id="signalsTable">
+</tbody>
+</table>
+<div style="margin-top:12px;font-size:11px;color:var(--mute);text-align:center">Click any row to expand entry/exit strategies and factor breakdown</div>
+</div>
+
+<!-- Investment Thesis -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px">
+<div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+<span style="color:var(--green)">●</span> Bull Case Thesis
+</div>
+<div style="font-size:13px;color:var(--txt2);line-height:1.8">
+<p style="margin-bottom:12px"><strong style="color:var(--txt)">Compute Dominance:</strong> Inference and compute subnets (SN64, SN51, SN4) capture increasing share of AI workloads as centralized alternatives face capacity constraints. Post-halving emission compression favors established subnets with proven utility.</p>
+<p style="margin-bottom:12px"><strong style="color:var(--txt)">Institutional Catalyst:</strong> ETF approvals (Grayscale GTAO filing) could drive $500M+ inflows. European staked ETP products create passive demand for high-APY subnets.</p>
+<p><strong style="color:var(--txt)">Network Effects:</strong> Code quality improvements (+18% QoQ) and validator competition indicate maturing ecosystem. Subnet specialization creates defensible moats.</p>
+</div>
+</div>
+<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px">
+<div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+<span style="color:var(--rose)">●</span> Risk Factors
+</div>
+<div style="font-size:13px;color:var(--txt2);line-height:1.8">
+<p style="margin-bottom:12px"><strong style="color:var(--txt)">Concentration Risk:</strong> Top 10 subnets capture 62% of emissions. Regulatory action against any major subnet could cascade through the network.</p>
+<p style="margin-bottom:12px"><strong style="color:var(--txt)">TAO Beta:</strong> All subnet tokens exhibit high correlation to TAO (avg β=0.85). Macro crypto drawdowns affect entire ecosystem regardless of fundamentals.</p>
+<p><strong style="color:var(--txt)">Technology Risk:</strong> Rapid AI advancement could obsolete current subnet architectures. OpenAI/Anthropic breakthroughs may reduce decentralized compute demand.</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+
+    <div id="research-view" class="view">
+<section class="sec">
+<div class="sec-hd">
+<div>
+<div class="sec-t">Latest Research & Reports</div>
+<div class="sec-sub">In-depth analysis and market insights</div>
+</div>
+</div>
+<div class="res-g" id="resG"></div>
+</section>
+</div>
+
+    <div id="glossary-view" class="view">
+<section class="sec">
+<div class="sec-hd">
+<div>
+<div class="sec-t">Investment Glossary</div>
+<div class="sec-sub">Definitions and formulas for all quantitative metrics and valuation models</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px">
+<!-- Valuation Metrics -->
+<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
+<div style="font-size:14px;font-weight:700;color:var(--cyan);margin-bottom:16px;display:flex;align-items:center;gap:8px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+Valuation Metrics
+</div>
+<div class="gloss-item"><div class="gloss-term">Alpha Price (α)</div><div class="gloss-def">The price of one subnet token denominated in TAO. Determined by subnet market cap / total token supply. Lower alpha with high emissions = undervalued.</div></div>
+<div class="gloss-item"><div class="gloss-term">α/EM Ratio</div><div class="gloss-def">Alpha Price divided by Emission Share %. Measures value per unit of network emissions. <span class="gloss-formula">α/EM = Alpha / (Emission Share)</span>. Lower = more undervalued.</div></div>
+<div class="gloss-item"><div class="gloss-term">P/E Ratio</div><div class="gloss-def">Price-to-Earnings adapted for subnets. Market Cap / Annual Emission Value. <span class="gloss-formula">P/E = MC / (Daily TAO × 365 × TAO Price)</span>. Lower = cheaper relative to earnings.</div></div>
+<div class="gloss-item"><div class="gloss-term">TANAV</div><div class="gloss-def">TAO-Adjusted Net Asset Value. Fair value based on staked TAO, emission rights, and subnet utility. <span class="gloss-formula">TANAV = (Staked TAO × Price) + PV(Future Emissions)</span></div></div>
+<div class="gloss-item"><div class="gloss-term">EYS (Emission Yield Spread)</div><div class="gloss-def">Difference between subnet APY and network average APY. Positive = above-market yield. <span class="gloss-formula">EYS = Subnet APY - Network Avg APY</span></div></div>
+<div class="gloss-item"><div class="gloss-term">DCF Model</div><div class="gloss-def">Discounted Cash Flow. Present value of future emissions using growth and discount rates. <span class="gloss-formula">DCF = Σ(Emission × (1+g)^t / (1+r)^t)</span></div></div>
+</div>
+
+<!-- Risk Metrics -->
+<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
+<div style="font-size:14px;font-weight:700;color:var(--rose);margin-bottom:16px;display:flex;align-items:center;gap:8px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+Risk Metrics
+</div>
+<div class="gloss-item"><div class="gloss-term">Sharpe Ratio</div><div class="gloss-def">Risk-adjusted return. Excess return per unit of total volatility. <span class="gloss-formula">Sharpe = (Return - Rf) / σ</span>. >1.0 good, >2.0 excellent.</div></div>
+<div class="gloss-item"><div class="gloss-term">Sortino Ratio</div><div class="gloss-def">Like Sharpe but only penalizes downside volatility. <span class="gloss-formula">Sortino = (Return - Rf) / σ_downside</span>. Higher = better downside protection.</div></div>
+<div class="gloss-item"><div class="gloss-term">Calmar Ratio</div><div class="gloss-def">Return per unit of maximum drawdown. <span class="gloss-formula">Calmar = Annual Return / Max Drawdown</span>. Higher = better recovery potential.</div></div>
+<div class="gloss-item"><div class="gloss-term">Omega Ratio</div><div class="gloss-def">Probability-weighted ratio of gains vs losses. <span class="gloss-formula">Ω = ∫(1-F(r))dr / ∫F(r)dr</span>. >1.0 = more upside than downside.</div></div>
+<div class="gloss-item"><div class="gloss-term">VaR (95%)</div><div class="gloss-def">Value at Risk. Maximum expected 1-day loss at 95% confidence. 5% chance of exceeding this loss. <span class="gloss-formula">VaR = σ × 1.65 × √(1/252) × Portfolio</span></div></div>
+<div class="gloss-item"><div class="gloss-term">CVaR / Expected Shortfall</div><div class="gloss-def">Average loss when VaR is exceeded. Better captures tail risk than VaR alone. <span class="gloss-formula">CVaR = E[Loss | Loss > VaR]</span></div></div>
+<div class="gloss-item"><div class="gloss-term">Max Drawdown</div><div class="gloss-def">Largest peak-to-trough decline. Key metric for fund managers and risk limits. <span class="gloss-formula">MDD = (Trough - Peak) / Peak</span></div></div>
+<div class="gloss-item"><div class="gloss-term">Information Ratio</div><div class="gloss-def">Active return per unit of tracking error vs benchmark. <span class="gloss-formula">IR = (Rp - Rb) / Tracking Error</span>. Measures consistency of alpha.</div></div>
+</div>
+
+<!-- Portfolio Metrics -->
+<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
+<div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:16px;display:flex;align-items:center;gap:8px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+Portfolio Metrics
+</div>
+<div class="gloss-item"><div class="gloss-term">TAO Beta (β)</div><div class="gloss-def">Portfolio sensitivity to TAO price movements. β=1.0 moves 1:1 with TAO. <span class="gloss-formula">β = Cov(Rp, Rtao) / Var(Rtao)</span>. <1 = defensive.</div></div>
+<div class="gloss-item"><div class="gloss-term">Jensen's Alpha</div><div class="gloss-def">Excess return above CAPM expected return. Measures selection skill. <span class="gloss-formula">α = Rp - [Rf + β(Rm - Rf)]</span></div></div>
+<div class="gloss-item"><div class="gloss-term">Treynor Ratio</div><div class="gloss-def">Excess return per unit of systematic (beta) risk. <span class="gloss-formula">Treynor = (Rp - Rf) / β</span></div></div>
+<div class="gloss-item"><div class="gloss-term">Efficient Frontier</div><div class="gloss-def">Set of optimal portfolios offering highest return for each risk level. Portfolios below the frontier are suboptimal.</div></div>
+<div class="gloss-item"><div class="gloss-term">Risk Parity</div><div class="gloss-def">Allocation strategy where each position contributes equal risk to portfolio. <span class="gloss-formula">w_i × σ_i = w_j × σ_j for all i,j</span></div></div>
+</div>
+
+<!-- TAO Flow Metrics -->
+<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:20px">
+<div style="font-size:14px;font-weight:700;color:var(--amber);margin-bottom:16px;display:flex;align-items:center;gap:8px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+TAO Flow & Yield
+</div>
+<div class="gloss-item"><div class="gloss-term">Emission Share (%)</div><div class="gloss-def">Subnet's percentage of total daily TAO emissions. Determined by root network weights. Higher = more rewards distributed.</div></div>
+<div class="gloss-item"><div class="gloss-term">Staking APY</div><div class="gloss-def">Annual percentage yield from delegating TAO to subnet validators. <span class="gloss-formula">APY = (Daily Emissions × 365) / Staked TAO</span></div></div>
+<div class="gloss-item"><div class="gloss-term">TVL (Total Value Locked)</div><div class="gloss-def">Total TAO staked to subnet validators. Higher TVL = more confidence but potentially lower APY.</div></div>
+<div class="gloss-item"><div class="gloss-term">Emission Yield Ratio (EYR)</div><div class="gloss-def">Market Cap / Annual Emission Value. <span class="gloss-formula">EYR = MC / (Emissions × 365 × TAO Price)</span>. <1.0 = undervalued, >2.0 = premium.</div></div>
+<div class="gloss-item"><div class="gloss-term">Daily TAO Flow</div><div class="gloss-def">Net TAO moving into/out of subnet staking. Positive = accumulation, negative = distribution.</div></div>
+<div class="gloss-item"><div class="gloss-term">Impermanent Loss (IL)</div><div class="gloss-def">Loss vs holding TAO when subnet alpha price diverges. <span class="gloss-formula">IL = 2√(price ratio)/(1+price ratio) - 1</span></div></div>
+</div>
+</div>
+</section>
+</div>
+
+    <div id="reports-view" class="view">
+<section class="sec" style="background:transparent;border:none;padding:0">
+
+<!-- Hero Section -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:40px">
+<div>
+<div style="font-size:10px;color:var(--mute);letter-spacing:0.2em;margin-bottom:16px">INSTITUTIONAL REPORT GENERATOR</div>
+<h1 style="font-family:'Syne',sans-serif;font-size:42px;font-weight:800;line-height:1.1;margin-bottom:20px">Publish-ready research in <span style="color:var(--green)">seconds.</span></h1>
+<p style="font-size:14px;color:var(--txt2);line-height:1.7;margin-bottom:32px">Our AI engine synthesizes on-chain data, subnet metrics, valuation models, and macro context into comprehensive LP-grade research documents — on demand.</p>
+
+<!-- Feature List -->
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;gap:16px;align-items:flex-start">
+<div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--cyan);flex-shrink:0">RVT</div>
+<div>
+<div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Valuation Models (RVT, P/E)</div>
+<div style="font-size:12px;color:var(--txt2)">Relative Value to Token and Price-to-Emissions ratios across all subnets in real time.</div>
+</div>
+</div>
+<div style="display:flex;gap:16px;align-items:flex-start">
+<div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--violet);flex-shrink:0">β</div>
+<div>
+<div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Sharpe & Beta Calculations</div>
+<div style="font-size:12px;color:var(--txt2)">Risk-adjusted return metrics benchmarked against TAO index and broader DeFi baselines.</div>
+</div>
+</div>
+<div style="display:flex;gap:16px;align-items:flex-start">
+<div style="width:40px;height:40px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green);flex-shrink:0">QC</div>
+<div>
+<div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px">Code Quality Metrics</div>
+<div style="font-size:12px;color:var(--txt2)">Automated validator and miner code quality scoring — a proprietary signal no other platform offers.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Generated Report Preview -->
+<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:24px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+<div style="display:flex;align-items:center;gap:8px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--txt)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+<span style="font-size:13px;font-weight:600">Institutional Report</span>
+</div>
+<span style="font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:var(--green);border-radius:50%"></span>GENERATED 0:32s AGO</span>
+</div>
+
+<div style="margin-bottom:24px">
+<h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px">Bittensor Subnet Intelligence<br>Q1 2026 — Risk Score Analysis</h2>
+<div style="font-size:11px;color:var(--mute)">FEB 22, 2026 · Confidential — Institutional</div>
+</div>
+
+<!-- Metrics Row -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
+<div style="padding:16px;border-left:2px solid var(--bdr)">
+<div style="font-size:9px;color:var(--mute);letter-spacing:0.1em;margin-bottom:6px">SHARPE</div>
+<div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace">2.18</div>
+<div style="font-size:10px;color:var(--green)">▲ 0.14 MoM</div>
+</div>
+<div style="padding:16px;border-left:2px solid var(--bdr)">
+<div style="font-size:9px;color:var(--mute);letter-spacing:0.1em;margin-bottom:6px">AVG APY</div>
+<div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace">24.8%</div>
+<div style="font-size:10px;color:var(--green)">▲ 3.2%</div>
+</div>
+<div style="padding:16px;border-left:2px solid var(--bdr)">
+<div style="font-size:9px;color:var(--mute);letter-spacing:0.1em;margin-bottom:6px">RISK VOL</div>
+<div style="font-size:24px;font-weight:700;font-family:'IBM Plex Mono',monospace">0.42</div>
+<div style="font-size:10px;color:var(--rose)">▼ 0.06</div>
+</div>
+</div>
+
+<div style="font-size:12px;color:var(--txt2);line-height:1.7;margin-bottom:20px">
+<strong style="color:var(--txt)">Executive Summary:</strong> Q1 2026 marks a structural inflection in Bittensor subnet maturity. SN22 Audio and SN1 Prediction demonstrate superior risk-adjusted returns, with RVT multiples compressing toward fair value. <strong style="color:var(--txt)">Code quality metrics</strong> improved 18% QoQ, suggesting validator competition is intensifying across the network...
+</div>
+
+<!-- Action Buttons -->
+<div style="display:flex;gap:12px">
+<button class="btn btn-p" onclick="window.exportReportPDF()">EXPORT PDF</button>
+<button class="btn btn-g" onclick="window.shareReport()">SHARE</button>
+<button class="btn btn-g" onclick="window.regenerateReport()">REGENERATE</button>
+</div>
+</div>
+</div>
+
+<!-- Report Configuration (Collapsible) -->
+<details style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;margin-bottom:24px">
+<summary style="padding:20px;cursor:pointer;font-family:'Syne',sans-serif;font-size:14px;font-weight:700">Advanced Report Configuration</summary>
+<div style="padding:0 20px 20px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+<div>
+<div style="margin-bottom:16px">
+<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Report Type</label>
+<select id="rpt-type" class="calc-in" style="width:100%">
+<option value="quarterly">Quarterly Holdings Report (10-Q)</option>
+<option value="annual">Annual Investment Summary (10-K)</option>
+<option value="position">Position Mark-to-Market</option>
+<option value="risk">Risk & Exposure Analysis</option>
+<option value="strategy">Subnet Allocation Strategy</option>
+</select>
+</div>
+<div style="margin-bottom:16px">
+<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Reporting Period</label>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<input type="date" id="rpt-start" class="calc-in" value="2026-01-01">
+<input type="date" id="rpt-end" class="calc-in" value="2026-02-22">
+</div>
+</div>
+<div>
+<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Entity Name</label>
+<input type="text" id="rpt-entity" class="calc-in" placeholder="e.g., Acme Digital Holdings LLC" style="width:100%">
+</div>
+</div>
+<div>
+<div style="margin-bottom:16px">
+<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Total TAO Holdings</label>
+<input type="number" id="rpt-tao" class="calc-in" placeholder="10000" style="width:100%">
+</div>
+<div style="margin-bottom:16px">
+<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Cost Basis (USD)</label>
+<input type="number" id="rpt-basis" class="calc-in" placeholder="1500000" style="width:100%">
+</div>
+<div>
+<label style="display:block;font-size:11px;color:var(--mute);margin-bottom:6px">Include Data Sources</label>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px">
+<input type="checkbox" checked> Dashboard Metrics
+</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px">
+<input type="checkbox" checked> On-chain Data
+</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px">
+<input type="checkbox" checked> X.com Sentiment
+</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);cursor:pointer;padding:4px 8px;background:var(--bg3);border-radius:4px">
+<input type="checkbox" checked> GitHub Activity
+</label>
+</div>
+</div>
+</div>
+</div>
+</details>
+
+</section>
+</div>
+
+<!-- LESSON MODAL -->
+<div id="lessonModal" class="lesson-m">
+<div class="lesson-box">
+<div class="lesson-hdr">
+<div class="lesson-hdr-l">
+<div class="lesson-tag" id="lessonTag">Module 1</div>
+<div class="lesson-t" id="lessonTitle">Loading...</div>
+<div class="lesson-meta"><span id="lessonMeta">5 min read</span></div>
+</div>
+<div class="lesson-close" onclick="window.closeLesson()">×</div>
+</div>
+<div class="lesson-cnt" id="lessonContent">
+<p>Loading content...</p>
+</div>
+</div>
+</div>
+
+<!-- RESEARCH MODAL -->
+<div id="researchModal" class="lesson-m">
+<div class="lesson-box">
+<div class="lesson-hdr">
+<div class="lesson-hdr-l">
+<div class="lesson-tag" id="researchCat">Research</div>
+<div class="lesson-t" id="researchTitle">Loading...</div>
+<div class="lesson-meta"><span id="researchDate">Date</span></div>
+</div>
+<div class="lesson-close" onclick="window.closeResearch()">×</div>
+</div>
+<div class="lesson-cnt" id="researchContent">
+<p>Loading content...</p>
+</div>
+</div>
 </div>
 
 <!-- Login Modal -->
