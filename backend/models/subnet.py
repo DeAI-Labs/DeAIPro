@@ -14,7 +14,7 @@ class Subnet(Document):
     """
     
     # Basic identification
-    id: int  # NetUID
+    net_uid: int  # NetUID (was 'id' — renamed to avoid MongoDB _id collision)
     name: str
     category: str
     icon: Optional[str] = None  # emoji or icon URL
@@ -49,7 +49,7 @@ class Subnet(Document):
     class Settings:
         collection = "subnets"
         indexes = [
-            IndexModel([("id", ASCENDING)], unique=True),
+            IndexModel([("net_uid", ASCENDING)], unique=True),
             IndexModel([("category", ASCENDING)]),
             IndexModel([("market_cap_millions", DESCENDING)]),
             IndexModel([("apy", DESCENDING)]),
