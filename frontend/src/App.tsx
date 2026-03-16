@@ -8,7 +8,7 @@ import {
   isSignInWithEmailLink,
   signInWithEmailLink,
 } from "firebase/auth";
-import DeAIDashboard from "./DeAIDashboard";
+import DeAIDashboard from "./Dashboard";
 
 // ── Modal rendered via portal so LandingPage stacking context can't trap it ──
 const SignInModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
