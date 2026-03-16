@@ -3,6 +3,7 @@
 from datetime import datetime
 from typing import Literal, Optional
 from beanie import Document, Indexed
+from pymongo import IndexModel, ASCENDING, DESCENDING
 from pydantic import Field
 
 
@@ -13,7 +14,7 @@ class Subnet(Document):
     """
     
     # Basic identification
-    id: Indexed(int, unique=True)  # NetUID
+    id: int  # NetUID
     name: str
     category: str
     icon: Optional[str] = None  # emoji or icon URL
@@ -48,10 +49,10 @@ class Subnet(Document):
     class Settings:
         collection = "subnets"
         indexes = [
-            [("id", 1)],  # unique index on id
-            [("category", 1)],
-            [("market_cap_millions", -1)],
-            [("apy", -1)],
-            [("trend", 1)],
-            [("updated_at", -1)],
+            IndexModel([("id", ASCENDING)], unique=True),
+            IndexModel([("category", ASCENDING)]),
+            IndexModel([("market_cap_millions", DESCENDING)]),
+            IndexModel([("apy", DESCENDING)]),
+            IndexModel([("trend", ASCENDING)]),
+            IndexModel([("updated_at", DESCENDING)]),
         ]

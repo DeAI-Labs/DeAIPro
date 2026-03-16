@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from beanie import Document, Indexed
+from pymongo import IndexModel, ASCENDING, DESCENDING
 from pydantic import Field, EmailStr
 
 
@@ -11,7 +12,7 @@ class TemporaryAccess(Document):
     
     # User identification
     email: Indexed(EmailStr)
-    token: Indexed(str, unique=True)  # Random 32-char token
+    token: str  # Random 32-char token
     
     # Lifetime management
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -31,12 +32,8 @@ class TemporaryAccess(Document):
     class Settings:
         collection = "temporary_access"
         indexes = [
-            # Beanie creates these standard indexes at startup.
-            # NOTE: The TTL index on `created_at` (expireAfterSeconds=86400) is
-            # created imperatively in dependencies/db.py because Beanie's
-            # Settings.indexes list does not support TTL options.
-            [("token", 1)],   # unique index on token
-            [("email", 1)],
-            [("expires_at", 1)],
-            [("created_at", -1)],
+            IndexModel([("token", ASCENDING)], unique=True),
+            IndexModel([("email", ASCENDING)]),
+            IndexModel([("expires_at", ASCENDING)]),
+            IndexModel([("created_at", DESCENDING)]),
         ]

@@ -2,7 +2,8 @@
 
 from datetime import datetime
 from typing import Literal, Optional
-from beanie import Document, Indexed
+from beanie import Document
+from pymongo import IndexModel, ASCENDING, DESCENDING
 from pydantic import Field
 
 
@@ -10,7 +11,7 @@ class SyncState(Document):
     """Tracks the last sync time and status for background workers."""
     
     # Service identification
-    service: Indexed(str, unique=True)  # "metagraph", "github_commits", "price", "research_news"
+    service: str  # "metagraph", "github_commits", "price", "research_news"
     
     # Timing
     last_run: Optional[datetime] = None
@@ -34,8 +35,8 @@ class SyncState(Document):
     class Settings:
         collection = "sync_state"
         indexes = [
-            [("service", 1)],  # unique index
-            [("last_run", -1)],
-            [("status", 1)],
-            [("updated_at", -1)],
+            IndexModel([("service", ASCENDING)], unique=True),
+            IndexModel([("last_run", DESCENDING)]),
+            IndexModel([("status", ASCENDING)]),
+            IndexModel([("updated_at", DESCENDING)]),
         ]
