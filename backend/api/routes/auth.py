@@ -219,4 +219,3 @@ async def verify_token(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to verify token",
         )
-

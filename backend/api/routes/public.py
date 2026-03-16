@@ -328,22 +328,6 @@ async def get_lessons(
             "code": "LESSONS_ERROR",
         }
 
-@limiter.limit("100/minute")
-async def get_research(request: Request):
-    """Get research articles"""
-    return {
-        "articles": [],
-        "message": "Research articles added in Phase 2",
-    }
-
-@router.get("/api/lessons")
-@limiter.limit("100/minute")
-async def get_lessons(request: Request):
-    """Get educational lessons"""
-    return {
-        "lessons": [],
-        "message": "Lessons added in Phase 2",
-    }
 
 @router.post("/api/request-access")
 @limiter.limit("10/minute")
