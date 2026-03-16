@@ -1,8 +1,5 @@
 """
 DeAIPro Backend - FastAPI Entry Point
-
-Main application factory and startup/shutdown logic.
-Routes are organized modularly in api.routes.*
 """
 
 from fastapi import FastAPI, Request, status
@@ -15,8 +12,6 @@ import structlog
 import firebase_admin
 from firebase_admin import credentials
 import os
-from pathlib import Path
-import uuid
 
 from config.settings import settings
 from middleware.logging import setup_logging
@@ -26,13 +21,13 @@ import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
-# Configure logging
 setup_logging()
 logger = structlog.get_logger(__name__)
 
-# IMPROVED: Initialize Sentry for backend monitoring if DSN is configured.
 if settings.sentry_dsn_backend:
-    sentry_logging = LoggingIntegration(level=os.environ.get("SENTRY_LOG_LEVEL", "INFO"), event_level=None)
+    sentry_logging = LoggingIntegration(
+        level=os.environ.get("SENTRY_LOG_LEVEL", "INFO"), event_level=None
+    )
     sentry_sdk.init(
         dsn=settings.sentry_dsn_backend,
         integrations=[FastApiIntegration(), sentry_logging],
@@ -40,9 +35,8 @@ if settings.sentry_dsn_backend:
         environment=settings.environment,
     )
 
-# Initialize Firebase Admin
+
 def init_firebase():
-    """Initialize Firebase Admin SDK"""
     try:
         if settings.google_application_credentials and os.path.exists(
             settings.google_application_credentials
@@ -58,7 +52,7 @@ def init_firebase():
         if settings.environment == "production":
             raise
 
-# Create FastAPI app
+
 app = FastAPI(
     title="DeAIPro API",
     description="Real-time Bittensor analytics and intelligence platform",
@@ -70,89 +64,77 @@ app = FastAPI(
 # Rate Limiting
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=[settings.rate_limit_default] if settings.rate_limit_enabled else []
+    default_limits=[settings.rate_limit_default] if settings.rate_limit_enabled else [],
 )
 app.state.limiter = limiter
+
 
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
     logger.warning("Rate limit exceeded", remote_addr=get_remote_address(request))
     raise HTTPException(
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-        detail="Too many requests. Please try again later."
+        detail="Too many requests. Please try again later.",
     )
 
-# CORS Middleware
-cors_origins = [origin.strip() for origin in settings.backend_cors_origins.split(",")]
+
+# CORS — allow Vercel frontend + local dev
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=[
+        "https://deai-zeta.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Import and include routes (after app creation)
+# ── Routes — all mounted under /api prefix ────────────────────────────────────
 from api.routes import public, auth, admin, health
 
-app.include_router(public.router)
-app.include_router(auth.router)
-app.include_router(admin.router)
-app.include_router(health.router)
+app.include_router(health.router,  prefix="/api")
+app.include_router(public.router,  prefix="/api")
+app.include_router(auth.router,    prefix="/api")
+app.include_router(admin.router,   prefix="/api")
 
-# Startup/Shutdown Events
+
+# Startup / Shutdown
 @app.on_event("startup")
 async def startup_event():
-    """Startup: Initialize Firebase, MongoDB, and background workers"""
     logger.info("🚀 DeAIPro starting up...")
-    
     init_firebase()
-    
-    # Initialize MongoDB connection
     try:
         await db.connect()
     except Exception as e:
         logger.error(f"Failed to connect to database: {e}")
         raise
-    
-    # Start background scheduler
     try:
         await scheduler.start()
     except Exception as e:
         logger.error(f"Failed to start background scheduler: {e}")
         raise
-    
     logger.info("✓ All services initialized")
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Shutdown: Close connections and cleanup"""
     logger.info("🛑 DeAIPro shutting down...")
-    
-    # Stop background scheduler
     await scheduler.stop()
-    
-    # Disconnect from database
     await db.disconnect()
 
 
-# Health Check Endpoint
-@app.get("/api/health")
-@limiter.limit("100/minute")
-async def health_check(request: Request):
-    """Health check endpoint"""
-    return {
-        "status": "ok",
-        "service": "DeAIPro",
-        "version": "1.0.0",
-        "environment": settings.environment,
-    }
+# Root redirect to docs
+@app.get("/")
+async def root():
+    return {"message": "DeAIPro API", "docs": "/api/docs", "health": "/api/health"}
 
-# Main entry point
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
-        "app.main:app",
+        "main:app",
         host="0.0.0.0",
         port=8000,
         reload=settings.environment == "development",
