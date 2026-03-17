@@ -7,7 +7,7 @@ from datetime import datetime
 
 from main import app
 from cache import MongoCache
-from dynamic import fetch_tao_price, fetch_subnet_tokens_from_coingecko
+from dynamic import fetch_tao_price
 
 # Test Client
 client = TestClient(app)
@@ -92,8 +92,10 @@ class TestDynamicDataFetching:
         # Should return dict or None
         assert result is None or isinstance(result, dict)
     @pytest.mark.asyncio
-    async def test_fetch_coingecko_subnets_structure(self):
-        assert isinstance(result, dict)
+    async def test_fetch_all_subnet_data_structure(self):
+        from dynamic import fetch_all_subnet_data
+        result = await fetch_all_subnet_data()
+        assert result is None or isinstance(result, dict)
 
 
 # Error Handling Tests

@@ -33,7 +33,6 @@ from websocket_manager import price_ticker_manager
 from services.pdf import PDFReportGenerator
 from dynamic import (
     fetch_tao_price,
-    fetch_subnet_tokens_from_coingecko,
     fetch_subnets_from_taostats,
     fetch_all_subnet_data,
     fetch_all_news,
@@ -224,9 +223,13 @@ async def health_check(request: Request):
 @limiter.limit("100/minute")
 async def get_stats(request: Request):
     try:
-        # Fetch price data
-        tao_data = await fetch_tao_price()
-        if not tao_data:
+        # Fetch price + live subnet data concurrently
+        tao_data, subnet_data = await asyncio.gather(
+            fetch_tao_price(),
+            fetch_all_subnet_data(),
+            return_exceptions=True,
+        )
+        if not tao_data or isinstance(tao_data, Exception):
             # Fallback
             tao_data = {
                 "tao_price": 180.80,
@@ -236,11 +239,13 @@ async def get_stats(request: Request):
                 "tao_price_btc": 0.00065,
                 "source": "fallback"
             }
+        if isinstance(subnet_data, Exception) or not subnet_data:
+            subnet_data = {}
 
         # Calculate aggregates
-        sum_alpha_mc = sum(v.get("market_cap_millions", 0) for v in cg_data.values())
+        sum_alpha_mc = sum(v.get("market_cap_millions", 0) for v in subnet_data.values())
         total_ecosystem_mc = (tao_data["market_cap"] / 1e6) + sum_alpha_mc
-        active_subnets = len(cg_data) if cg_data else len([s for s in static_subnets if s.get("em", 0) > 0])
+        active_subnets = len(subnet_data) if subnet_data else len([s for s in static_subnets if s.get("em", 0) > 0])
         logger.info("Stats retrieved", subnets=active_subnets, source=tao_data.get("source", "unknown"))
         return {
             "tao_price": tao_data["tao_price"],

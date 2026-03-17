@@ -28,7 +28,7 @@ class PriceService(BaseService):
         super().__init__()
         self.coingecko_api_url = coingecko_api_url or "https://api.coingecko.com/api/v3"
         self.timeout = aiohttp.ClientTimeout(total=30)
-        self.tao_id = "affyn"  # CoinGecko ID for Bittensor/TAO
+        self.tao_id = "bittensor"  # CoinGecko ID for Bittensor/TAO
 
     async def run(self) -> None:
         """Fetch and store TAO price data."""
