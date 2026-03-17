@@ -13,7 +13,6 @@ class BackgroundScheduler:
     """Background job scheduler using APScheduler."""
 
     def __init__(self):
-        """Initialize the scheduler."""
         self.scheduler: AsyncIOScheduler = None
         self.services = {}
 
@@ -22,14 +21,12 @@ class BackgroundScheduler:
         try:
             self.scheduler = AsyncIOScheduler()
 
-            # Import services here to avoid circular imports
             from services.metagraph import MetagraphService
             from services.github_service import GitHubService
             from services.price import PriceService
             from services.news import NewsService
             from services.health import HealthService
 
-            # Initialize services
             metagraph_service = MetagraphService()
             github_service = GitHubService()
             price_service = PriceService()
@@ -44,7 +41,6 @@ class BackgroundScheduler:
                 "health": health_service,
             }
 
-            # Schedule metagraph sync (every 15 minutes)
             self.scheduler.add_job(
                 metagraph_service.run,
                 trigger=IntervalTrigger(minutes=metagraph_service.interval_minutes),
@@ -55,7 +51,6 @@ class BackgroundScheduler:
                 misfire_grace_time=60,
             )
 
-            # Schedule GitHub sync (every 60 minutes)
             self.scheduler.add_job(
                 github_service.run,
                 trigger=IntervalTrigger(minutes=github_service.interval_minutes),
@@ -66,7 +61,6 @@ class BackgroundScheduler:
                 misfire_grace_time=300,
             )
 
-            # Schedule price sync (every 5 minutes)
             self.scheduler.add_job(
                 price_service.run,
                 trigger=IntervalTrigger(minutes=price_service.interval_minutes),
@@ -77,7 +71,6 @@ class BackgroundScheduler:
                 misfire_grace_time=30,
             )
 
-            # Schedule news sync (every 30 minutes)
             self.scheduler.add_job(
                 news_service.run,
                 trigger=IntervalTrigger(minutes=news_service.interval_minutes),
@@ -88,7 +81,6 @@ class BackgroundScheduler:
                 misfire_grace_time=120,
             )
 
-            # Schedule health check (every 1 minute)
             self.scheduler.add_job(
                 health_service.run,
                 trigger=IntervalTrigger(minutes=health_service.interval_minutes),
@@ -99,16 +91,25 @@ class BackgroundScheduler:
                 misfire_grace_time=30,
             )
 
-            # Start the scheduler
-            self.scheduler.start()
+            # Run all services immediately on startup so data is available right away
+            import asyncio
+            for name, svc in [
+                ("metagraph", metagraph_service),
+                ("price", price_service),
+                ("news", news_service),
+                ("github", github_service),
+            ]:
+                try:
+                    logger.info(f"Running initial {name} sync")
+                    await svc.run()
+                except Exception as e:
+                    logger.error(f"Initial {name} sync failed: {e}")
 
-            logger.info(
-                "scheduler_started",
-                jobs_scheduled=len(self.scheduler.get_jobs()),
-            )
+            self.scheduler.start()
+            logger.info("Scheduler started", jobs=len(self.scheduler.get_jobs()))
 
         except Exception as e:
-            logger.error("scheduler_startup_error", error=str(e))
+            logger.error(f"Scheduler startup error: {e}")
             raise
 
     async def stop(self) -> None:
@@ -116,42 +117,25 @@ class BackgroundScheduler:
         try:
             if self.scheduler and self.scheduler.running:
                 self.scheduler.shutdown(wait=True)
-                logger.info("scheduler_stopped")
+                logger.info("Scheduler stopped")
         except Exception as e:
-            logger.error("scheduler_shutdown_error", error=str(e))
+            logger.error(f"Scheduler shutdown error: {e}")
 
     def get_jobs(self) -> list:
-        """Get list of scheduled jobs.
-        
-        Returns:
-            List of job details
-        """
         if not self.scheduler:
             return []
-
-        jobs = []
-        for job in self.scheduler.get_jobs():
-            jobs.append({
+        return [
+            {
                 "id": job.id,
                 "name": job.name,
-                "next_run_time": (
-                    job.next_run_time.isoformat()
-                    if job.next_run_time
-                    else None
-                ),
+                "next_run_time": job.next_run_time.isoformat() if job.next_run_time else None,
                 "trigger": str(job.trigger),
-            })
-
-        return jobs
+            }
+            for job in self.scheduler.get_jobs()
+        ]
 
     def get_health_service(self):
-        """Get health service for status checks.
-        
-        Returns:
-            HealthService instance
-        """
         return self.services.get("health")
 
 
-# Global scheduler instance
 scheduler = BackgroundScheduler()

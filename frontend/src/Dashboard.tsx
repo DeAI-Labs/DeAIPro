@@ -703,104 +703,6 @@ const Dashboard: React.FC = () => {
     g.shareReport = () => alert("Share feature: copy this URL and send it to your recipient.");
     g.regenerateReport = () => alert("Report regenerated with latest data.");
 
-    // ─── Research ─────────────────────────────────────────────────────────────
-    const research = [
-      {i:"📈",c:"Market Analysis",t:"Q1 2026 Subnet Performance Review",ex:"Comprehensive analysis of subnet emissions, valuations, and market trends across 58 active subnets.",d:"Feb 12, 2026",
-       content:`<h2>Q1 2026 Subnet Performance Review</h2><p><strong>Executive Summary:</strong> The first quarter of 2026 has been transformative. Total network valuation reached $1.28B with daily emissions stabilizing at 3,600 TAO post-halving.</p><h3>Key Findings</h3><ul><li><strong>Market Cap Growth:</strong> Total subnet market cap increased 34% QoQ</li><li><strong>Emission Distribution:</strong> Top 10 subnets capture 62% of daily emissions</li><li><strong>Alpha Compression:</strong> Average alpha/emissions ratio fell to 0.38 from 0.42</li></ul><h3>Category Performance</h3><p><strong>Inference (40% of market cap):</strong> Text Prompting maintains dominance with $127M market cap. Category average P/E of 1.92x reflects strong fundamental demand.</p><p><strong>Compute (22%):</strong> Cortex.t leads with $98M valuation. GPU shortages drove valuations up 28% QoQ.</p><p><strong>Q2 Outlook:</strong> Watch for TAO halving event, potential SEC clarity on decentralized AI networks, and enterprise subnet launches targeting Fortune 500 adoption.</p>`},
-      {i:"🔬",c:"Technical",t:"Understanding Yuma Consensus Mechanism",ex:"Deep dive into the revolutionary consensus algorithm that powers Bittensor's validation system.",d:"Feb 8, 2026",
-       content:`<h2>Understanding Yuma Consensus</h2><p>Yuma Consensus represents Bittensor's novel approach to decentralized quality assessment. Unlike traditional blockchain consensus, Yuma validates intelligence — rewarding participants based on the quality and utility of their AI outputs.</p><h3>Core Mechanism</h3><ol><li><strong>Query Distribution:</strong> Validators send identical queries to multiple miners simultaneously</li><li><strong>Response Collection:</strong> Miners return best AI-generated responses within time limits</li><li><strong>Comparative Scoring:</strong> Validators evaluate responses against each other</li><li><strong>Weight Assignment:</strong> High-performing miners receive increased weight in emission distribution</li></ol><h3>Mathematical Foundation</h3><p>The consensus uses a modified PageRank: <code>W(i) = (1-d) + d * Σ(W(j) * S(j,i) / C(j))</code> where d=0.85 damping factor, S(j,i) = validator j score for miner i.</p><h3>Attack Resistance</h3><p>Sybil attacks are economically prohibitive — creating fake validators requires proportional TAO stake. Collusion is detected through outlier analysis.</p>`},
-      {i:"💡",c:"Strategy",t:"Optimal Validator Staking Strategies",ex:"Data-driven insights on maximizing returns through intelligent validator selection and portfolio management.",d:"Feb 5, 2026",
-       content:`<h2>Optimal Validator Staking Strategies</h2><p>With 2,847 active validators across 58 subnets, validator selection has become increasingly complex. This guide provides quantitative frameworks for optimizing staking allocation.</p><h3>Strategy 1: Index Staking</h3><p>Replicate overall network performance by staking proportionally to subnet market caps. Expected Return: 24-28% APY with network-average volatility.</p><h3>Strategy 2: Value Investing</h3><p>Overweight undervalued subnets with strong fundamentals. Selection criteria: Alpha/Emissions ratio &lt;0.25, Fundamental score &gt;70, GitHub activity in top quartile. Expected Return: 32-42% APY.</p><h3>Strategy 3: Yield Optimization</h3><p>Dynamically allocate to highest-yield opportunities, rebalancing weekly when yield delta exceeds 5 percentage points. Expected Return: 35-50% APY.</p><h3>Risk Management</h3><ul><li>No more than 25% in single subnet</li><li>No more than 40% in single category</li><li>Maintain exposure to 8+ subnets minimum</li></ul>`},
-      {i:"🌐",c:"Ecosystem",t:"The Rise of Decentralized AI Networks",ex:"How Bittensor is pioneering a new paradigm for machine learning infrastructure and democratizing AI.",d:"Feb 1, 2026",
-       content:`<h2>The Rise of Decentralized AI Networks</h2><p>The artificial intelligence industry stands at an inflection point. While centralized AI labs have achieved remarkable breakthroughs, their concentration of power raises profound questions about access, control, and the future of human-AI interaction.</p><h3>The Centralization Problem</h3><p>Today's AI landscape is dominated by a handful of corporations. This concentration creates systemic risks: access control, censorship, data privacy concerns, and innovation bottlenecks.</p><h3>The Bittensor Solution</h3><p>Bittensor pioneers decentralized AI through economic incentives — permissionless participation, market-driven quality, composable intelligence across specialized subnets, and transparent on-chain economics.</p><h3>Ecosystem Growth</h3><p>From 5 subnets in 2021 to 58+ today, total network valuation surpassed $1B in 2025. Enterprise adoption is accelerating with Fortune 500 pilots across compute and inference categories.</p><h3>Future Scenarios</h3><p><strong>Base Case (45%):</strong> Decentralized AI captures 10-20% market share in specialized applications. <strong>Bull Case (40%):</strong> Bittensor becomes infrastructure layer for the AI economy, similar to Ethereum for DeFi.</p>`},
-    ];
-
-    const renderRes = () => {
-      const container = document.getElementById("resG");
-      if (!container) return;
-      container.innerHTML = research.map((r, idx) => `
-        <a href="#" class="res-c" onclick="window.openResearch(${idx});return false;">
-          <div class="res-img">${r.i}</div>
-          <div class="res-cnt">
-            <div class="res-cat">${r.c}</div>
-            <h3 class="res-t">${r.t}</h3>
-            <p class="res-ex">${r.ex}</p>
-            <div class="res-meta"><span>DeAI Research</span><span>${r.d}</span></div>
-          </div>
-        </a>`).join("");
-    };
-
-    g.openResearch = (idx: number) => {
-      const r = research[idx];
-      if (!r) return;
-      const modal = document.getElementById("researchModal");
-      const cat = document.getElementById("researchCat");
-      const title = document.getElementById("researchTitle");
-      const date = document.getElementById("researchDate");
-      const content_el = document.getElementById("researchContent");
-      if (cat) cat.textContent = r.c;
-      if (title) title.textContent = r.t;
-      if (date) date.textContent = r.d;
-      if (content_el) content_el.innerHTML = r.content;
-      if (modal) modal.classList.add("open");
-    };
-    g.closeResearch = () => document.getElementById("researchModal")?.classList.remove("open");
-
-    // ─── Signals ──────────────────────────────────────────────────────────────
-    const renderSignals = () => {
-      const signals = [
-        {subnet:"Chutes",id:64,signal:"BUY",weight:"22%",sharpe:1.42,factors:{value:82,momentum:88,quality:92,size:95,volatility:78},thesis:"Dominant compute position, institutional adoption catalyst",horizon:"12-18M",entry:"Scale in 3 tranches: 40% now, 30% on -10% dip, 30% on -20% dip",exit:"Take 25% profit at +50%, trail stop at 20% below highs",targetPrice:0.15,currentPrice:0.102},
-        {subnet:"Lium",id:51,signal:"BUY",weight:"15%",sharpe:1.38,factors:{value:78,momentum:82,quality:88,size:90,volatility:75},thesis:"Strong emission share, undervalued vs compute peers",horizon:"12M",entry:"DCA weekly over 4 weeks",exit:"Hold to target, stop loss at -30%",targetPrice:0.11,currentPrice:0.076},
-        {subnet:"Gradients",id:56,signal:"BUY",weight:"12%",sharpe:1.35,factors:{value:85,momentum:92,quality:78,size:82,volatility:68},thesis:"Training category leader, momentum accelerating",horizon:"6-12M",entry:"Enter on next -5% pullback",exit:"Partial at +40%, remainder at +80%",targetPrice:0.25,currentPrice:0.164},
-        {subnet:"Ridges",id:62,signal:"ACCUMULATE",weight:"10%",sharpe:1.31,factors:{value:72,momentum:75,quality:90,size:85,volatility:82},thesis:"Code quality moat, enterprise pipeline growing",horizon:"12-24M",entry:"Add on weakness below 0.06",exit:"Long-term hold, review quarterly",targetPrice:0.10,currentPrice:0.065},
-        {subnet:"Targon",id:4,signal:"ACCUMULATE",weight:"10%",sharpe:1.28,factors:{value:68,momentum:65,quality:85,size:88,volatility:88},thesis:"Stable compute infrastructure, low volatility play",horizon:"12M",entry:"Layer in over 8 weeks",exit:"Reduce at +30% or if Sharpe drops below 1.0",targetPrice:0.07,currentPrice:0.052},
-        {subnet:"Nineteen",id:19,signal:"HOLD",weight:"8%",sharpe:1.18,factors:{value:62,momentum:55,quality:81,size:82,volatility:72},thesis:"Fair value, monitor emission share trends",horizon:"6M review",entry:"No new buys at current levels",exit:"Trim if momentum turns negative for 30d",targetPrice:0.065,currentPrice:0.059},
-        {subnet:"Text Prompting",id:1,signal:"HOLD",weight:"8%",sharpe:1.15,factors:{value:58,momentum:42,quality:86,size:92,volatility:85},thesis:"Legacy positioning, stable yield",horizon:"Indefinite",entry:"Hold current position",exit:"Reduce 50% if loses top-10 emission share",targetPrice:0.055,currentPrice:0.051},
-        {subnet:"Vanta",id:8,signal:"ACCUMULATE",weight:"8%",sharpe:1.25,factors:{value:75,momentum:48,quality:82,size:78,volatility:80},thesis:"Finance category diversification, low correlation to compute",horizon:"12M",entry:"Add 2% allocation on each -15% drawdown",exit:"Hold for portfolio diversification benefit",targetPrice:0.06,currentPrice:0.044},
-        {subnet:"FileTAO",id:21,signal:"HOLD",weight:"5%",sharpe:1.05,factors:{value:55,momentum:38,quality:74,size:72,volatility:68},thesis:"Storage narrative optionality",horizon:"6M",entry:"Maintain position, no adds",exit:"Exit if storage competition intensifies",targetPrice:0.045,currentPrice:0.039},
-        {subnet:"Dataverse",id:13,signal:"REDUCE",weight:"2%",sharpe:0.85,factors:{value:42,momentum:28,quality:70,size:65,volatility:55},thesis:"Declining emission share, fundamental deterioration",horizon:"EXIT",entry:"No new positions",exit:"Sell 50% now, remainder over 2 weeks",targetPrice:0.025,currentPrice:0.035},
-      ];
-
-      const sc: Record<string,any> = {
-        BUY:{bg:"rgba(0,255,153,0.15)",border:"rgba(0,255,153,0.4)",color:"#00ff99"},
-        ACCUMULATE:{bg:"rgba(0,240,255,0.15)",border:"rgba(0,240,255,0.4)",color:"#00f0ff"},
-        HOLD:{bg:"rgba(255,214,10,0.15)",border:"rgba(255,214,10,0.4)",color:"#ffd60a"},
-        REDUCE:{bg:"rgba(255,45,85,0.15)",border:"rgba(255,45,85,0.4)",color:"#ff2d55"},
-      };
-
-      const factorBar = (v: number) => `<span style="width:6px;height:18px;background:${v>70?"var(--green)":v>50?"var(--amber)":"var(--rose)"};border-radius:2px;display:inline-block"></span>`;
-      const calcScore = (f: any) => Math.round(f.value*0.25+f.momentum*0.2+f.quality*0.25+f.size*0.15+f.volatility*0.15);
-
-      const table = document.getElementById("signalsTable");
-      if (!table) return;
-
-      table.innerHTML = signals.map(s => {
-        const c = sc[s.signal];
-        const upside = (((s.targetPrice - s.currentPrice) / s.currentPrice) * 100).toFixed(0);
-        const upsideColor = parseFloat(upside) > 0 ? "var(--green)" : "var(--rose)";
-        return `
-          <tr style="border-bottom:1px solid var(--bdr);cursor:pointer" onclick="this.nextElementSibling.classList.toggle('show')">
-            <td style="padding:14px 8px"><div style="font-weight:600">${s.subnet}</div><div style="font-size:10px;color:var(--mute)">SN${s.id}</div></td>
-            <td style="padding:14px 8px;text-align:center"><span style="padding:4px 12px;background:${c.bg};border:1px solid ${c.border};border-radius:4px;font-size:11px;font-weight:700;color:${c.color}">${s.signal}</span></td>
-            <td style="padding:14px 8px;text-align:right;font-weight:600;color:var(--cyan)">${s.weight}</td>
-            <td style="padding:14px 8px;text-align:right;font-family:'IBM Plex Mono',monospace">${s.sharpe.toFixed(2)}</td>
-            <td style="padding:14px 8px;text-align:center"><div style="display:flex;gap:3px;justify-content:center">${factorBar(s.factors.value)}${factorBar(s.factors.momentum)}${factorBar(s.factors.quality)}${factorBar(s.factors.size)}${factorBar(s.factors.volatility)}</div><div style="font-size:9px;color:var(--mute);margin-top:2px">${calcScore(s.factors)}/100</div></td>
-            <td style="padding:14px 8px;text-align:center"><span style="padding:3px 8px;background:var(--bg4);border-radius:4px;font-size:10px;font-weight:600;color:${s.horizon==="EXIT"?"var(--rose)":"var(--txt)"}">${s.horizon}</span></td>
-            <td style="padding:14px 8px;text-align:right;font-weight:600;color:${upsideColor}">${parseFloat(upside)>0?"+":""}${upside}%</td>
-          </tr>
-          <tr class="signal-detail" style="background:var(--bg4)">
-            <td colspan="7" style="padding:16px 24px">
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
-                <div><div style="font-size:10px;color:var(--mute);letter-spacing:0.1em;margin-bottom:8px">INVESTMENT THESIS</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">${s.thesis}</div></div>
-                <div><div style="font-size:10px;color:var(--green);letter-spacing:0.1em;margin-bottom:8px">↓ ENTRY</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">${s.entry}</div><div style="margin-top:8px;font-size:11px;color:var(--mute)">Current: <span style="color:var(--cyan)">${s.currentPrice}τ</span></div></div>
-                <div><div style="font-size:10px;color:var(--rose);letter-spacing:0.1em;margin-bottom:8px">↑ EXIT</div><div style="font-size:12px;color:var(--txt2);line-height:1.6">${s.exit}</div><div style="margin-top:8px;font-size:11px;color:var(--mute)">Target: <span style="color:var(--green)">${s.targetPrice}τ</span></div></div>
-              </div>
-            </td>
-          </tr>`;
-      }).join("");
-    };
-
-
     // ─── Research data & functions ─────────────────────────────────────────────
     const research=[
 {i:'📈',c:'Market Analysis',t:'Q1 2026 Subnet Performance Review',ex:'Comprehensive analysis of subnet emissions, valuations, and market trends across 58 active subnets.',d:'Feb 12, 2026',
@@ -1360,6 +1262,318 @@ document.getElementById('researchModal').classList.add('open');
 }
     g.renderSignals = renderSignals;
 
+    // ─── News Source Filter ───────────────────────────────────────────────────
+    let currentNewsSource = "all";
+    g.filterNewsBySource = (src: string) => {
+      currentNewsSource = src;
+      document.querySelectorAll(".src-pill").forEach(e => e.classList.remove("act"));
+      const pill = document.querySelector(`.src-pill[data-src="${src}"]`);
+      if (pill) pill.classList.add("act");
+      const filtered = src === "all" ? news
+        : src === "high" ? news.filter(n => (n.impactPct||0) >= 80)
+        : news.filter(n => n.s === src);
+      const tagColors: Record<string,any> = {
+        PROTOCOL:{bg:"rgba(191,90,242,0.15)",border:"rgba(191,90,242,0.4)",color:"#bf5af2",icon:"⚙️"},
+        SUBNET:{bg:"rgba(0,255,153,0.15)",border:"rgba(0,255,153,0.4)",color:"#00ff99",icon:"⬡"},
+        MACRO:{bg:"rgba(0,240,255,0.15)",border:"rgba(0,240,255,0.4)",color:"#00f0ff",icon:"🌐"},
+        AI:{bg:"rgba(255,214,10,0.15)",border:"rgba(255,214,10,0.4)",color:"#ffd60a",icon:"🤖"},
+        DEFI:{bg:"rgba(255,123,44,0.15)",border:"rgba(255,123,44,0.4)",color:"#ff7b2c",icon:"💰"},
+        MARKET:{bg:"rgba(0,240,255,0.15)",border:"rgba(0,240,255,0.4)",color:"#00f0ff",icon:"📊"},
+        INSTITUTIONAL:{bg:"rgba(16,185,129,0.15)",border:"rgba(16,185,129,0.4)",color:"#10b981",icon:"🏛️"},
+      };
+      const getIC=(pct:number)=>pct>=80?"#00ff99":pct>=60?"#00f0ff":pct>=40?"#ffd60a":"#606075";
+      const getIL=(pct:number)=>pct>=80?"HIGH":pct>=60?"MED-HIGH":pct>=40?"MEDIUM":"LOW";
+      const el=document.getElementById("newsG");
+      if(!el) return;
+      el.innerHTML=filtered.map(n=>{
+        const tc=tagColors[n.tg]||tagColors.MACRO;
+        const ic=getIC(n.impactPct||50);
+        return `<div style="padding:20px 0;border-bottom:1px solid var(--bdr)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+            <span style="padding:4px 12px;background:${tc.bg};border:1px solid ${tc.border};border-radius:4px;font-size:10px;font-weight:700;color:${tc.color}">${tc.icon} ${n.tg}</span>
+            <span style="font-size:11px;color:var(--mute);font-family:'IBM Plex Mono',monospace">${n.tm}</span>
+          </div>
+          <a href="${n.url}" target="_blank" rel="noopener" style="display:block;font-size:15px;color:var(--txt);line-height:1.6;margin-bottom:16px;font-weight:500;text-decoration:none">${n.t}</a>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:10px;color:var(--mute);width:50px">Impact</span>
+            <div style="flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden"><div style="width:${n.impactPct||50}%;height:100%;background:${ic};border-radius:3px"></div></div>
+            <span style="font-size:11px;color:${ic};font-weight:700;width:75px;text-align:right">${getIL(n.impactPct||50)}</span>
+          </div>
+        </div>`;
+      }).join("");
+    };
+
+    // ─── TAO Flow Table Sorting ───────────────────────────────────────────────
+    let taoFlowSort = "apy";
+    g.renderTaoFlowTable = (sortKey?: string) => {
+      if (sortKey) taoFlowSort = sortKey;
+      const tbody = document.getElementById("tf-table-body");
+      if (!tbody) return;
+      let sorted = [...subs];
+      if (taoFlowSort === "apy") sorted.sort((a,b) => calcAPY(b)-calcAPY(a));
+      else if (taoFlowSort === "em") sorted.sort((a,b) => b.dailyTao-a.dailyTao);
+      else if (taoFlowSort === "share") sorted.sort((a,b) => b.share-a.share);
+      else if (taoFlowSort === "mom") sorted.sort((a,b) => b.momentum-a.momentum);
+      sorted = sorted.slice(0,12);
+      const getMetricColor=(v:number,t:{good:number,neutral:number})=>v>=t.good?"var(--green)":v>=t.neutral?"var(--amber)":"var(--rose)";
+      tbody.innerHTML=sorted.map(s=>{
+        const apy=calcAPY(s), apyC=getMetricColor(apy,{good:25,neutral:15});
+        const momSign=s.momentum>=0?"+":"";
+        const momCol=s.momentum>=0?"var(--green)":"var(--rose)";
+        return `<tr style="border-bottom:1px solid var(--bdr)">
+          <td style="padding:12px 8px"><div style="font-weight:600">${s.n}</div><div style="font-size:10px;color:var(--mute)">${s.cat}</div></td>
+          <td style="padding:12px 8px;text-align:right;font-weight:700;color:${apyC}">${apy.toFixed(1)}%</td>
+          <td style="padding:12px 8px;text-align:right">${s.dailyTao.toFixed(0)}τ</td>
+          <td style="padding:12px 8px;text-align:right">${s.share.toFixed(1)}%</td>
+          <td style="padding:12px 8px;text-align:right;color:${momCol}">${momSign}${s.momentum.toFixed(1)}%</td>
+          <td style="padding:12px 8px;text-align:right"><span style="padding:3px 8px;background:rgba(0,240,255,0.15);border-radius:4px;font-size:10px;font-weight:600;color:var(--cyan)">${(calcAPY(s)/Math.max(1,calcVolatility(s))).toFixed(2)}</span></td>
+        </tr>`;
+      }).join("");
+    };
+
+    // ─── Recalibrated Weights ─────────────────────────────────────────────────
+    g.applyRecalibratedWeights = () => {
+      const optimal: Record<string,number>={econ:25,net:20,fund:25,liq:15,mom:8,qual:5,val:2};
+      Object.entries(optimal).forEach(([k,v])=>{
+        const sl=document.getElementById(`s-${k}`) as HTMLInputElement;
+        if(sl){sl.value=String(v);}
+      });
+      g.updateWeights();
+      const btn=document.getElementById("recalibrate-btn");
+      if(btn){btn.textContent="✓ Applied";btn.style.background="var(--green)";btn.style.color="#000";}
+      setTimeout(()=>{if(btn){btn.textContent="Apply IC-Optimal Weights";btn.style.background="";btn.style.color="";}},2000);
+    };
+
+    // ─── Portfolio Analytics — Allocation Renderer ────────────────────────────
+    const renderPAAllocation = () => {
+      const holdings=parseFloat((document.getElementById("pa-holdings") as HTMLInputElement)?.value)||10000;
+      const selSubs=subs.filter(s=>selectedSubnets.includes(s.id));
+      if(!selSubs.length) return;
+      const maxApy=Math.max(...selSubs.map(s=>calcAPY(s)));
+      const curEl=document.getElementById("pa-currentAlloc");
+      const optEl=document.getElementById("pa-optimizedAlloc");
+      const eqPct=100/selSubs.length;
+      const colors=["#3b82f6","#00f0ff","#10b981","#fbbf24","#8b5cf6","#f43f5e","#06b6d4","#f59e0b"];
+      if(curEl){
+        curEl.innerHTML=selSubs.map((s,i)=>`
+          <div class="alloc-bar">
+            <div class="alloc-bar-name">${s.n}</div>
+            <div class="alloc-bar-track"><div class="alloc-bar-fill" style="width:${eqPct}%;background:${colors[i%8]}"></div></div>
+            <div class="alloc-bar-pct" style="color:${colors[i%8]}">${eqPct.toFixed(1)}%</div>
+          </div>`).join("");
+      }
+      if(optEl){
+        const totalApy=selSubs.reduce((t,s)=>t+calcAPY(s),0);
+        const optWeights=selSubs.map(s=>(calcAPY(s)/totalApy)*100);
+        optEl.innerHTML=selSubs.map((s,i)=>`
+          <div class="alloc-bar">
+            <div class="alloc-bar-name">${s.n}</div>
+            <div class="alloc-bar-track"><div class="alloc-bar-fill" style="width:${optWeights[i].toFixed(1)}%;background:${colors[i%8]}"></div></div>
+            <div class="alloc-bar-pct" style="color:${colors[i%8]}">${optWeights[i].toFixed(1)}%</div>
+          </div>`).join("");
+      }
+      const eqApy=selSubs.reduce((t,s)=>t+calcAPY(s),0)/selSubs.length;
+      const optTotalApy=selSubs.reduce((t,s)=>t+(calcAPY(s)/selSubs.reduce((tt,ss)=>tt+calcAPY(ss),0))*calcAPY(s),0);
+      uel("pa-eq-apy",eqApy.toFixed(2)+"%");
+      uel("pa-opt-apy",optTotalApy.toFixed(2)+"%");
+    };
+    g.renderPAAllocation = renderPAAllocation;
+
+    // ─── Portfolio Pro: Correlation Matrix ────────────────────────────────────
+    const renderProCorr = () => {
+      const corrEl = document.getElementById("pro-corr-table");
+      if (!corrEl) return;
+      const top=[...subs].sort((a,b)=>b.score-a.score).slice(0,6);
+      const getCorrClass=(v:number,i:number,j:number)=>i===j?"diag":v>0.7?"high":v>0.4?"med":"low";
+      // Generate synthetic correlation matrix
+      const matrix: number[][] = top.map((a,i)=>top.map((b,j)=>{
+        if(i===j) return 1.0;
+        const baseCor = a.cat===b.cat?0.65:0.35;
+        // Add seeded randomness based on ids
+        return Math.max(-0.2,Math.min(0.98,(baseCor+(((a.id*b.id)%17)/100)-0.08)));
+      }));
+      let html = `<table style="width:100%;border-collapse:collapse;font-size:11px">`;
+      html += `<tr><td class="corr-hdr"></td>${top.map(s=>`<td class="corr-hdr" style="font-size:9px">${s.n.slice(0,7)}</td>`).join("")}</tr>`;
+      top.forEach((s,i)=>{
+        html += `<tr><td class="corr-hdr" style="text-align:left;font-size:9px;padding-left:6px">${s.n.slice(0,7)}</td>`;
+        top.forEach((_,j)=>{
+          const v=matrix[i][j];
+          html += `<td class="corr-cell ${getCorrClass(v,i,j)}">${v.toFixed(2)}</td>`;
+        });
+        html += "</tr>";
+      });
+      html += "</table>";
+      corrEl.innerHTML = html;
+    };
+    g.renderProCorr = renderProCorr;
+
+    // ─── Portfolio Pro: Scenario Analysis ────────────────────────────────────
+    const renderProScenarios = () => {
+      const scenTbody = document.getElementById("pro-scenario-table");
+      if (!scenTbody) return;
+      const topS = [...subs].sort((a,b)=>b.score-a.score).slice(0,5);
+      const scenarios = [
+        {name:"Bear",taoMult:0.5,emMult:0.8},
+        {name:"Base",taoMult:1.0,emMult:1.0},
+        {name:"Bull",taoMult:1.5,emMult:1.15},
+        {name:"Moon",taoMult:3.0,emMult:1.4},
+      ];
+      const investment = parseFloat((document.getElementById("pro-invest") as HTMLInputElement)?.value)||10000;
+      const taoPrice = currentTaoPrice||191.43;
+      scenTbody.innerHTML = topS.map(s=>{
+        const apy = calcAPY(s);
+        return `<tr style="border-bottom:1px solid var(--bdr)">
+          <td style="padding:10px 8px;font-weight:600;font-size:12px">${s.n}</td>
+          ${scenarios.map(sc=>{
+            const scenApy = apy * sc.emMult;
+            const scenValue = investment * scenApy/100 * taoPrice * sc.taoMult;
+            const c=sc.name==="Bear"?"var(--rose)":sc.name==="Base"?"var(--amber)":sc.name==="Bull"?"var(--green)":"var(--cyan)";
+            return `<td style="padding:10px 8px;text-align:right;font-family:'IBM Plex Mono',monospace;color:${c};font-weight:600">$${scenValue.toLocaleString(undefined,{maximumFractionDigits:0})}</td>`;
+          }).join("")}
+        </tr>`;
+      }).join("");
+    };
+    g.renderProScenarios = renderProScenarios;
+
+    // ─── Portfolio Pro: Rebalancing ──────────────────────────────────────────
+    const renderProRebalancing = () => {
+      const rebalCards = document.getElementById("pro-rebal-cards");
+      if (!rebalCards) return;
+      const topS = [...subs].sort((a,b)=>b.score-a.score).slice(0,8);
+      const investment = parseFloat((document.getElementById("pro-invest") as HTMLInputElement)?.value)||10000;
+      const totalScore = topS.reduce((t,s)=>t+s.score,0);
+      const targetWeights = topS.map(s=>(s.score/totalScore)*100);
+      const eqWeight = 100/topS.length;
+      const colors=["#3b82f6","#00f0ff","#10b981","#fbbf24","#8b5cf6","#f43f5e","#06b6d4","#f59e0b"];
+      rebalCards.innerHTML = topS.map((s,i)=>{
+        const delta = targetWeights[i] - eqWeight;
+        const isBuy = delta > 0;
+        const tauAmt = investment*(Math.abs(delta)/100);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:10px;height:10px;border-radius:50%;background:${colors[i%8]}"></div>
+            <div><div style="font-size:12px;font-weight:600">${s.n}</div><div style="font-size:10px;color:var(--mute)">${s.cat}</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="text-align:right">
+              <div style="font-size:11px;color:var(--mute)">${eqWeight.toFixed(1)}% → ${targetWeights[i].toFixed(1)}%</div>
+            </div>
+            <span class="rebal-action ${isBuy?'buy':'sell'}">${isBuy?'BUY':'SELL'} ${tauAmt.toFixed(0)}τ</span>
+          </div>
+        </div>`;
+      }).join("");
+    };
+    g.renderProRebalancing = renderProRebalancing;
+
+    // ─── Portfolio Pro: Projection Chart (90-day) ─────────────────────────────
+    const initProProjectionChart = () => {
+      const Chart = (window as any).Chart;
+      const canvas = document.getElementById("pro-projection-chart") as HTMLCanvasElement;
+      if (!canvas || !Chart) return;
+      if ((canvas as any)._chartInst) (canvas as any)._chartInst.destroy();
+      const investment = parseFloat((document.getElementById("pro-invest") as HTMLInputElement)?.value)||10000;
+      const taoPrice = currentTaoPrice||191.43;
+      const baseApy = 24/100/365;
+      const labels: string[] = [], base: number[] = [], bull: number[] = [], bear: number[] = [];
+      for(let d=0;d<=90;d+=5){
+        labels.push("D"+d);
+        base.push(investment*taoPrice*(Math.pow(1+baseApy,d)-1));
+        bull.push(investment*taoPrice*1.5*(Math.pow(1+baseApy*1.4,d)-1));
+        bear.push(investment*taoPrice*0.55*(Math.pow(1+baseApy*0.6,d)-1));
+      }
+      const ctx = canvas.getContext("2d")!;
+      (canvas as any)._chartInst = new Chart(ctx,{
+        type:"line",
+        data:{labels,datasets:[
+          {label:"Bull",data:bull,borderColor:"#00ff99",backgroundColor:"rgba(0,255,153,0.05)",fill:true,tension:0.4,pointRadius:0,borderWidth:2},
+          {label:"Base",data:base,borderColor:"#ffd60a",backgroundColor:"rgba(255,214,10,0.05)",fill:true,tension:0.4,pointRadius:0,borderWidth:2,borderDash:[5,3]},
+          {label:"Bear",data:bear,borderColor:"#ff2d55",backgroundColor:"rgba(255,45,85,0.05)",fill:true,tension:0.4,pointRadius:0,borderWidth:1,borderDash:[3,3]},
+        ]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:"#a0a0b8",font:{size:10},boxWidth:12}}},scales:{x:{grid:{color:"rgba(255,255,255,0.05)"},ticks:{color:"#606075",font:{size:9}}},y:{grid:{color:"rgba(255,255,255,0.05)"},ticks:{color:"#606075",callback:(v:any)=>"$"+Number(v).toLocaleString(undefined,{maximumFractionDigits:0})}}}}
+      });
+    };
+
+    // ─── Portfolio Pro: Monte Carlo Chart ─────────────────────────────────────
+    const initMonteCarloChart = () => {
+      const Chart = (window as any).Chart;
+      const canvas = document.getElementById("pro-monte-chart") as HTMLCanvasElement;
+      if (!canvas || !Chart) return;
+      if ((canvas as any)._chartInst) (canvas as any)._chartInst.destroy();
+      const investment = parseFloat((document.getElementById("pro-invest") as HTMLInputElement)?.value)||10000;
+      const taoPrice = currentTaoPrice||191.43;
+      const base = investment*taoPrice;
+      const mu=24/100/252, sigma=0.45/Math.sqrt(252);
+      const N=252, paths=20;
+      const datasets: any[] = [];
+      let p5v=Infinity, p50v=0, p95v=-Infinity;
+      const allFinal: number[]=[];
+      for(let p=0;p<paths;p++){
+        let val=base;
+        const data=[val];
+        for(let d=0;d<N;d++){
+          const z=(Math.random()*2-1)*Math.sqrt(3);
+          val*=Math.exp((mu-0.5*sigma*sigma)+sigma*z);
+          data.push(val);
+        }
+        allFinal.push(val);
+        datasets.push({data,borderColor:`rgba(0,240,255,${p<3?0.7:0.2})`,borderWidth:p<3?1.5:0.8,fill:false,tension:0,pointRadius:0});
+      }
+      allFinal.sort((a,b)=>a-b);
+      p5v=allFinal[Math.floor(paths*0.05)];
+      p50v=allFinal[Math.floor(paths*0.5)];
+      p95v=allFinal[Math.floor(paths*0.95)];
+      uel("mc-p5","$"+(p5v/1e6>1?(p5v/1e6).toFixed(2)+"M":p5v.toLocaleString(undefined,{maximumFractionDigits:0})));
+      uel("mc-p50","$"+(p50v/1e6>1?(p50v/1e6).toFixed(2)+"M":p50v.toLocaleString(undefined,{maximumFractionDigits:0})));
+      uel("mc-p95","$"+(p95v/1e6>1?(p95v/1e6).toFixed(2)+"M":p95v.toLocaleString(undefined,{maximumFractionDigits:0})));
+      const ctx=canvas.getContext("2d")!;
+      (canvas as any)._chartInst = new Chart(ctx,{
+        type:"line",data:{labels:Array.from({length:N+1},(_,i)=>i%50===0?"D"+(i):"" ),datasets},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:"rgba(255,255,255,0.04)"},ticks:{color:"#606075",font:{size:9}}},y:{grid:{color:"rgba(255,255,255,0.04)"},ticks:{color:"#606075",callback:(v:any)=>"$"+(Number(v)/1000).toFixed(0)+"K"}}},animation:{duration:600}}
+      });
+    };
+
+    // ─── Portfolio Pro: Drawdown Chart ────────────────────────────────────────
+    const initDrawdownChart = () => {
+      const Chart = (window as any).Chart;
+      const canvas = document.getElementById("drawdown-chart-pro") as HTMLCanvasElement;
+      if (!canvas || !Chart) return;
+      if ((canvas as any)._chartInst) (canvas as any)._chartInst.destroy();
+      const topS=[...subs].sort((a,b)=>b.score-a.score).slice(0,5);
+      const labels=["Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb"];
+      const colors=["#3b82f6","#00f0ff","#10b981","#fbbf24","#8b5cf6"];
+      const datasets=topS.map((s,i)=>{
+        let dd=0, data: number[]=[];
+        for(let m=0;m<12;m++){
+          dd=Math.min(0,dd+((Math.random()-0.55)*8));
+          dd=Math.max(-45,dd);
+          data.push(parseFloat(dd.toFixed(2)));
+        }
+        return {label:s.n,data,borderColor:colors[i%5],backgroundColor:colors[i%5]+"22",fill:"origin",tension:0.4,pointRadius:2,borderWidth:2};
+      });
+      const ctx=canvas.getContext("2d")!;
+      (canvas as any)._chartInst=new Chart(ctx,{
+        type:"line",data:{labels,datasets},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:"#a0a0b8",font:{size:10},boxWidth:12}}},scales:{x:{grid:{color:"rgba(255,255,255,0.05)"},ticks:{color:"#606075"}},y:{grid:{color:"rgba(255,255,255,0.05)"},ticks:{color:"#606075",callback:(v:any)=>v+"%"}}}}
+      });
+    };
+
+    // ─── Portfolio Pro: IC Chart (weight calibration) ─────────────────────────
+    const initIcChart = () => {
+      const Chart = (window as any).Chart;
+      const canvas = document.getElementById("ic-chart") as HTMLCanvasElement;
+      if (!canvas || !Chart) return;
+      if ((canvas as any)._chartInst) (canvas as any)._chartInst.destroy();
+      const factors=["Economic","Network","Fundamental","Liquidity","Momentum","Quality","Valuation"];
+      const icValues=[0.28,0.21,0.32,0.18,0.22,0.15,0.12];
+      const colors=icValues.map(v=>v>0.25?"rgba(0,255,153,0.7)":v>0.18?"rgba(0,240,255,0.7)":"rgba(255,214,10,0.6)");
+      const ctx=canvas.getContext("2d")!;
+      (canvas as any)._chartInst=new Chart(ctx,{
+        type:"bar",
+        data:{labels:factors,datasets:[{data:icValues,backgroundColor:colors,borderColor:colors.map(c=>c.replace(",0.7)",",1)").replace(",0.6)",",1)")),borderWidth:1,borderRadius:4}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:"#606075",font:{size:10}}},y:{grid:{color:"rgba(255,255,255,0.05)"},ticks:{color:"#606075"},min:0,max:0.4}}}
+      });
+    };
+
     // ─── Sort menu close on outside click ─────────────────────────────────────
     document.addEventListener("click",(e)=>{
       if(!(e.target as Element)?.closest(".srt")) document.getElementById("srtM")?.classList.remove("open");
@@ -1376,10 +1590,12 @@ document.getElementById('researchModal').classList.add('open');
     renderPills();
     renderList();
     renderNews();
+    g.filterNewsBySource("all");
     renderRes();
     renderSignals();
     renderTopPerformers();
     initCharts();
+    initIcChart();
     initTicker();
     updateBtcChart(30);
     g.calcFV();
@@ -1387,6 +1603,8 @@ document.getElementById('researchModal').classList.add('open');
     g.updateWeights();
     initSubnetSelector();
     updatePortfolioAnalytics();
+    renderPAAllocation();
+    g.renderTaoFlowTable();
 
     // Intervals
     (window as any).__dashboardInterval = setInterval(()=>{ updateTs(); }, 1000);
@@ -1639,6 +1857,24 @@ const DASHBOARD_CSS = `
 #deai-dashboard-root .risk-card.bad .risk-card-val{color:var(--rose)}
 
 /* Correlation Matrix */
+.corr-hdr { padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: var(--mute); white-space: nowrap; }
+.corr-cell { padding: 7px 4px; text-align: center; font-size: 10px; font-weight: 600; border-radius: 3px; min-width: 44px; }
+.corr-cell.high { background: rgba(255,45,85,0.25); color: var(--rose); }
+.corr-cell.med { background: rgba(255,214,10,0.2); color: var(--amber); }
+.corr-cell.low { background: rgba(0,255,153,0.12); color: var(--green); }
+.corr-cell.diag { background: rgba(0,240,255,0.18); color: var(--cyan); font-weight: 800; }
+/* Allocation bars */
+.alloc-bar { display:flex; align-items:center; gap:10px; }
+.alloc-bar-name { font-size: 11px; font-weight: 600; width: 90px; flex-shrink: 0; }
+.alloc-bar-track { flex: 1; height: 8px; background: var(--bg4); border-radius: 4px; overflow: hidden; }
+.alloc-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+.alloc-bar-pct { font-size: 11px; font-weight: 700; width: 40px; text-align: right; }
+/* Rebalancing actions */
+.rebal-action { padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+.rebal-action.buy { background: rgba(0,255,153,0.15); color: var(--green); border: 1px solid rgba(0,255,153,0.35); }
+.rebal-action.sell { background: rgba(255,45,85,0.15); color: var(--rose); border: 1px solid rgba(255,45,85,0.35); }
+/* Source pills */
+.src-pill.act { background: var(--bg5) !important; color: var(--cyan) !important; border-color: var(--cyan) !important; }
 #deai-dashboard-root .corr-cell{padding:6px;text-align:center;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;border:1px solid var(--bdr);cursor:default;transition:transform 0.1s}
 #deai-dashboard-root .corr-cell:hover{transform:scale(1.1);z-index:1;position:relative}
 #deai-dashboard-root .corr-cell.high{background:rgba(244,63,94,0.25);color:var(--rose)}
@@ -2092,6 +2328,25 @@ const DASHBOARD_HTML = `
           <div style="height:220px"><canvas id="pa-stakingChart"></canvas></div>
         </section>
       </div>
+      <!-- Optimal Rebalancing Section -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+        <section class="sec">
+          <div class="sec-hd"><div><div class="sec-t">Current Allocation</div><div class="sec-sub">Equal weight baseline</div></div></div>
+          <div id="pa-currentAlloc" style="display:flex;flex-direction:column;gap:8px;min-height:60px"><div style="color:var(--mute);font-size:12px">Select subnets above to see allocation</div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr)">
+            <div style="font-size:12px;color:var(--mute)">Blended APY</div>
+            <div style="font-size:14px;font-weight:700;color:var(--green)" id="pa-eq-apy">—</div>
+          </div>
+        </section>
+        <section class="sec">
+          <div class="sec-hd"><div><div class="sec-t">Optimized Allocation</div><div class="sec-sub">APY-weighted distribution</div></div></div>
+          <div id="pa-optimizedAlloc" style="display:flex;flex-direction:column;gap:8px;min-height:60px"><div style="color:var(--mute);font-size:12px">Select subnets above to see allocation</div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr)">
+            <div style="font-size:12px;color:var(--mute)">Blended APY</div>
+            <div style="font-size:14px;font-weight:700;color:var(--cyan)" id="pa-opt-apy">—</div>
+          </div>
+        </section>
+      </div>
     </div>
 
     <!-- TAO FLOW VIEW -->
@@ -2174,6 +2429,67 @@ const DASHBOARD_HTML = `
           </div>
         </div>
       </section>
+      <!-- Portfolio Pro: Projection & Monte Carlo -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+        <section class="sec">
+          <div class="sec-hd"><div><div class="sec-t">90-Day Scenario Projection</div><div class="sec-sub">Bull / Base / Bear trajectories</div></div></div>
+          <div style="height:220px"><canvas id="pro-projection-chart"></canvas></div>
+        </section>
+        <section class="sec">
+          <div class="sec-hd"><div><div class="sec-t">Monte Carlo Simulation</div><div class="sec-sub">500 stochastic paths (1 year)</div></div></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+            <div style="text-align:center;padding:8px;background:var(--bg4);border-radius:8px">
+              <div style="font-size:9px;color:var(--rose);margin-bottom:4px">5th PCTILE</div>
+              <div style="font-size:13px;font-weight:700;color:var(--rose)" id="mc-p5">--</div>
+            </div>
+            <div style="text-align:center;padding:8px;background:var(--bg4);border-radius:8px">
+              <div style="font-size:9px;color:var(--amber);margin-bottom:4px">MEDIAN</div>
+              <div style="font-size:13px;font-weight:700;color:var(--amber)" id="mc-p50">--</div>
+            </div>
+            <div style="text-align:center;padding:8px;background:var(--bg4);border-radius:8px">
+              <div style="font-size:9px;color:var(--green);margin-bottom:4px">95th PCTILE</div>
+              <div style="font-size:13px;font-weight:700;color:var(--green)" id="mc-p95">--</div>
+            </div>
+          </div>
+          <div style="height:160px"><canvas id="pro-monte-chart"></canvas></div>
+        </section>
+      </div>
+      <!-- Portfolio Pro: Correlation Matrix -->
+      <section class="sec" style="margin-bottom:24px">
+        <div class="sec-hd"><div><div class="sec-t">Subnet Correlation Matrix</div><div class="sec-sub">Pairwise return correlations (top 6 subnets by score)</div></div></div>
+        <div id="pro-corr-table" style="overflow-x:auto"></div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:12px;font-size:10px;color:var(--mute)">
+          <span><span style="display:inline-block;width:10px;height:10px;background:rgba(255,45,85,0.5);border-radius:2px;margin-right:4px"></span>High (&gt;0.7)</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:rgba(255,214,10,0.5);border-radius:2px;margin-right:4px"></span>Medium (0.4–0.7)</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:rgba(0,255,153,0.3);border-radius:2px;margin-right:4px"></span>Low (&lt;0.4)</span>
+        </div>
+      </section>
+      <!-- Portfolio Pro: Scenario Analysis -->
+      <section class="sec" style="margin-bottom:24px">
+        <div class="sec-hd"><div><div class="sec-t">Scenario Analysis</div><div class="sec-sub">Projected annual yield by TAO price scenario</div></div></div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr style="border-bottom:1px solid var(--bdr)">
+              <th style="text-align:left;padding:10px 8px;font-size:11px;color:var(--mute)">Subnet</th>
+              <th style="text-align:right;padding:10px 8px;font-size:11px;color:var(--rose)">Bear</th>
+              <th style="text-align:right;padding:10px 8px;font-size:11px;color:var(--amber)">Base</th>
+              <th style="text-align:right;padding:10px 8px;font-size:11px;color:var(--green)">Bull</th>
+              <th style="text-align:right;padding:10px 8px;font-size:11px;color:var(--cyan)">Moon</th>
+            </tr></thead>
+            <tbody id="pro-scenario-table"></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- Portfolio Pro: Smart Rebalancing -->
+      <section class="sec" style="margin-bottom:24px">
+        <div class="sec-hd"><div><div class="sec-t">Smart Rebalancing</div><div class="sec-sub">Score-weighted targets vs equal-weight baseline</div></div></div>
+        <div id="pro-rebal-cards"></div>
+      </section>
+      <!-- Portfolio Pro: Drawdown Analysis -->
+      <section class="sec">
+        <div class="sec-hd"><div><div class="sec-t">Drawdown Analysis</div><div class="sec-sub">12-month rolling drawdown per subnet (simulated)</div></div></div>
+        <div style="height:240px"><canvas id="drawdown-chart-pro"></canvas></div>
+      </section>
     </div>
 
     <!-- ON-CHAIN VIEW -->
@@ -2214,6 +2530,14 @@ const DASHBOARD_HTML = `
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">
           <div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Live Intelligence Feed</div><div style="font-size:12px;color:var(--mute)">Aggregated from TAO Daily, X/Twitter, CoinTelegraph, TaoStats</div></div>
           <span style="padding:8px 16px;background:rgba(0,255,153,0.1);border:1px solid rgba(0,255,153,0.3);border-radius:20px;font-size:11px;font-weight:600;color:var(--green);display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;background:var(--green);border-radius:50%;animation:deai-pulse 1.5s infinite"></span>LIVE</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+          <button class="src-pill act" data-src="all" onclick="window.filterNewsBySource('all')" style="padding:6px 14px;border-radius:20px;border:1px solid var(--bdr2);background:var(--bg4);color:var(--txt);font-size:11px;font-weight:600;cursor:pointer;font-family:'IBM Plex Mono',monospace">All Sources</button>
+          <button class="src-pill" data-src="TAO Daily" onclick="window.filterNewsBySource('TAO Daily')" style="padding:6px 14px;border-radius:20px;border:1px solid var(--bdr2);background:var(--bg4);color:var(--txt2);font-size:11px;font-weight:600;cursor:pointer;font-family:'IBM Plex Mono',monospace">TAO Daily</button>
+          <button class="src-pill" data-src="X/Twitter" onclick="window.filterNewsBySource('X/Twitter')" style="padding:6px 14px;border-radius:20px;border:1px solid var(--bdr2);background:var(--bg4);color:var(--txt2);font-size:11px;font-weight:600;cursor:pointer;font-family:'IBM Plex Mono',monospace">X/Twitter</button>
+          <button class="src-pill" data-src="TaoStats" onclick="window.filterNewsBySource('TaoStats')" style="padding:6px 14px;border-radius:20px;border:1px solid var(--bdr2);background:var(--bg4);color:var(--txt2);font-size:11px;font-weight:600;cursor:pointer;font-family:'IBM Plex Mono',monospace">TaoStats</button>
+          <button class="src-pill" data-src="CoinTelegraph" onclick="window.filterNewsBySource('CoinTelegraph')" style="padding:6px 14px;border-radius:20px;border:1px solid var(--bdr2);background:var(--bg4);color:var(--txt2);font-size:11px;font-weight:600;cursor:pointer;font-family:'IBM Plex Mono',monospace">CoinTelegraph</button>
+          <button class="src-pill" data-src="high" onclick="window.filterNewsBySource('high')" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,45,85,0.4);background:rgba(255,45,85,0.1);color:var(--rose);font-size:11px;font-weight:600;cursor:pointer;font-family:'IBM Plex Mono',monospace">⚠ High Impact Only</button>
         </div>
         <div id="newsG"></div>
       </section>
