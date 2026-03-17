@@ -244,13 +244,16 @@ async def get_stats(request: Request):
 
         # Calculate aggregates
         sum_alpha_mc = sum(v.get("market_cap_millions", 0) for v in subnet_data.values())
-        total_ecosystem_mc = (tao_data["market_cap"] / 1e6) + sum_alpha_mc
+        total_ecosystem_mc = (tao_data.get("market_cap", 1280000000) / 1e6) + sum_alpha_mc
         active_subnets = len(subnet_data) if subnet_data else len([s for s in static_subnets if s.get("em", 0) > 0])
         logger.info("Stats retrieved", subnets=active_subnets, source=tao_data.get("source", "unknown"))
+        
+        tao_price = tao_data.get("tao_price") or tao_data.get("usd", 180.80)
+        
         return {
-            "tao_price": tao_data["tao_price"],
+            "tao_price": tao_price,
             "tao_price_btc": tao_data.get("tao_price_btc", 0),
-            "market_cap": tao_data["market_cap"],
+            "market_cap": tao_data.get("market_cap", 1280000000),
             "volume_24h": tao_data["volume_24h"],
             "tao_price_change_24h": tao_data.get("tao_price_change_24h", 0),
             "volume_change_24h": 0.0,
@@ -281,7 +284,7 @@ async def get_subnets(request: Request, detailed: bool = False):
         if isinstance(all_subnet_data, Exception):
             logger.warning(f"Dynamic subnet fetch failed: {all_subnet_data}, using fallback")
             all_subnet_data = {}
-        if isinstance(tao_data, Exception):
+        if isinstance(tao_data, Exception) or not tao_data:
             tao_data = {"tao_price": 180.80}
         tao_price = tao_data.get("tao_price", 180.80)
 

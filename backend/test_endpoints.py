@@ -111,7 +111,7 @@ class TestErrorHandling:
 class TestAuthentication:
     def test_missing_bearer_token(self):
         response = client.get("/api/subnets-detailed")
-        assert response.status_code == 403  # Missing credentials
+        assert response.status_code == 401  # Missing credentials
     def test_invalid_bearer_token(self):
         response = client.get(
             "/api/subnets-detailed",

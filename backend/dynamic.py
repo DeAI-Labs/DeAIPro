@@ -245,7 +245,7 @@ async def fetch_tao_price() -> Optional[Dict[str, Any]]:
     try:
         from services.price import PriceService
         service = PriceService()
-        return await service.get_current_price()
+        return await service._fetch_current_price()
     except Exception as e:
         logger.warning(f"fetch_tao_price failed: {e}")
         return None
