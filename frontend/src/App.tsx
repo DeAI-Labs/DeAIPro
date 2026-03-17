@@ -4,32 +4,57 @@ import { DataProvider, useData } from "./contexts/DataContext";
 import { LandingPage } from "./pages/LandingPage";
 import { auth } from "./firebase";
 import {
-  sendSignInLinkToEmail,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   isSignInWithEmailLink,
   signInWithEmailLink,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import DeAIDashboard from "./Dashboard";
 
-// Colours match the LandingPage dark palette: #040508 bg, #090c12 card, #1c2638 border, #5b5ef4 accent
 const SignInModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState("");
+  const [mode, setMode] = useState<"signin" | "forgot">("signin");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
-  const handleSend = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
-      await sendSignInLinkToEmail(auth, email, {
-        url: window.location.href,
-        handleCodeInApp: true,
-      });
-      localStorage.setItem("emailForSignIn", email);
-      setSent(true);
+      await signInWithEmailAndPassword(auth, email, password);
+      onClose();
     } catch (err: any) {
-      setError(err.message || "Failed to send sign-in link");
+      // If no account exists yet, create one
+      if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
+        try {
+          await createUserWithEmailAndPassword(auth, email, password);
+          onClose();
+        } catch (createErr: any) {
+          setError(createErr.message || "Failed to create account");
+        }
+      } else if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+        setError("Incorrect password. Use 'Forgot password' to reset.");
+      } else {
+        setError(err.message || "Sign in failed");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMessage(`Password reset email sent to ${email}`);
+    } catch (err: any) {
+      setError(err.message || "Failed to send reset email");
     } finally {
       setLoading(false);
     }
@@ -56,81 +81,73 @@ const SignInModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         fontFamily: "system-ui, -apple-system, sans-serif",
       }}>
 
-        {sent ? (
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "38px", marginBottom: "14px" }}>📬</div>
-            <div style={{ fontSize: "17px", fontWeight: 700, color: "#dce8f0", marginBottom: "8px" }}>
-              Check your email
+        {mode === "forgot" ? (
+          /* ── Forgot password ── */
+          <form onSubmit={handleForgotPassword}>
+            <div style={{ fontSize: "20px", fontWeight: 700, color: "#dce8f0", letterSpacing: "-0.02em", marginBottom: "6px" }}>
+              Reset password
             </div>
-            <div style={{ fontSize: "13px", color: "#4a5f75", lineHeight: 1.6, marginBottom: "24px" }}>
-              We sent a sign-in link to{" "}
-              <span style={{ color: "#8a9bb0" }}>{email}</span>
+            <div style={{ fontSize: "14px", color: "#4a5f75", marginBottom: "24px", lineHeight: 1.5 }}>
+              We'll send a reset link to your email.
             </div>
-            <button
-              onClick={onClose}
-              style={{ width: "100%", padding: "11px", background: "transparent", border: "1px solid #1c2638", borderRadius: "8px", color: "#4a5f75", fontSize: "14px", cursor: "pointer" }}
-            >
-              Close
+
+            {error && <div style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#ff6b8a", fontSize: "13px", marginBottom: "14px" }}>{error}</div>}
+            {message && <div style={{ background: "rgba(0,255,153,0.1)", border: "1px solid rgba(0,255,153,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#00ff99", fontSize: "13px", marginBottom: "14px" }}>{message}</div>}
+
+            <label style={{ display: "block", fontSize: "12px", color: "#8a9bb0", marginBottom: "8px" }}>Email address</label>
+            <input
+              type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              required placeholder="you@example.com"
+              style={{ width: "100%", padding: "11px 14px", background: "#0d1117", border: "1px solid #1c2638", borderRadius: "8px", color: "#dce8f0", fontSize: "14px", outline: "none", boxSizing: "border-box", marginBottom: "14px" }}
+            />
+            <button type="submit" disabled={loading}
+              style={{ width: "100%", padding: "12px", border: "none", borderRadius: "8px", background: "#5b5ef4", color: "#fff", fontSize: "14px", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.6 : 1, marginBottom: "10px" }}>
+              {loading ? "Sending…" : "Send reset link"}
             </button>
-          </div>
+            <button type="button" onClick={() => { setMode("signin"); setError(""); setMessage(""); }}
+              style={{ width: "100%", padding: "11px", background: "transparent", border: "1px solid #1c2638", borderRadius: "8px", color: "#4a5f75", fontSize: "14px", cursor: "pointer" }}>
+              Back to sign in
+            </button>
+          </form>
         ) : (
-          <form onSubmit={handleSend}>
+          /* ── Sign in ── */
+          <form onSubmit={handleSignIn}>
             <div style={{ fontSize: "20px", fontWeight: 700, color: "#dce8f0", letterSpacing: "-0.02em", marginBottom: "6px" }}>
               Sign in
             </div>
             <div style={{ fontSize: "14px", color: "#4a5f75", marginBottom: "24px", lineHeight: 1.5 }}>
-              Enter your email and we'll send you a magic link.
+              Enter your email and password.
             </div>
 
-            {error && (
-              <div style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#ff6b8a", fontSize: "13px", marginBottom: "14px" }}>
-                {error}
-              </div>
-            )}
+            {error && <div style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#ff6b8a", fontSize: "13px", marginBottom: "14px" }}>{error}</div>}
 
-            <label style={{ display: "block", fontSize: "12px", color: "#8a9bb0", marginBottom: "8px" }}>
-              Email address
-            </label>
+            <label style={{ display: "block", fontSize: "12px", color: "#8a9bb0", marginBottom: "8px" }}>Email address</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-              style={{
-                width: "100%", padding: "11px 14px",
-                background: "#0d1117", border: "1px solid #1c2638",
-                borderRadius: "8px", color: "#dce8f0",
-                fontSize: "14px", outline: "none",
-                boxSizing: "border-box", marginBottom: "14px",
-              }}
+              type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              required placeholder="you@example.com"
+              style={{ width: "100%", padding: "11px 14px", background: "#0d1117", border: "1px solid #1c2638", borderRadius: "8px", color: "#dce8f0", fontSize: "14px", outline: "none", boxSizing: "border-box", marginBottom: "14px" }}
             />
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: "100%", padding: "12px", border: "none",
-                borderRadius: "8px", background: "#5b5ef4",
-                color: "#fff", fontSize: "14px", fontWeight: 600,
-                cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading ? 0.6 : 1,
-                marginBottom: "10px",
-              }}
-            >
-              {loading ? "Sending…" : "Send sign-in link"}
-            </button>
+            <label style={{ display: "block", fontSize: "12px", color: "#8a9bb0", marginBottom: "8px" }}>Password</label>
+            <input
+              type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+              required placeholder="••••••••"
+              style={{ width: "100%", padding: "11px 14px", background: "#0d1117", border: "1px solid #1c2638", borderRadius: "8px", color: "#dce8f0", fontSize: "14px", outline: "none", boxSizing: "border-box", marginBottom: "6px" }}
+            />
 
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                width: "100%", padding: "11px",
-                background: "transparent", border: "1px solid #1c2638",
-                borderRadius: "8px", color: "#4a5f75",
-                fontSize: "14px", cursor: "pointer",
-              }}
-            >
+            <div style={{ textAlign: "right", marginBottom: "16px" }}>
+              <button type="button" onClick={() => { setMode("forgot"); setError(""); }}
+                style={{ background: "none", border: "none", color: "#5b5ef4", fontSize: "12px", cursor: "pointer", padding: 0 }}>
+                Forgot password?
+              </button>
+            </div>
+
+            <button type="submit" disabled={loading}
+              style={{ width: "100%", padding: "12px", border: "none", borderRadius: "8px", background: "#5b5ef4", color: "#fff", fontSize: "14px", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.6 : 1, marginBottom: "10px" }}>
+              {loading ? "Signing in…" : "Sign in"}
+            </button>
+            <button type="button" onClick={onClose}
+              style={{ width: "100%", padding: "11px", background: "transparent", border: "1px solid #1c2638", borderRadius: "8px", color: "#4a5f75", fontSize: "14px", cursor: "pointer" }}>
               Cancel
             </button>
           </form>
@@ -146,20 +163,17 @@ const AppContent: React.FC = () => {
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
+  // Handle any lingering email link sign-ins from before the switch
   useEffect(() => {
     if (isSignInWithEmailLink(auth, window.location.href)) {
       let email = localStorage.getItem("emailForSignIn");
-      if (!email) email = window.prompt("Please confirm your email to complete sign-in:");
       if (email) {
         signInWithEmailLink(auth, email, window.location.href)
           .then(() => {
             localStorage.removeItem("emailForSignIn");
             window.history.replaceState({}, document.title, window.location.pathname);
           })
-          .catch((err) => {
-            console.error("Sign-in link error:", err);
-            alert("Sign-in failed: " + err.message);
-          });
+          .catch(console.error);
       }
     }
   }, []);
