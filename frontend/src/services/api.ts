@@ -7,11 +7,11 @@ import {
 } from "../types";
 
 // Vite requires import.meta.env (not process.env)
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://deai-kyzf.onrender.com";
+const API_BASE =
+  import.meta.env.NEXT_PUBLIC_API_URL || import.meta.env.VITE_API_URL || "https://deai-kyzf.onrender.com";
 
 // All routes are under /api prefix (matches FastAPI router prefix="/api")
-const API = `${API_BASE_URL}/api`;
+const API = `${API_BASE}/api`;
 
 const DEFAULT_HEADERS = { "Content-Type": "application/json" };
 
