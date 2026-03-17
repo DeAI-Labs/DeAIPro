@@ -357,7 +357,7 @@ export const LandingPage: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =>
                 datasets: [
                   { label: 'Individual Subnets', data: subnets, backgroundColor: 'rgba(245,158,11,0.88)', borderColor: 'rgba(245,158,11,0.2)', borderWidth: 1, pointRadius: 8, pointHoverRadius: 10 },
                   { label: 'Your Portfolio', data: [{ x: 21, y: 33 }], backgroundColor: 'rgba(16,185,129,0.95)', borderColor: 'rgba(16,185,129,0.4)', borderWidth: 2, pointRadius: 14, pointHoverRadius: 16 },
-                  { label: 'Efficient Frontier', data: frontierPts as any, type: 'line', borderColor: 'rgba(34,211,238,0.85)', borderWidth: 2.5, fill: false, tension: 0.4, pointRadius: 0 }
+                  { label: 'Efficient Frontier', data: frontierPts as any, type: 'scatter' as const, borderColor: 'rgba(34,211,238,0.85)', borderWidth: 2.5, fill: false, tension: 0.4, pointRadius: 0 }
                 ]
               }}
               options={{

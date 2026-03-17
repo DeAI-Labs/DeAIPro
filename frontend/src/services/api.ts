@@ -15,7 +15,7 @@ const API = `${API_BASE_URL}/api`;
 
 const DEFAULT_HEADERS = { "Content-Type": "application/json" };
 
-export const getAuthHeader = (token?: string) =>
+export const getAuthHeader = (token?: string): Record<string, string> =>
   token ? { Authorization: `Bearer ${token}` } : {};
 
 export class APIError extends Error {
