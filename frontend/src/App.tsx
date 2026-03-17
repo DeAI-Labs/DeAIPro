@@ -4,57 +4,33 @@ import { DataProvider, useData } from "./contexts/DataContext";
 import { LandingPage } from "./pages/LandingPage";
 import { auth } from "./firebase";
 import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   isSignInWithEmailLink,
   signInWithEmailLink,
-  sendPasswordResetEmail,
+  sendSignInLinkToEmail,
 } from "firebase/auth";
 import DeAIDashboard from "./Dashboard";
 
+const actionCodeSettings = {
+  url: window.location.origin,
+  handleCodeInApp: true,
+};
+
 const SignInModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"signin" | "forgot">("signin");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+  const [sent, setSent] = useState(false);
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSendLink = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      onClose();
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      localStorage.setItem("emailForSignIn", email);
+      setSent(true);
     } catch (err: any) {
-      // If no account exists yet, create one
-      if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
-        try {
-          await createUserWithEmailAndPassword(auth, email, password);
-          onClose();
-        } catch (createErr: any) {
-          setError(createErr.message || "Failed to create account");
-        }
-      } else if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
-        setError("Incorrect password. Use 'Forgot password' to reset.");
-      } else {
-        setError(err.message || "Sign in failed");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    try {
-      await sendPasswordResetEmail(auth, email);
-      setMessage(`Password reset email sent to ${email}`);
-    } catch (err: any) {
-      setError(err.message || "Failed to send reset email");
+      setError(err.message || "Failed to send sign-in link");
     } finally {
       setLoading(false);
     }
@@ -80,71 +56,46 @@ const SignInModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         maxWidth: "380px",
         fontFamily: "system-ui, -apple-system, sans-serif",
       }}>
-
-        {mode === "forgot" ? (
-          /* ── Forgot password ── */
-          <form onSubmit={handleForgotPassword}>
+        {sent ? (
+          /* ── Link sent confirmation ── */
+          <>
             <div style={{ fontSize: "20px", fontWeight: 700, color: "#dce8f0", letterSpacing: "-0.02em", marginBottom: "6px" }}>
-              Reset password
+              Check your email
             </div>
             <div style={{ fontSize: "14px", color: "#4a5f75", marginBottom: "24px", lineHeight: 1.5 }}>
-              We'll send a reset link to your email.
+              We sent a sign-in link to <span style={{ color: "#dce8f0" }}>{email}</span>. Click the link in that email to sign in — no password needed.
             </div>
-
-            {error && <div style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#ff6b8a", fontSize: "13px", marginBottom: "14px" }}>{error}</div>}
-            {message && <div style={{ background: "rgba(0,255,153,0.1)", border: "1px solid rgba(0,255,153,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#00ff99", fontSize: "13px", marginBottom: "14px" }}>{message}</div>}
-
-            <label style={{ display: "block", fontSize: "12px", color: "#8a9bb0", marginBottom: "8px" }}>Email address</label>
-            <input
-              type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              required placeholder="you@example.com"
-              style={{ width: "100%", padding: "11px 14px", background: "#0d1117", border: "1px solid #1c2638", borderRadius: "8px", color: "#dce8f0", fontSize: "14px", outline: "none", boxSizing: "border-box", marginBottom: "14px" }}
-            />
-            <button type="submit" disabled={loading}
-              style={{ width: "100%", padding: "12px", border: "none", borderRadius: "8px", background: "#5b5ef4", color: "#fff", fontSize: "14px", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.6 : 1, marginBottom: "10px" }}>
-              {loading ? "Sending…" : "Send reset link"}
-            </button>
-            <button type="button" onClick={() => { setMode("signin"); setError(""); setMessage(""); }}
+            <button type="button" onClick={onClose}
               style={{ width: "100%", padding: "11px", background: "transparent", border: "1px solid #1c2638", borderRadius: "8px", color: "#4a5f75", fontSize: "14px", cursor: "pointer" }}>
-              Back to sign in
+              Close
             </button>
-          </form>
+          </>
         ) : (
-          /* ── Sign in ── */
-          <form onSubmit={handleSignIn}>
+          /* ── Email entry ── */
+          <form onSubmit={handleSendLink}>
             <div style={{ fontSize: "20px", fontWeight: 700, color: "#dce8f0", letterSpacing: "-0.02em", marginBottom: "6px" }}>
               Sign in
             </div>
             <div style={{ fontSize: "14px", color: "#4a5f75", marginBottom: "24px", lineHeight: 1.5 }}>
-              Enter your email and password.
+              Enter your email and we'll send you a magic link — no password needed.
             </div>
 
-            {error && <div style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#ff6b8a", fontSize: "13px", marginBottom: "14px" }}>{error}</div>}
+            {error && (
+              <div style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#ff6b8a", fontSize: "13px", marginBottom: "14px" }}>
+                {error}
+              </div>
+            )}
 
             <label style={{ display: "block", fontSize: "12px", color: "#8a9bb0", marginBottom: "8px" }}>Email address</label>
             <input
               type="email" value={email} onChange={(e) => setEmail(e.target.value)}
               required placeholder="you@example.com"
-              style={{ width: "100%", padding: "11px 14px", background: "#0d1117", border: "1px solid #1c2638", borderRadius: "8px", color: "#dce8f0", fontSize: "14px", outline: "none", boxSizing: "border-box", marginBottom: "14px" }}
+              style={{ width: "100%", padding: "11px 14px", background: "#0d1117", border: "1px solid #1c2638", borderRadius: "8px", color: "#dce8f0", fontSize: "14px", outline: "none", boxSizing: "border-box", marginBottom: "16px" }}
             />
-
-            <label style={{ display: "block", fontSize: "12px", color: "#8a9bb0", marginBottom: "8px" }}>Password</label>
-            <input
-              type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-              required placeholder="••••••••"
-              style={{ width: "100%", padding: "11px 14px", background: "#0d1117", border: "1px solid #1c2638", borderRadius: "8px", color: "#dce8f0", fontSize: "14px", outline: "none", boxSizing: "border-box", marginBottom: "6px" }}
-            />
-
-            <div style={{ textAlign: "right", marginBottom: "16px" }}>
-              <button type="button" onClick={() => { setMode("forgot"); setError(""); }}
-                style={{ background: "none", border: "none", color: "#5b5ef4", fontSize: "12px", cursor: "pointer", padding: 0 }}>
-                Forgot password?
-              </button>
-            </div>
 
             <button type="submit" disabled={loading}
               style={{ width: "100%", padding: "12px", border: "none", borderRadius: "8px", background: "#5b5ef4", color: "#fff", fontSize: "14px", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.6 : 1, marginBottom: "10px" }}>
-              {loading ? "Signing in…" : "Sign in"}
+              {loading ? "Sending…" : "Send magic link"}
             </button>
             <button type="button" onClick={onClose}
               style={{ width: "100%", padding: "11px", background: "transparent", border: "1px solid #1c2638", borderRadius: "8px", color: "#4a5f75", fontSize: "14px", cursor: "pointer" }}>
@@ -163,10 +114,13 @@ const AppContent: React.FC = () => {
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
-  // Handle any lingering email link sign-ins from before the switch
+  // Complete sign-in when user lands back via the magic link
   useEffect(() => {
     if (isSignInWithEmailLink(auth, window.location.href)) {
       let email = localStorage.getItem("emailForSignIn");
+      if (!email) {
+        email = window.prompt("Please confirm your email to complete sign-in:") || "";
+      }
       if (email) {
         signInWithEmailLink(auth, email, window.location.href)
           .then(() => {
