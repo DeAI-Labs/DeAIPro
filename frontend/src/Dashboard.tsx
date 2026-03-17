@@ -686,9 +686,7 @@ const Dashboard: React.FC = () => {
     };
 
     // ─── Modal helpers ────────────────────────────────────────────────────────
-    g.openModal = () => document.getElementById("loginM")?.classList.add("open");
-    g.closeModal = () => document.getElementById("loginM")?.classList.remove("open");
-    g.handleLogin = (e: Event) => { e.preventDefault(); alert("Magic link sent!"); g.closeModal(); };
+    // ─── Modal helpers ────────────────────────────────────────────────────────
     g.openApiSettings = () => document.getElementById("apiModal")?.classList.add("show");
     g.closeApiSettings = () => document.getElementById("apiModal")?.classList.remove("show");
     g.saveAndConnectApi = () => {
@@ -2801,17 +2799,6 @@ TAO Flow &amp; Yield
 </div>
 </div>
 
-<!-- Login Modal -->
-<div id="loginM" class="modal">
-  <div class="modal-box">
-    <div class="modal-t">Sign in to DeAI Nexus Pro</div>
-    <form onsubmit="window.handleLogin(event)">
-      <div class="form-row"><label class="form-l">Email Address</label><input type="email" class="form-in" placeholder="your@email.com" required></div>
-      <div class="form-act"><button type="button" class="btn btn-g" onclick="window.closeModal()">Cancel</button><button type="submit" class="btn btn-p">Continue</button></div>
-    </form>
-    <p style="font-size:11px;color:var(--mute);text-align:center;margin-top:20px">We'll send you a magic link to sign in securely</p>
-  </div>
-</div>
 
 <style>
 @keyframes deai-spin{to{transform:rotate(360deg)}}
