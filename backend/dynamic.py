@@ -100,7 +100,7 @@ async def fetch_subnets_from_taostats() -> Optional[Dict[int, Dict[str, Any]]]:
     if not TAOSTATS_API_KEY:
         logger.debug("TaoStats API key not set, skipping")
         return None
-    headers = {"Authorization": TAOSTATS_API_KEY}
+    headers = {"Authorization": f"Bearer {TAOSTATS_API_KEY}"}
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.get(
