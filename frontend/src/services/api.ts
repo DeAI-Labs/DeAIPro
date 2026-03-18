@@ -33,7 +33,9 @@ const handleResponse = async (response: Response) => {
       errorData
     );
   }
-  return response.json();
+  const json = await response.json();
+  // Unwrap the FastAPI data envelope if it exists
+  return json.data !== undefined ? json.data : json;
 };
 
 // ── Public ────────────────────────────────────────────────────────────────────
