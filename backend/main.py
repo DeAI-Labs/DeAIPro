@@ -588,3 +588,15 @@ async def websocket_price_ticker(websocket: WebSocket):
         logger.error(f"WebSocket error: {e}")
         await price_ticker_manager.disconnect(websocket)
 
+@app.get("/")
+async def root():
+    return {"status": "online", "message": "DeAI Backend is running"}
+
+import os
+import uvicorn
+
+if __name__ == "__main__":
+    # Render provides a PORT environment variable. If it's missing, we use 8000.
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+
