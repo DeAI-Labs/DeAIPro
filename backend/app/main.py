@@ -61,6 +61,19 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
+# CORS — allow Vercel frontend + local dev
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://deai-zeta.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Rate Limiting
 limiter = Limiter(
     key_func=get_remote_address,
@@ -76,20 +89,6 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         detail="Too many requests. Please try again later.",
     )
-
-
-# CORS — allow Vercel frontend + local dev
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "https://deai-zeta.vercel.app",
-        "http://localhost:5173",
-        "http://localhost:3000",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # ── Routes — all mounted under /api prefix ────────────────────────────────────
 from api.routes import public, auth, admin, health

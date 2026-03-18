@@ -76,16 +76,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Rate Limiting
-limiter = Limiter(key_func=get_remote_address)
-app.state.limiter = limiter
-
-@app.exception_handler(RateLimitExceeded)
-async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
-    logger.warning("Rate limit exceeded", remote_addr=get_remote_address(request))
-    raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
-
-
 # CORS
 app.add_middleware(
     CORSMiddleware,
@@ -98,6 +88,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Rate Limiting
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    logger.warning("Rate limit exceeded", remote_addr=get_remote_address(request))
+    raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
 
 # Authentication — canonical implementations live in dependencies/auth.py
 from dependencies.auth import (
