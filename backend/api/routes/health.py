@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/api/health",
+    "/health",
     response_model=dict,
     tags=["Health"],
     summary="System health check",
@@ -46,7 +46,7 @@ async def health_check(request: Request):
 
 
 @router.get(
-    "/api/health/services/{service_name}",
+    "/health/services/{service_name}",
     response_model=dict,
     tags=["Health"],
     summary="Get specific service status",
@@ -91,7 +91,7 @@ async def get_service_status(request: Request, service_name: str):
 
 
 @router.get(
-    "/api/health/jobs",
+    "/health/jobs",
     response_model=dict,
     tags=["Health"],
     summary="Get scheduled background jobs",

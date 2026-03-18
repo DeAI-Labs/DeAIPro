@@ -16,7 +16,7 @@ from dependencies import get_current_user, CurrentUser
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/api", tags=["auth"])
+router = APIRouter(tags=["auth"])
 limiter = Limiter(key_func=get_remote_address)
 
 

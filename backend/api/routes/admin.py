@@ -7,7 +7,7 @@ import structlog
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/api/admin", tags=["admin"])
+router = APIRouter(prefix="/admin", tags=["admin"])
 
 # Note: Full implementations with Firebase auth will be added in Phase 2
 

@@ -30,7 +30,7 @@ router = APIRouter(tags=["public"])
 limiter = Limiter(key_func=get_remote_address)
 
 
-@router.get("/api/stats", response_model=dict)
+@router.get("/stats", response_model=dict)
 @limiter.limit("100/minute")
 async def get_stats(request: Request):
     """Get current ecosystem statistics (TAO price, market cap, active subnets)"""
@@ -68,7 +68,7 @@ async def get_stats(request: Request):
         }
 
 
-@router.get("/api/subnets", response_model=dict)
+@router.get("/subnets", response_model=dict)
 @limiter.limit("100/minute")
 async def get_subnets(
     request: Request,
@@ -131,7 +131,7 @@ async def get_subnets(
         }
 
 
-@router.get("/api/subnets/{subnet_id}", response_model=dict)
+@router.get("/subnets/{subnet_id}", response_model=dict)
 @limiter.limit("100/minute")
 async def get_subnet_detail(request: Request, subnet_id: int):
     """Get detailed information about a specific subnet"""
@@ -184,7 +184,7 @@ async def get_subnet_detail(request: Request, subnet_id: int):
         }
 
 
-@router.get("/api/news", response_model=dict)
+@router.get("/news", response_model=dict)
 @limiter.limit("100/minute")
 async def get_news(
     request: Request,
@@ -233,7 +233,7 @@ async def get_news(
         }
 
 
-@router.get("/api/research", response_model=dict)
+@router.get("/research", response_model=dict)
 @limiter.limit("100/minute")
 async def get_research(
     request: Request,
@@ -282,7 +282,7 @@ async def get_research(
         }
 
 
-@router.get("/api/lessons", response_model=dict)
+@router.get("/lessons", response_model=dict)
 @limiter.limit("100/minute")
 async def get_lessons(
     request: Request,
@@ -329,7 +329,7 @@ async def get_lessons(
         }
 
 
-@router.post("/api/request-access")
+@router.post("/request-access")
 @limiter.limit("10/minute")
 async def request_access(request: Request, body: dict):
     """Request temporary access"""
