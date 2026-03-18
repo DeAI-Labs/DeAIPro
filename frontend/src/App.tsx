@@ -8,7 +8,7 @@ import {
   signInWithEmailLink,
   sendSignInLinkToEmail,
 } from "firebase/auth";
-import DeAIDashboard from "./Dashboard";
+import { DashboardPage } from "./pages/DashboardPage";
 
 const actionCodeSettings = {
   url: window.location.origin,
@@ -146,7 +146,7 @@ const AppContent: React.FC = () => {
     );
   }
 
-  if (state.user) return <DeAIDashboard />;
+  if (state.user) return <DashboardPage />;
 
   return (
     <>
