@@ -12,6 +12,12 @@ const API_BASE = import.meta.env.VITE_API_URL || "https://deai-kyzf.onrender.com
 // All routes are under /api prefix (matches FastAPI router prefix="/api")
 const API = `${API_BASE}/api`;
 
+// --- START DEBUG LOGGING ---
+console.log("🛠️ [DEBUG] VITE_API_URL is:", import.meta.env.VITE_API_URL);
+console.log("🛠️ [DEBUG] API_BASE resolved to:", API_BASE);
+console.log("🛠️ [DEBUG] Full API endpoint is:", API);
+// --- END DEBUG LOGGING ---
+
 const DEFAULT_HEADERS = { "Content-Type": "application/json" };
 
 export const getAuthHeader = (token?: string): Record<string, string> =>
