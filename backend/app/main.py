@@ -2,6 +2,11 @@
 DeAIPro Backend - FastAPI Entry Point
 """
 
+from contextlib import asynccontextmanager
+import json
+import time
+import threading
+
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import HTTPException
@@ -23,6 +28,31 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 
 setup_logging()
 logger = structlog.get_logger(__name__)
+
+def _agent_log(hypothesisId: str, location: str, message: str, data: dict | None = None, runId: str = "pre-fix"):
+    # #region agent log
+    try:
+        payload = {
+            "id": f"log_{int(time.time() * 1000)}_{os.getpid()}",
+            "timestamp": int(time.time() * 1000),
+            "runId": runId,
+            "hypothesisId": hypothesisId,
+            "location": location,
+            "message": message,
+            "data": data or {},
+        }
+        with open("/home/ciarrai/Documents/DeAI/.cursor/debug.log", "a", encoding="utf-8") as f:
+            f.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+    # #endregion agent log
+
+_agent_log(
+    "H1",
+    "backend/app/main.py:module",
+    "Imported backend/app/main.py",
+    data={"pid": os.getpid(), "thread": threading.current_thread().name},
+)
 
 if settings.sentry_dsn_backend:
     sentry_logging = LoggingIntegration(
@@ -53,12 +83,48 @@ def init_firebase():
             raise
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    _agent_log(
+        "H3",
+        "backend/app/main.py:lifespan",
+        "lifespan start entered",
+        data={
+            "pid": os.getpid(),
+            "thread": threading.current_thread().name,
+            "loop_running": asyncio.get_running_loop() is not None,
+        },
+    )
+    logger.info("🚀 DeAIPro starting up...")
+    init_firebase()
+    try:
+        await db.connect()
+    except Exception as e:
+        _agent_log("H4", "backend/app/main.py:lifespan", "db.connect failed", data={"error": str(e)})
+        logger.error(f"Failed to connect to database: {e}")
+        raise
+    try:
+        await scheduler.start()
+    except Exception as e:
+        _agent_log("H2", "backend/app/main.py:lifespan", "scheduler.start failed", data={"error": str(e)})
+        logger.error(f"Failed to start background scheduler: {e}")
+        raise
+    logger.info("✓ All services initialized")
+
+    yield
+
+    logger.info("🛑 DeAIPro shutting down...")
+    await scheduler.stop()
+    await db.disconnect()
+
+
 app = FastAPI(
     title="DeAIPro API",
     description="Real-time Bittensor analytics and intelligence platform",
     version="1.0.0",
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
+    lifespan=lifespan,
 )
 
 # CORS — allow Vercel frontend + local dev
@@ -97,31 +163,6 @@ app.include_router(health.router,  prefix="/api")
 app.include_router(public.router,  prefix="/api")
 app.include_router(auth.router,    prefix="/api")
 app.include_router(admin.router,   prefix="/api")
-
-
-# Startup / Shutdown
-@app.on_event("startup")
-async def startup_event():
-    logger.info("🚀 DeAIPro starting up...")
-    init_firebase()
-    try:
-        await db.connect()
-    except Exception as e:
-        logger.error(f"Failed to connect to database: {e}")
-        raise
-    try:
-        await scheduler.start()
-    except Exception as e:
-        logger.error(f"Failed to start background scheduler: {e}")
-        raise
-    logger.info("✓ All services initialized")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    logger.info("🛑 DeAIPro shutting down...")
-    await scheduler.stop()
-    await db.disconnect()
 
 
 # Root redirect to docs

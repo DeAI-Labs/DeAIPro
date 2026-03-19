@@ -14,6 +14,35 @@ import asyncio
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
+# #region agent log
+import json as _agent_json
+import time as _agent_time
+import threading as _agent_threading
+
+def _agent_log(hypothesisId: str, location: str, message: str, data: dict | None = None, runId: str = "pre-fix"):
+    try:
+        payload = {
+            "id": f"log_{int(_agent_time.time() * 1000)}_{os.getpid()}",
+            "timestamp": int(_agent_time.time() * 1000),
+            "runId": runId,
+            "hypothesisId": hypothesisId,
+            "location": location,
+            "message": message,
+            "data": data or {},
+        }
+        with open("/home/ciarrai/Documents/DeAI/.cursor/debug.log", "a", encoding="utf-8") as f:
+            f.write(_agent_json.dumps(payload, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+_agent_log(
+    "H1",
+    "backend/main.py:module",
+    "Imported backend/main.py",
+    data={"pid": os.getpid(), "thread": _agent_threading.current_thread().name},
+)
+# #endregion agent log
+
 # FUTURE: Platform roadmap (backend)
 # - Integrate Bittensor Python SDK for on-chain subnet/owner/scoring data.
 # - Migrate all in-memory/static caching to MongoDB-backed collections.

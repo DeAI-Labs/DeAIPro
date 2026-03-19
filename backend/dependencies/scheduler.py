@@ -1,12 +1,35 @@
 """APScheduler background job scheduler configuration and management."""
 
 from datetime import datetime
+import asyncio
+import json
+import os
+import threading
+import time
 
 import structlog
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 logger = structlog.get_logger(__name__)
+
+def _agent_log(hypothesisId: str, location: str, message: str, data: dict | None = None, runId: str = "pre-fix"):
+    # #region agent log
+    try:
+        payload = {
+            "id": f"log_{int(time.time() * 1000)}_{os.getpid()}",
+            "timestamp": int(time.time() * 1000),
+            "runId": runId,
+            "hypothesisId": hypothesisId,
+            "location": location,
+            "message": message,
+            "data": data or {},
+        }
+        with open("/home/ciarrai/Documents/DeAI/.cursor/debug.log", "a", encoding="utf-8") as f:
+            f.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+    # #endregion agent log
 
 
 class BackgroundScheduler:
@@ -19,7 +42,24 @@ class BackgroundScheduler:
     async def start(self) -> None:
         """Start the background scheduler."""
         try:
+            _agent_log(
+                "H3",
+                "backend/dependencies/scheduler.py:BackgroundScheduler.start",
+                "scheduler.start entered",
+                data={
+                    "pid": os.getpid(),
+                    "thread": threading.current_thread().name,
+                    "loop_running": True,
+                    "loop_type": type(asyncio.get_running_loop()).__name__,
+                },
+            )
             self.scheduler = AsyncIOScheduler()
+            _agent_log(
+                "H3",
+                "backend/dependencies/scheduler.py:BackgroundScheduler.start",
+                "AsyncIOScheduler instantiated",
+                data={"scheduler_type": type(self.scheduler).__name__},
+            )
 
             from services.metagraph import MetagraphService
             from services.github_service import GitHubService
@@ -92,7 +132,6 @@ class BackgroundScheduler:
             )
 
             # Run all services immediately on startup so data is available right away
-            import asyncio
             for name, svc in [
                 ("metagraph", metagraph_service),
                 ("price", price_service),
@@ -103,12 +142,30 @@ class BackgroundScheduler:
                     logger.info(f"Running initial {name} sync")
                     await svc.run()
                 except Exception as e:
+                    _agent_log(
+                        "H4",
+                        "backend/dependencies/scheduler.py:BackgroundScheduler.start",
+                        "initial svc.run failed",
+                        data={"service": name, "error": str(e)},
+                    )
                     logger.error(f"Initial {name} sync failed: {e}")
 
             self.scheduler.start()
+            _agent_log(
+                "H2",
+                "backend/dependencies/scheduler.py:BackgroundScheduler.start",
+                "scheduler.start() called",
+                data={"jobs": len(self.scheduler.get_jobs())},
+            )
             logger.info("Scheduler started", jobs=len(self.scheduler.get_jobs()))
 
         except Exception as e:
+            _agent_log(
+                "H2",
+                "backend/dependencies/scheduler.py:BackgroundScheduler.start",
+                "Scheduler startup error",
+                data={"error": str(e), "type": type(e).__name__},
+            )
             logger.error(f"Scheduler startup error: {e}")
             raise
 
