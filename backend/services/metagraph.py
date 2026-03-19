@@ -155,7 +155,7 @@ class MetagraphService(BaseService):
             # requires collection-init and therefore a live MongoDB connection.
             subnet = await Subnet.find_one({"net_uid": subnet_id})
 
-            if subnet:
+            if subnet is not None:
                 # Update existing subnet
                 subnet.name = data.get("name", subnet.name)
                 subnet.market_cap_millions = data.get("market_cap_millions", 0)
