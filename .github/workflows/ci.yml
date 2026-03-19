@@ -27,10 +27,10 @@ jobs:
         working-directory: ./backend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -41,16 +41,16 @@ jobs:
           pip install -r requirements.txt
 
       - name: Format check (Black)
-        run: black --check app config middleware
+        run: black --check . --exclude=__pycache__
 
       - name: Lint (Flake8)
-        run: flake8 app config middleware
+        run: flake8 . --exclude=__pycache__
 
       - name: Type check (Mypy)
-        run: mypy app config middleware
+        run: mypy . --ignore-missing-imports
 
       - name: Sort imports (isort)
-        run: isort --check-only app config middleware
+        run: isort --check-only . 
 
   # Backend Tests
   backend-test:
@@ -79,10 +79,10 @@ jobs:
       DEBUG: 'false'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -113,13 +113,15 @@ jobs:
         working-directory: ./frontend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -140,13 +142,15 @@ jobs:
         working-directory: ./frontend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -170,7 +174,7 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
