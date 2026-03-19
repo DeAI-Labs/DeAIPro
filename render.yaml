@@ -7,7 +7,6 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-
   - type: web
     name: deai-frontend
     runtime: node
