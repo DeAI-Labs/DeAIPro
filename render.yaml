@@ -2,16 +2,18 @@ services:
   - type: web
     name: deai-backend
     runtime: python
-    buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
   - type: web
     name: deai-frontend
     runtime: node
-    buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npm run preview
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run preview
     envVars:
       - key: NODE_VERSION
         value: 20.12.0
