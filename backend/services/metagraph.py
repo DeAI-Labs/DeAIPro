@@ -153,7 +153,7 @@ class MetagraphService(BaseService):
             # Find subnet by netuid (integer ID field).
             # Using dict form avoids Beanie's expression evaluation which
             # requires collection-init and therefore a live MongoDB connection.
-            subnet = await Subnet.find_one({"id": subnet_id})
+            subnet = await Subnet.find_one({"net_uid": subnet_id})
 
             if subnet:
                 # Update existing subnet

@@ -48,7 +48,7 @@ A cutting-edge real-time analytics and intelligence dashboard for the Bittensor 
 
 ### CORS & HTTPS
 
-- CORS allowed for: `localhost:5173`, `de-ai-pro.vercel.app`
+- CORS allowed for: `localhost:5173`, `deai-zeta.vercel.app`
 - HTTPS enforced in production
 - Secure cookies (HttpOnly, SameSite=Lax)
 

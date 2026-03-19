@@ -59,9 +59,9 @@ services:
     container_name: deaipro_frontend
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: http://backend:8000
-      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN}
-      NEXT_PUBLIC_ENVIRONMENT: ${ENVIRONMENT:-development}
+      VITE_API_URL: http://backend:8000
+      VITE_SENTRY_DSN: ${VITE_SENTRY_DSN}
+      VITE_ENVIRONMENT: ${ENVIRONMENT:production}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:
