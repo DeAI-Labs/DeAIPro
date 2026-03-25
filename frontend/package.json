@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "description": "Real-time Bittensor analytics and intelligence platform frontend",
   "private": true,
-  "homepage": ".",
-  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
