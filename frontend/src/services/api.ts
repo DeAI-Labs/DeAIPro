@@ -6,14 +6,14 @@ import {
   Lesson,
 } from "../types";
 
-// Vite requires import.meta.env (not process.env)
-const API_BASE = import.meta.env.VITE_API_URL || "https://deai-kyzf.onrender.com";
+// Next.js uses process.env.NEXT_PUBLIC_
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://deai-kyzf.onrender.com";
 
 // All routes are under /api prefix (matches FastAPI router prefix="/api")
 const API = `${API_BASE}/api`;
 
 // --- START DEBUG LOGGING ---
-console.log("🛠️ [DEBUG] VITE_API_URL is:", import.meta.env.VITE_API_URL);
+console.log("🛠️ [DEBUG] NEXT_PUBLIC_API_URL is:", process.env.NEXT_PUBLIC_API_URL);
 console.log("🛠️ [DEBUG] API_BASE resolved to:", API_BASE);
 console.log("🛠️ [DEBUG] Full API endpoint is:", API);
 // --- END DEBUG LOGGING ---
