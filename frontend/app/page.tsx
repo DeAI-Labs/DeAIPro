@@ -1,5 +1,7 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import './landing.css';
 import { fetchStats, fetchNews, type Stats, type NewsItem } from '@/lib/api';
 
@@ -19,10 +21,17 @@ const RATIO_DATA: Record<string, any> = {
 };
 
 export default function LandingPage() {
+  const router = useRouter();
+  const [reportSeconds, setReportSeconds] = useState(12);
   const [stats, setStats] = useState<Stats | null>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
   const taoBtcChartRef = useRef<any>(null);
   const frontierChartRef = useRef<any>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => setReportSeconds(s => s + 1), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -136,8 +145,8 @@ export default function LandingPage() {
           <div className="logo-mark">&#x3C4;</div>
           <div className="logo-name">DeAI <span>Strategies</span></div>
         </div>
-        <ul><li><a href="#">Platform</a></li><li><a href="#">Subnets</a></li><li><a href="#">Research</a></li><li><a href="#">Institutional</a></li></ul>
-        <div className="nav-btns"><button className="btn-ghost">Sign In</button><button className="btn-primary">Request Access</button></div>
+        <ul><li><Link href="/dashboard">Platform</Link></li><li><Link href="/dashboard">Subnets</Link></li><li><Link href="/dashboard">Research</Link></li><li><Link href="/dashboard">Institutional</Link></li></ul>
+        <div className="nav-btns"><button className="btn-ghost" onClick={() => router.push('/login')}>Sign In</button><button className="btn-primary" onClick={() => router.push('/dashboard')}>Request Access</button></div>
       </nav>
       <section className="hero">
         <div className="hero-grid">
@@ -145,12 +154,12 @@ export default function LandingPage() {
             <div className="eyebrow fi d1"><span className="dot"></span>Intelligence Capital Markets</div>
             <h1 className="fi d2">Institutional Access<br/>to the <em>Decentralized<br/>AI Economy.</em></h1>
             <p className="hero-sub fi d3">Regulated, vertically integrated intelligence for allocating capital across Bittensor subnets. Real-time feeds, portfolio analytics, and AI-generated research in one platform.</p>
-            <div className="hero-cta fi d4"><button className="btn-primary btn-lg">Request Institutional Access</button><button className="btn-ghost btn-lg">View Demo</button></div>
+            <div className="hero-cta fi d4"><button className="btn-primary btn-lg" onClick={() => router.push('/dashboard')}>Request Institutional Access</button><button className="btn-ghost btn-lg" onClick={() => router.push('/dashboard')}>View Demo</button></div>
             <div className="hero-stats fi d4">
-              <div><div className="hs-val">{fmt(marketCap)}</div><div className="hs-label">TVL Deployed</div></div>
-              <div><div className="hs-val">24.8%</div><div className="hs-label">Avg APY</div></div>
-              <div><div className="hs-val">{activeSubnets}</div><div className="hs-label">Subnets</div></div>
-              <div><div className="hs-val">2.18</div><div className="hs-label">Sharpe</div></div>
+              <div><div className="hs-val">{marketCap ? fmt(marketCap) : '...'}</div><div className="hs-label">Market Cap</div></div>
+              <div><div className="hs-val">{volume24h ? fmt(volume24h) : '...'}</div><div className="hs-label">24h Volume</div></div>
+              <div><div className="hs-val">{activeSubnets || '...'}</div><div className="hs-label">Subnets</div></div>
+              <div><div className="hs-val">{taoPrice ? `$${taoPrice.toFixed(0)}` : '...'}</div><div className="hs-label">TAO Price</div></div>
             </div>
           </div>
           <div className="hero-card fi d3">
@@ -165,9 +174,9 @@ export default function LandingPage() {
                   </div>
                 )) : (
                   <>
-                    <div className="ni"><div className="ni-time">2m</div><div><div className="ni-tag">MACRO</div><div className="ni-text">Fed signals pause &mdash; DeAI subnets outperforming benchmark by +4.2%.</div></div></div>
-                    <div className="ni" style={{ borderColor: 'var(--cyan)' }}><div className="ni-time">9m</div><div><div className="ni-tag" style={{ background: 'rgba(34,211,238,0.1)', color: 'var(--cyan)' }}>SUBNET</div><div className="ni-text">SN22 Audio hits 6-month high emission rate. Validator Gini at 0.34.</div></div></div>
-                    <div className="ni" style={{ borderColor: 'var(--amber)' }}><div className="ni-time">14m</div><div><div className="ni-tag" style={{ background: 'rgba(245,158,11,0.1)', color: 'var(--amber)' }}>REPORT</div><div className="ni-text">Q1 Subnet Risk Score Analysis generated &mdash; available for download.</div></div></div>
+                    <div className="ni"><div className="ni-time">Just now</div><div><div className="ni-tag">MACRO</div><div className="ni-text">Fed signals pause &mdash; DeAI subnets outperforming benchmark by +4.2%.</div></div></div>
+                    <div className="ni" style={{ borderColor: 'var(--cyan)' }}><div className="ni-time">5m ago</div><div><div className="ni-tag" style={{ background: 'rgba(34,211,238,0.1)', color: 'var(--cyan)' }}>SUBNET</div><div className="ni-text">SN22 Audio hits 6-month high emission rate. Validator Gini at 0.34.</div></div></div>
+                    <div className="ni" style={{ borderColor: 'var(--amber)' }}><div className="ni-time">12m ago</div><div><div className="ni-tag" style={{ background: 'rgba(245,158,11,0.1)', color: 'var(--amber)' }}>REPORT</div><div className="ni-text">Q1 Subnet Risk Score Analysis generated &mdash; available for download.</div></div></div>
                   </>
                 )}
               </div>
@@ -208,7 +217,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="rp-card fi d2">
-            <div className="rp-hdr"><div className="rp-hdr-title">&#128196; Institutional Report</div><div className="rp-status"><div className="rp-status-dot"></div>GENERATED 0:32s AGO</div></div>
+            <div className="rp-hdr"><div className="rp-hdr-title">&#128196; Institutional Report</div><div className="rp-status"><div className="rp-status-dot"></div>GENERATED {reportSeconds}s AGO</div></div>
             <div className="rp-body">
               <div className="rp-title">Bittensor Subnet Intelligence<br/>Q1 2026 &mdash; Risk Score Analysis</div><div className="rp-date">FEB 22, 2026 &middot; Confidential &mdash; Institutional</div>
               <div className="rp-metrics">
@@ -260,12 +269,12 @@ export default function LandingPage() {
                   </div>
                 );
               }).concat(
-                Array(Math.max(0, 5 - news.length)).fill(null).map((_,i) => <div className="ns-item" key={`pad-${i}`}><div className="ns-top"><span className="ns-cat c-macro">Macro</span><span className="ns-time">2 min ago</span></div><div className="ns-headline">Fed signals pause &mdash; DeAI subnets outperforming benchmark by +4.2%.</div><div className="impact"><span>Impact</span><div className="impact-bar"><div className="impact-fill" style={{ width: '85%', background: 'var(--green)' }}></div></div><span style={{ fontFamily: "'JetBrains Mono',monospace", color: 'var(--green)', fontSize: 9 }}>HIGH</span></div></div>)
+                Array(Math.max(0, 5 - news.length)).fill(null).map((_,i) => <div className="ns-item" key={`pad-${i}`}><div className="ns-top"><span className="ns-cat c-ai">AI</span><span className="ns-time">{2+i} min ago</span></div><div className="ns-headline">Anthropic releases Claude 3.5 Sonnet &mdash; immediate uplift observed in benchmark scores.</div><div className="impact"><span>Impact</span><div className="impact-bar"><div className="impact-fill" style={{ width: '85%', background: 'var(--green)' }}></div></div><span style={{ fontFamily: "'JetBrains Mono',monospace", color: 'var(--green)', fontSize: 9 }}>HIGH</span></div></div>)
               ) : (
                 <>
-                  <div className="ns-item"><div className="ns-top"><span className="ns-cat c-macro">Macro</span><span className="ns-time">2 min ago</span></div><div className="ns-headline">Federal Reserve signals extended pause; risk assets rally as DeFi TVL climbs 4.2% intraday.</div><div className="impact"><span>Impact</span><div className="impact-bar"><div className="impact-fill" style={{ width: '85%', background: 'var(--green)' }}></div></div><span style={{ fontFamily: "'JetBrains Mono',monospace", color: 'var(--green)', fontSize: 9 }}>HIGH</span></div></div>
+                  <div className="ns-item"><div className="ns-top"><span className="ns-cat c-macro">Macro</span><span className="ns-time">Just now</span></div><div className="ns-headline">Federal Reserve signals extended pause; risk assets rally as DeFi TVL climbs 4.2% intraday.</div><div className="impact"><span>Impact</span><div className="impact-bar"><div className="impact-fill" style={{ width: '85%', background: 'var(--green)' }}></div></div><span style={{ fontFamily: "'JetBrains Mono',monospace", color: 'var(--green)', fontSize: 9 }}>HIGH</span></div></div>
                   <div className="ns-item"><div className="ns-top"><span className="ns-cat c-subnet">Subnet</span><span className="ns-time">9 min ago</span></div><div className="ns-headline">SN22 Audio subnet reaches 6-month peak emission rate. Validator concentration drops to 0.34 Gini.</div><div className="impact"><span>Impact</span><div className="impact-bar"><div className="impact-fill" style={{ width: '72%', background: 'var(--cyan)' }}></div></div><span style={{ fontFamily: "'JetBrains Mono',monospace", color: 'var(--cyan)', fontSize: 9 }}>MED-HIGH</span></div></div>
-                  <div className="ns-item"><div className="ns-top"><span className="ns-cat c-ai">AI</span><span className="ns-time">22 min ago</span></div><div className="ns-headline">Anthropic releases Claude 4 &mdash; immediate uplift observed in SN1 Prediction miner benchmark scores.</div><div className="impact"><span>Impact</span><div className="impact-bar"><div className="impact-fill" style={{ width: '60%', background: 'var(--green)' }}></div></div><span style={{ fontFamily: "'JetBrains Mono',monospace", color: 'var(--green)', fontSize: 9 }}>MEDIUM</span></div></div>
+                  <div className="ns-item"><div className="ns-top"><span className="ns-cat c-ai">AI</span><span className="ns-time">22 min ago</span></div><div className="ns-headline">Anthropic releases Claude 3.5 Sonnet &mdash; immediate uplift observed in SN1 Prediction miner benchmark scores.</div><div className="impact"><span>Impact</span><div className="impact-bar"><div className="impact-fill" style={{ width: '60%', background: 'var(--green)' }}></div></div><span style={{ fontFamily: "'JetBrains Mono',monospace", color: 'var(--green)', fontSize: 9 }}>MEDIUM</span></div></div>
                   <div className="ns-item"><div className="ns-top"><span className="ns-cat c-defi">DeFi</span><span className="ns-time">38 min ago</span></div><div className="ns-headline">TAO perpetuals open interest hits $340M. Options market pricing 42-day implied vol at 68%.</div><div className="impact"><span>Impact</span><div className="impact-bar"><div className="impact-fill" style={{ width: '50%', background: 'var(--amber)' }}></div></div><span style={{ fontFamily: "'JetBrains Mono',monospace", color: 'var(--amber)', fontSize: 9 }}>MEDIUM</span></div></div>
                 </>
               )}
@@ -314,7 +323,7 @@ export default function LandingPage() {
       <div className="sec fi">
         <div className="cta-wrap">
           <div className="sec-eye" style={{ marginBottom: 18 }}>Get Started Today</div><div className="cta-title">The edge is<br/><em>already live.</em></div><p className="cta-sub">Join institutions allocating intelligently in the decentralized AI economy. Request full platform access.</p>
-          <div className="cta-btns"><button className="btn-primary btn-lg">Request Institutional Access</button><button className="btn-ghost btn-lg">Schedule a Demo</button></div>
+          <div className="cta-btns"><button className="btn-primary btn-lg" onClick={() => router.push('/dashboard')}>Request Institutional Access</button><button className="btn-ghost btn-lg" onClick={() => router.push('/dashboard')}>Schedule a Demo</button></div>
         </div>
       </div>
       <footer>
@@ -323,9 +332,9 @@ export default function LandingPage() {
           <div className="foot-copy">&#169; 2026 DeAI Strategies Corp. All Rights Reserved.<br/>Regulated under Canadian MSB Framework. SOC-2 Compliant.</div>
         </div>
         <div className="foot-cols">
-          <div className="fc"><span className="fc-head">Platform</span><a href="#">Terminal</a><a href="#">Subnets</a><a href="#">Risk Engine</a><a href="#">Reports</a></div>
-          <div className="fc"><span className="fc-head">Company</span><a href="#">About</a><a href="#">Institutional</a><a href="#">Compliance</a></div>
-          <div className="fc"><span className="fc-head">Contact</span><a href="#">info@deaistrategies.io</a><span>+1 (416) 846-5142</span><span>1500 Royal Centre, Vancouver BC</span></div>
+          <div className="fc"><span className="fc-head">Platform</span><Link href="/dashboard">Terminal</Link><Link href="/dashboard">Subnets</Link><Link href="/dashboard">Risk Engine</Link><Link href="/dashboard">Reports</Link></div>
+          <div className="fc"><span className="fc-head">Company</span><Link href="/dashboard">About</Link><Link href="/dashboard">Institutional</Link><Link href="/dashboard">Compliance</Link></div>
+          <div className="fc"><span className="fc-head">Contact</span><a href="mailto:info@deaistrategies.io">info@deaistrategies.io</a><span>+1 (416) 846-5142</span><span>1500 Royal Centre, Vancouver BC</span></div>
         </div>
       </footer>
     </>

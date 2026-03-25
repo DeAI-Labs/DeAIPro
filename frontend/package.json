@@ -4,9 +4,7 @@
   "description": "Real-time Bittensor analytics and intelligence platform frontend",
   "private": true,
   "scripts": {
-    "predev": "node scripts/extract.js",
     "dev": "next dev",
-    "prebuild": "node scripts/extract.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
