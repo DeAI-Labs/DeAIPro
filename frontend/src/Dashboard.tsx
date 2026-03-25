@@ -1,3 +1,4 @@
+'use client';
 // @ts-nocheck
 import React, { useEffect, useRef } from "react";
 import { signOut } from "firebase/auth";
