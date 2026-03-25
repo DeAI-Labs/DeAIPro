@@ -125,3 +125,6 @@ temp/
 *.bak
 .cache/
 .tmp/
+
+# Un-ignore Next.js lib directory
+!frontend/lib/
