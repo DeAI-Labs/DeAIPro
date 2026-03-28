@@ -89,6 +89,10 @@ class MetagraphService(BaseService):
                 url = f"{self.taostats_api_url}/api/v1/subnets"
                 headers = {"Authorization": f"Bearer {self.taostats_api_key}"}
 
+                if self.taostats_api_key == "demo":
+                    logger.warning("TaoStats API key is 'demo'. Skipping live API call to avoid 401s.")
+                    return await self._generate_sample_data()
+
                 async with session.get(url, headers=headers) as response:
                     if response.status == 200:
                         data = await response.json()

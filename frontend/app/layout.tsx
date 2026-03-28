@@ -13,13 +13,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://de-ai-pro.vercel.app',
+    url: 'https://deai-zeta.vercel.app',
     siteName: 'DeAIPro',
     title: 'DeAIPro - Bittensor Intelligence Analytics',
     description: 'Real-time analytics and intelligence platform for Bittensor',
     images: [
       {
-        url: 'https://de-ai-pro.vercel.app/og-image.png',
+        url: 'https://deai-zeta.vercel.app/og-image.png',
         width: 1200,
         height: 630,
         alt: 'DeAIPro',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'DeAIPro - Bittensor Intelligence Analytics',
     description: 'Real-time analytics and intelligence for Bittensor',
-    images: ['https://de-ai-pro.vercel.app/og-image.png'],
+    images: ['https://deai-zeta.vercel.app/og-image.png'],
   },
 };
 

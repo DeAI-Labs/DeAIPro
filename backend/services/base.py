@@ -63,7 +63,7 @@ class BaseService(ABC):
             # Find existing SyncState for this service
             sync_state = await SyncState.find_one(SyncState.service == self.service_name)
 
-            if sync_state:
+            if sync_state is not None:
                 # Update existing record
                 sync_state.status = status.value
                 sync_state.last_run = datetime.utcnow()

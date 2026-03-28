@@ -1632,7 +1632,7 @@ const DASHBOARD_CSS = `
   font-size: 13px;
   line-height: 1.5;
 }
-#deai-dashboard-root {
+:root {
   --bg:#040508;--bg2:#090c12;--bg3:#0d1117;--bg4:#141b28;--bg5:#1c2638;
   --bdr:#141b28;--bdr2:#1c2638;--txt:#dce8f0;--txt2:#8a9bb0;--mute:#4a5f75;
   --blue:#3b82f6;--cyan:#00f0ff;--green:#00ff99;--amber:#ffd60a;

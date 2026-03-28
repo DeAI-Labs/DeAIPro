@@ -85,7 +85,7 @@ class PriceWorker(BaseWorker):
                 (PriceHistory.timestamp == hour_start)
             )
             
-            if existing:
+            if existing is not None:
                 # Update existing candle
                 existing.close = price_data.get("price_usd", 0)
                 existing.volume = price_data.get("volume_24h_usd", 0)

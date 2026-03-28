@@ -44,13 +44,38 @@ const handleResponse = async (response: Response) => {
   return json.data !== undefined ? json.data : json;
 };
 
+const fetchWithRetry = async (url: string, options: RequestInit = {}, retries = 3): Promise<Response> => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok || (response.status >= 400 && response.status < 500)) {
+        return response; 
+      }
+      if (response.status >= 500 && i < retries - 1) {
+         document.dispatchEvent(new CustomEvent('backend-reconnecting', { detail: { attempt: i + 1 } }));
+         await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000));
+         continue;
+      }
+      return response;
+    } catch (err: any) {
+      if (i < retries - 1) {
+         document.dispatchEvent(new CustomEvent('backend-reconnecting', { detail: { attempt: i + 1 } }));
+         await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000));
+         continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error("Fetch failed after retries");
+};
+
 // ── Public ────────────────────────────────────────────────────────────────────
 
 export const checkHealth = async () =>
-  handleResponse(await fetch(`${API}/health`, { headers: DEFAULT_HEADERS }));
+  handleResponse(await fetchWithRetry(`${API}/health`, { headers: DEFAULT_HEADERS }));
 
 export const getStats = async (): Promise<StatsResponse> =>
-  handleResponse(await fetch(`${API}/stats`, { headers: DEFAULT_HEADERS }));
+  handleResponse(await fetchWithRetry(`${API}/stats`, { headers: DEFAULT_HEADERS }));
 
 export const getSubnets = async (
   detailed = false,
@@ -58,7 +83,7 @@ export const getSubnets = async (
 ): Promise<Subnet[]> => {
   const params = detailed ? "?detailed=true" : "";
   const data = await handleResponse(
-    await fetch(`${API}/subnets${params}`, {
+    await fetchWithRetry(`${API}/subnets${params}`, {
       headers: { ...DEFAULT_HEADERS, ...getAuthHeader(token) },
     })
   );
@@ -101,7 +126,7 @@ export const getSubnets = async (
 };
 
 export const getNews = async (): Promise<NewsItem[]> => {
-  const data = await handleResponse(await fetch(`${API}/news`, { headers: DEFAULT_HEADERS }));
+  const data = await handleResponse(await fetchWithRetry(`${API}/news`, { headers: DEFAULT_HEADERS }));
   if (!Array.isArray(data)) return [];
   return data.map((n: any) => ({
     tg: n.category || "GENERAL",
@@ -113,7 +138,7 @@ export const getNews = async (): Promise<NewsItem[]> => {
 };
 
 export const getResearch = async (): Promise<ResearchArticle[]> => {
-  const data = await handleResponse(await fetch(`${API}/research`, { headers: DEFAULT_HEADERS }));
+  const data = await handleResponse(await fetchWithRetry(`${API}/research`, { headers: DEFAULT_HEADERS }));
   if (!Array.isArray(data)) return [];
   return data.map((r: any) => ({
     i: r.icon || "📄",
@@ -126,7 +151,7 @@ export const getResearch = async (): Promise<ResearchArticle[]> => {
 };
 
 export const getLessons = async (): Promise<Lesson[]> => {
-  const data = await handleResponse(await fetch(`${API}/lessons`, { headers: DEFAULT_HEADERS }));
+  const data = await handleResponse(await fetchWithRetry(`${API}/lessons`, { headers: DEFAULT_HEADERS }));
   if (!Array.isArray(data)) return [];
   return data.map((l: any) => ({
     id: l.id || Math.floor(Math.random() * 1000),
@@ -140,7 +165,7 @@ export const getLessons = async (): Promise<Lesson[]> => {
 
 export const requestAccess = async (email: string) =>
   handleResponse(
-    await fetch(`${API}/request-access`, {
+    await fetchWithRetry(`${API}/request-access`, {
       method: "POST",
       headers: DEFAULT_HEADERS,
       body: JSON.stringify({ email }),
@@ -151,14 +176,14 @@ export const getHistoricalTAO = async (
   days = 30
 ): Promise<Array<{ date: string; price: number }>> =>
   handleResponse(
-    await fetch(`${API}/historical/tao?days=${days}`, { headers: DEFAULT_HEADERS })
+    await fetchWithRetry(`${API}/historical/tao?days=${days}`, { headers: DEFAULT_HEADERS })
   );
 
 // ── Authenticated ─────────────────────────────────────────────────────────────
 
 export const getSubnetsDetailed = async (token: string) =>
   handleResponse(
-    await fetch(`${API}/subnets-detailed`, {
+    await fetchWithRetry(`${API}/subnets-detailed`, {
       headers: { ...DEFAULT_HEADERS, ...getAuthHeader(token) },
     })
   );
@@ -167,7 +192,7 @@ export const getSubnetsDetailed = async (token: string) =>
 
 export const approveAccess = async (email: string, token: string) =>
   handleResponse(
-    await fetch(`${API}/admin/approve-access`, {
+    await fetchWithRetry(`${API}/admin/approve-access`, {
       method: "POST",
       headers: { ...DEFAULT_HEADERS, ...getAuthHeader(token) },
       body: JSON.stringify({ email }),
@@ -176,7 +201,7 @@ export const approveAccess = async (email: string, token: string) =>
 
 export const getAdminStatus = async (token: string) =>
   handleResponse(
-    await fetch(`${API}/admin/status`, {
+    await fetchWithRetry(`${API}/admin/status`, {
       headers: { ...DEFAULT_HEADERS, ...getAuthHeader(token) },
     })
   );

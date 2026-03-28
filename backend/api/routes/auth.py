@@ -59,7 +59,7 @@ async def authenticate_temporary(
             TemporaryAccess.expires_at > datetime.utcnow(),
         )
         
-        if existing:
+        if existing is not None:
             logger.info(f"Temporary token already exists for {email}")
             return {
                 "status": "success",

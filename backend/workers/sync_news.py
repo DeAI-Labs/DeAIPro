@@ -107,7 +107,7 @@ class NewsWorker(BaseWorker):
                 SubnetNews.url == article_data["url"]
             )
             
-            if existing:
+            if existing is not None:
                 return False  # Already exists
             
             # Create new article

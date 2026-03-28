@@ -76,51 +76,70 @@ class PriceService(BaseService):
             )
 
     async def _fetch_current_price(self) -> Optional[dict]:
-        """Fetch current TAO price from CoinGecko.
+        """Fetch current TAO price from CoinGecko with caching and retry.
         
         Returns:
             Price data with usd, market_cap, volume_24h or None if fetch fails
         """
-        try:
-            async with aiohttp.ClientSession(timeout=self.timeout) as session:
-                url = f"{self.coingecko_api_url}/simple/price"
-                params = {
-                    "ids": self.tao_id,
-                    "vs_currencies": "usd",
-                    "include_market_cap": "true",
-                    "include_24hr_vol": "true",
-                }
+        now = datetime.utcnow()
+        if hasattr(self, '_last_price_time') and getattr(self, '_last_price_time'):
+            if (now - getattr(self, '_last_price_time')).total_seconds() < 60:
+                logger.debug("Using cached price data")
+                return getattr(self, '_last_price_data', None)
 
-                async with session.get(url, params=params) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        tao_data = data.get(self.tao_id, {})
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                async with aiohttp.ClientSession(timeout=self.timeout) as session:
+                    url = f"{self.coingecko_api_url}/simple/price"
+                    params = {
+                        "ids": self.tao_id,
+                        "vs_currencies": "usd",
+                        "include_market_cap": "true",
+                        "include_24hr_vol": "true",
+                    }
 
-                        return {
-                            "usd": tao_data.get("usd", 0),
-                            "market_cap": tao_data.get("usd_market_cap", 0),
-                            "volume_24h": tao_data.get("usd_24h_vol", 0),
-                        }
-                    else:
-                        await self.log_sync(
-                            "coingecko_api_error",
-                            level="warning",
-                            status_code=response.status,
-                        )
+                    async with session.get(url, params=params) as response:
+                        if response.status == 200:
+                            data = await response.json()
+                            tao_data = data.get(self.tao_id, {})
+                            result = {
+                                "usd": tao_data.get("usd", 0),
+                                "market_cap": tao_data.get("usd_market_cap", 0),
+                                "volume_24h": tao_data.get("usd_24h_vol", 0),
+                            }
+                            setattr(self, '_last_price_data', result)
+                            setattr(self, '_last_price_time', datetime.utcnow())
+                            return result
+                        elif response.status == 429:
+                            if attempt < max_retries - 1:
+                                backoff = 2 ** attempt
+                                logger.warning(f"CoinGecko 429 Rate Limiting, backing off {backoff}s")
+                                await asyncio.sleep(backoff)
+                                continue
+                            else:
+                                logger.error("CoinGecko 429 Rate Limiting, max retries reached")
+                                return getattr(self, '_last_price_data', None)
+                        else:
+                            await self.log_sync(
+                                "coingecko_api_error",
+                                level="warning",
+                                status_code=response.status,
+                            )
+                            return getattr(self, '_last_price_data', None)
 
-        except asyncio.TimeoutError:
-            await self.log_sync(
-                "coingecko_api_timeout",
-                level="warning",
-            )
-        except Exception as e:
-            await self.log_sync(
-                "price_fetch_error",
-                level="warning",
-                error=str(e),
-            )
+            except asyncio.TimeoutError:
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(2 ** attempt)
+                    continue
+                await self.log_sync("coingecko_api_timeout", level="warning")
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(2 ** attempt)
+                    continue
+                await self.log_sync("price_fetch_error", level="warning", error=str(e))
 
-        return None
+        return getattr(self, '_last_price_data', None)
 
     async def _create_hourly_candle(self, price_data: dict) -> bool:
         """Create or update hourly OHLCV candle.
@@ -144,7 +163,7 @@ class PriceService(BaseService):
                 & (PriceHistory.timestamp == candle_time)
             )
 
-            if existing_candle:
+            if existing_candle is not None:
                 # Update existing candle with new high/low/close
                 existing_candle.high = max(existing_candle.high, current_price)
                 existing_candle.low = min(existing_candle.low, current_price)

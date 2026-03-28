@@ -326,7 +326,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     dispatch({ type: "SET_SYNCING", payload: true });
 
     try {
-      const data = state.isAuthenticated && state.token
+      const data = (state.user && state.token)
         ? await fetchAllAuthenticatedData(state.token)
         : await fetchAllPublicData();
 

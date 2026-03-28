@@ -165,7 +165,7 @@ class NewsService(BaseService):
                     SubnetNews.url == article.get("url")
                 )
 
-                if existing:
+                if existing is not None:
                     # Update existing article with new data if needed
                     existing.title = article.get("title", existing.title)
                     existing.relevance_score = article.get(

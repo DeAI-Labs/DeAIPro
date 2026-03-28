@@ -48,7 +48,7 @@ class HealthService(BaseService):
                     SyncState.service == service_name
                 )
 
-                if sync_state:
+                if sync_state is not None:
                     # Check if service has synced recently
                     time_since_last_run = (
                         datetime.utcnow() - sync_state.last_run
@@ -114,7 +114,7 @@ class HealthService(BaseService):
                 SyncState.service == service_name
             )
 
-            if sync_state:
+            if sync_state is not None:
                 return {
                     "service": service_name,
                     "status": sync_state.status,

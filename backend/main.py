@@ -114,6 +114,7 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "https://deai-zeta.vercel.app",
+        "https://de-ai-pro.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -155,9 +156,22 @@ async def get_optional_user(request: Request):
         return None
 
 # Lifecycle Events
+async def keepalive_ping():
+    """Ping health endpoint every 10 min to keep Render awake."""
+    import aiohttp
+    while True:
+        await asyncio.sleep(600)  # 10 minutes
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://deai-kyzf.onrender.com/api/health", timeout=10.0) as response:
+                    logger.debug(f"Keepalive ping status: {response.status}")
+        except Exception as e:
+            logger.warning(f"Keepalive ping failed: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     logger.info("🚀 DeAIPro starting up...")
+    asyncio.create_task(keepalive_ping())
     try:
         # Initialize database connection
         from dependencies.db import db
@@ -437,6 +451,11 @@ async def admin_approve_access(
 ):
     email = body.email.lower().strip()
     try:
+        if not firebase_admin._apps:
+            logger.warning("Firebase not initialized. Cannot approve access.")
+            raise HTTPException(status_code=503, detail="Firebase auth is disabled on this instance")
+            
+        from firebase_admin import auth
         # Try to get or create Firebase user
         try:
             user_record = auth.get_user_by_email(email)
