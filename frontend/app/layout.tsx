@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import './globals.css';
 import { QueryProvider } from '@/lib/queryClient';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { AuthProvider } from '@/lib/authContext';
 
 export const metadata: Metadata = {
   title: 'DeAIPro - Bittensor Intelligence Analytics',
@@ -55,7 +56,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <ErrorBoundary>
           <QueryProvider>
-            {children}
+            <AuthProvider>
+              {children}
+            </AuthProvider>
           </QueryProvider>
         </ErrorBoundary>
       </body>

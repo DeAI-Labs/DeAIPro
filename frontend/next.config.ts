@@ -24,6 +24,14 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.googleapis.com' },
     ],
   },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [{ key: 'X-Content-Type-Options', value: 'nosniff' }],
+      },
+    ];
+  },
   // Disable ESLint during production builds (run separately in CI)
   eslint: {
     ignoreDuringBuilds: true,

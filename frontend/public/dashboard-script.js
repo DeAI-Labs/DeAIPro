@@ -1,4 +1,16 @@
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
 // TAO/BTC Chart Variables
 let taoBtcChart = null;
 let currentBtcDays = 30;
@@ -1104,7 +1116,11 @@ Top subnet tokens: 0.5-1.5 range
 let sortBy='mc',filterCat='All';
 let scoreWeights={econ:20,net:15,fund:25,liq:15,mom:10,qual:10,val:5};
 
-function updateTs(){const d=new Date();document.getElementById('liveTs').textContent=d.toLocaleTimeString();}
+function updateTs(){
+    const d = new Date();
+    const tsEl = document.getElementById('liveTs');
+    if (tsEl) tsEl.textContent = d.toLocaleTimeString();
+}
 
 // Global state
 let currentTaoPrice = 191.43;
@@ -1454,21 +1470,23 @@ function updatePrices(){
         currentTaoPrice = 183.42 + taoVar;
     }
     
-    document.getElementById('taoP').textContent = '$' + currentTaoPrice.toFixed(2);
-    document.getElementById('taoPriceLive').textContent = '$' + currentTaoPrice.toFixed(2);
+    const taoPEl = document.getElementById('taoP');
+    if (taoPEl) taoPEl.textContent = '$' + currentTaoPrice.toFixed(2);
+    const taoPriceLive = document.getElementById('taoPriceLive');
+    if (taoPriceLive) taoPriceLive.textContent = '$' + currentTaoPrice.toFixed(2);
 
-    // Sum of all alpha prices
     const alphaSum = subs.reduce((sum, s) => sum + s.alpha, 0);
-    document.getElementById('alphaPrice').textContent = alphaSum.toFixed(2);
+    const alphaEl = document.getElementById('alphaPrice');
+    if (alphaEl) alphaEl.textContent = alphaSum.toFixed(2);
 
-    // 24h subnet volume with realistic fluctuation
     const volBase = 92.7;
     const volVar = (Math.random()-0.5)*5;
-    document.getElementById('tradeVol').textContent = '$' + (volBase + volVar).toFixed(1) + 'M';
+    const tradeVolEl = document.getElementById('tradeVol');
+    if (tradeVolEl) tradeVolEl.textContent = '$' + (volBase + volVar).toFixed(1) + 'M';
 
-    // Update network cap based on TAO price
     const networkCap = (currentTaoPrice * 9600000) / 1e9; // ~9.6M TAO circulating post-halving
-    document.getElementById('netCap').textContent = '$' + networkCap.toFixed(2) + 'B';
+    const netCapEl = document.getElementById('netCap');
+    if (netCapEl) netCapEl.textContent = '$' + networkCap.toFixed(2) + 'B';
 }
 
 // Initialize live data fetching
@@ -1483,18 +1501,28 @@ async function initLiveData() {
 }
 
 function updateKPIs(){
-const tmc=subs.reduce((s,sub)=>s+sub.mc,0);
-document.getElementById('kpi-tmc').textContent='$'+tmc.toFixed(1)+'M';
-document.getElementById('kpi-sn').textContent=subs.length;
-const avgPe=subs.reduce((s,sub)=>s+sub.pe,0)/subs.filter(s=>s.pe>0).length;
-document.getElementById('kpi-pe').textContent=avgPe.toFixed(2)+'x';
+    const tmc=subs.reduce((s,sub)=>s+sub.mc,0);
+    const tmcEl = document.getElementById('kpi-tmc');
+    if (tmcEl) tmcEl.textContent = '$'+tmc.toFixed(1)+'M';
+    const snEl = document.getElementById('kpi-sn');
+    if (snEl) snEl.textContent = subs.length;
+    const avgPe=subs.reduce((s,sub)=>s+sub.pe,0)/subs.filter(s=>s.pe>0).length;
+    const peEl = document.getElementById('kpi-pe');
+    if (peEl) peEl.textContent = avgPe.toFixed(2)+'x';
 }
 function renderPills(){
-const cats=['All',...new Set(subs.map(s=>s.cat))];
-document.getElementById('pillG').innerHTML=cats.map(c=>'<div class="pill '+(c===filterCat?'act':'')+'" onclick="filterBy(\''+c+'\')">'+c+'</div>').join('');
+    const cats=['All',...new Set(subs.map(s=>s.cat))];
+    const pillG = document.getElementById('pillG');
+    if (!pillG) return;
+    pillG.innerHTML = cats.map(c=>'<div class="pill '+(c===filterCat?'act':'')+'" onclick="filterBy(\''+c+'\')">'+c+'</div>').join('');
 }
 function filterBy(c){filterCat=c;renderPills();renderList();}
-function sortList(s){sortBy=s;document.getElementById('srtM').classList.remove('open');renderList();}
+function sortList(s){
+    sortBy=s;
+    const srtM = document.getElementById('srtM');
+    if (srtM) srtM.classList.remove('open');
+    renderList();
+}
 
 // Calculate APY based on emission share and network dynamics
 // Formula: APY = (Daily Emissions * 365 * Validator Share * TAO Price) / (Stake Value) * 100
@@ -2030,10 +2058,15 @@ function calcRelativeValue() {
     const diffColor = diff > 0 ? 'var(--rose)' : 'var(--green)';
     const diffSign = diff > 0 ? '+' : '';
     
-    document.getElementById('rv-base-val').textContent = baseVal.toFixed(2) + suffix;
-    document.getElementById('rv-comp-val').textContent = compVal.toFixed(2) + suffix;
-    document.getElementById('rv-diff').textContent = diffSign + diff.toFixed(1) + '%';
-    document.getElementById('rv-diff').style.color = diffColor;
+    const baseValEl = document.getElementById('rv-base-val');
+    if (baseValEl) baseValEl.textContent = baseVal.toFixed(2) + suffix;
+    const compValEl = document.getElementById('rv-comp-val');
+    if (compValEl) compValEl.textContent = compVal.toFixed(2) + suffix;
+    const diffEl = document.getElementById('rv-diff');
+    if (diffEl) {
+        diffEl.textContent = diffSign + diff.toFixed(1) + '%';
+        diffEl.style.color = diffColor;
+    }
     
     const signalEl = document.getElementById('rv-signal');
     if (signalEl) {
@@ -2059,7 +2092,9 @@ if(sortBy==='sharpe')return calcSharpe(b)-calcSharpe(a);
 return 0;
 });
 
-document.getElementById('subL').innerHTML=list.map((s,i)=>{
+const subL = document.getElementById('subL');
+    if (!subL) return;
+    subL.innerHTML = list.map((s,i)=>{
 const grade=s.score>=80?'A+':s.score>=75?'A':s.score>=70?'A-':s.score>=65?'B+':s.score>=60?'B':s.score>=55?'B-':s.score>=50?'C+':s.score>=40?'C':'D';
 const gradeClass=grade[0]==='A'?'grade-a':grade[0]==='B'?'grade-b':grade[0]==='C'?'grade-c':'grade-d';
 const scoreColor=s.score>=70?'var(--green)':s.score>=50?'var(--cyan)':'var(--amber)';
@@ -2505,7 +2540,11 @@ function renderNews(){
 </div>`;
     }).join('');
 }
-function renderRes(){document.getElementById('resG').innerHTML=research.map((r,idx)=>'<a href="#" class="res-c" onclick="openResearch('+idx+');return false;"><div class="res-img">'+r.i+'</div><div class="res-cnt"><div class="res-cat">'+r.c+'</div><h3 class="res-t">'+r.t+'</h3><p class="res-ex">'+r.ex+'</p><div class="res-meta"><span>DeAI Research</span><span>'+r.d+'</span></div></div></a>').join('');}
+function renderRes(){
+    const resG = document.getElementById('resG');
+    if (!resG) return;
+    resG.innerHTML = research.map((r,idx)=>'<a href="#" class="res-c" onclick="openResearch('+idx+');return false;"><div class="res-img">'+r.i+'</div><div class="res-cnt"><div class="res-cat">'+r.c+'</div><h3 class="res-t">'+r.t+'</h3><p class="res-ex">'+r.ex+'</p><div class="res-meta"><span>DeAI Research</span><span>'+r.d+'</span></div></div></a>').join('');
+}
 
 // Filter news by source
 let currentNewsFilter = 'all';
@@ -4046,9 +4085,236 @@ document.getElementById('fv-sig').style.color=pr<0?'var(--green)':'var(--rose)';
 }
 function calcDCF(){const em=parseFloat(document.getElementById('d-em').value)||1;const tao=parseFloat(document.getElementById('d-tao').value)||180.80;const g=parseFloat(document.getElementById('d-g').value)/100||0.05;const d=parseFloat(document.getElementById('d-d').value)/100||0.25;const mc=parseFloat(document.getElementById('d-mc').value)||1;const y=parseFloat(document.getElementById('d-y').value)||5;let npv=0,dv=em*tao;for(let i=1;i<=y;i++){dv*=(1+g);npv+=dv*365/Math.pow(1+d,i);}const fv=npv/1e6;const rt=fv/mc;const up=(rt-1)*100;document.getElementById('dcf-r').textContent='$'+fv.toFixed(1)+'M';document.getElementById('dcf-rt').textContent=rt.toFixed(2)+'x';document.getElementById('dcf-rt').style.color=rt>1?'var(--green)':'var(--rose)';document.getElementById('dcf-up').textContent=(up>=0?'+':'')+up.toFixed(0)+'%';document.getElementById('dcf-up').style.color=up>0?'var(--green)':'var(--rose)';document.getElementById('dcf-sig').textContent=rt>1?'UNDER':'OVER';document.getElementById('dcf-sig').style.color=rt>1?'var(--green)':'var(--rose)';}
 function showView(v){document.querySelectorAll('.nav-i').forEach(e=>e.classList.remove('act'));document.querySelector('.nav-i[data-v="'+v+'"]')?.classList.add('act');document.querySelectorAll('.view').forEach(e=>e.classList.remove('act'));document.getElementById(v+'-view')?.classList.add('act');}
-function openModal(){document.getElementById('loginM').classList.add('open');}
-function closeModal(){document.getElementById('loginM').classList.remove('open');}
-function handleLogin(e){e.preventDefault();alert('Magic link sent! Check your email to sign in.');closeModal();}
+const firebaseConfig = (window.__DEAI_FIREBASE_CONFIG__ || {});
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const googleProvider = new GoogleAuthProvider();
+
+const authTargets = {
+  loginModal: () => document.getElementById('loginM'),
+  contentRoot: () => document.getElementById('dashboardContent'),
+  authShell: () => document.getElementById('dashboardAuthShell'),
+  authStatus: () => document.getElementById('authStatus'),
+};
+
+const authErrorMap = (code) => {
+  switch (code) {
+    case 'auth/user-not-found':
+      return 'No account found with this email';
+    case 'auth/wrong-password':
+      return 'Incorrect password';
+    case 'auth/email-already-in-use':
+      return 'An account already exists with this email';
+    case 'auth/weak-password':
+      return 'Password must be at least 6 characters';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address';
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Please try again later';
+    case 'auth/network-request-failed':
+      return 'Network error. Check your connection';
+    default:
+      return 'Authentication error. Please try again';
+  }
+};
+
+const setAuthStatus = (message, type = 'error') => {
+  const status = authTargets.authStatus();
+  if (!status) return;
+  status.textContent = message || '';
+  status.className = 'auth-status';
+  if (message) status.classList.add(type === 'success' ? 'success' : 'error');
+};
+
+const toggleBlur = (enabled) => {
+  const root = authTargets.contentRoot();
+  if (!root) return;
+  root.classList.toggle('blurred', enabled);
+};
+
+const openModal = () => {
+  const modal = authTargets.loginModal();
+  if (!modal) return;
+  modal.classList.add('open');
+  toggleBlur(true);
+};
+
+const closeModal = () => {
+  const modal = authTargets.loginModal();
+  if (!modal) return;
+  modal.classList.remove('open');
+  toggleBlur(false);
+  setAuthStatus('');
+};
+
+const switchAuthTab = (tab) => {
+  const signinTab = document.getElementById('signinTabBtn');
+  const signupTab = document.getElementById('signupTabBtn');
+  const signinPanel = document.getElementById('signinPanel');
+  const signupPanel = document.getElementById('signupPanel');
+  if (!signinTab || !signupTab || !signinPanel || !signupPanel) return;
+  signinTab.classList.toggle('active', tab === 'signin');
+  signupTab.classList.toggle('active', tab === 'signup');
+  signinPanel.classList.toggle('active', tab === 'signin');
+  signupPanel.classList.toggle('active', tab === 'signup');
+  setAuthStatus('');
+};
+
+const togglePasswordField = (inputId, toggleId) => {
+  const input = document.getElementById(inputId);
+  const toggle = document.getElementById(toggleId);
+  if (!input || !toggle) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    toggle.textContent = 'Hide';
+  } else {
+    input.type = 'password';
+    toggle.textContent = 'Show';
+  }
+};
+
+const updateAuthShell = (user) => {
+  const shell = authTargets.authShell();
+  if (!shell) return;
+  if (user) {
+    const email = user.email || 'User';
+    const shortEmail = email.length > 20 ? `${email.slice(0, 17)}...` : email;
+    shell.innerHTML = `\n      <button type="button" class="user-pill" id="dashboardUserButton">\n        <span class="user-avatar">${email.charAt(0).toUpperCase()}</span>\n        <span class="user-email">${shortEmail}</span>\n      </button>\n      <div class="user-dropdown" id="dashboardUserDropdown">\n        <button type="button" onclick="openAccount()">Account</button>\n        <button type="button" onclick="handleSignOut()">Sign Out</button>\n      </div>\n    `;
+    const btn = document.getElementById('dashboardUserButton');
+    btn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('dashboardUserDropdown')?.classList.toggle('open');
+    });
+  } else {
+    shell.innerHTML = `\n      <button class="btn btn-g" id="dashboardSignInButton" style="padding:8px 12px">Sign In</button>\n    `;
+    const btn = document.getElementById('dashboardSignInButton');
+    btn?.addEventListener('click', openModal);
+  }
+};
+
+const openAccount = () => {
+  alert('Account page is coming soon.');
+};
+
+const handleSignOut = async () => {
+  try {
+    await signOut(auth);
+    window.location.href = '/';
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const handleSignIn = async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('signinEmail')?.value?.trim();
+  const password = document.getElementById('signinPassword')?.value;
+  if (!email || !password) {
+    setAuthStatus('Please enter email and password');
+    return;
+  }
+  setAuthStatus('Signing in...', 'success');
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    closeModal();
+  } catch (error) {
+    setAuthStatus(authErrorMap(error?.code || (error && error.code) || ''), 'error');
+  }
+};
+
+const handleSignUp = async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('signupEmail')?.value?.trim();
+  const password = document.getElementById('signupPassword')?.value;
+  const confirm = document.getElementById('signupConfirmPassword')?.value;
+  if (!email || !password || !confirm) {
+    setAuthStatus('Please complete all fields');
+    return;
+  }
+  if (password !== confirm) {
+    setAuthStatus('Passwords do not match', 'error');
+    return;
+  }
+  setAuthStatus('Creating account...', 'success');
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    setAuthStatus('Account created. Signing in…', 'success');
+    closeModal();
+  } catch (error) {
+    setAuthStatus(authErrorMap(error?.code || (error && error.code) || ''), 'error');
+  }
+};
+
+const handleGoogleSignIn = async () => {
+  setAuthStatus('Redirecting to Google…', 'success');
+  try {
+    await signInWithPopup(auth, googleProvider);
+    closeModal();
+  } catch (error) {
+    setAuthStatus(authErrorMap(error?.code || (error && error.code) || ''), 'error');
+  }
+};
+
+const handleResetPassword = async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('signinEmail')?.value?.trim();
+  if (!email) {
+    setAuthStatus('Enter your email to reset password', 'error');
+    return;
+  }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    setAuthStatus('Reset email sent', 'success');
+  } catch (error) {
+    setAuthStatus(authErrorMap(error?.code || (error && error.code) || ''), 'error');
+  }
+};
+
+const initAuthControls = () => {
+  switchAuthTab('signin');
+  document.getElementById('signinTabBtn')?.addEventListener('click', () => switchAuthTab('signin'));
+  document.getElementById('signupTabBtn')?.addEventListener('click', () => switchAuthTab('signup'));
+  document.getElementById('signinPasswordToggle')?.addEventListener('click', () => togglePasswordField('signinPassword', 'signinPasswordToggle'));
+  document.getElementById('signupPasswordToggle')?.addEventListener('click', () => togglePasswordField('signupPassword', 'signupPasswordToggle'));
+  document.getElementById('signupConfirmToggle')?.addEventListener('click', () => togglePasswordField('signupConfirmPassword', 'signupConfirmToggle'));
+  document.getElementById('resetPasswordLink')?.addEventListener('click', handleResetPassword);
+  document.getElementById('googleSignInBtn')?.addEventListener('click', handleGoogleSignIn);
+  document.addEventListener('click', (event) => {
+    const dropdown = document.getElementById('dashboardUserDropdown');
+    if (dropdown && event.target instanceof HTMLElement && !event.target.closest('.user-pill')) {
+      dropdown.classList.remove('open');
+    }
+  });
+};
+
+onAuthStateChanged(auth, (user) => {
+  updateAuthShell(user);
+  if (user) {
+    closeModal();
+  } else if (window.location.pathname.includes('/dashboard')) {
+    openModal();
+  }
+});
+
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.handleSignIn = handleSignIn;
+window.handleSignUp = handleSignUp;
+window.handleGoogleSignIn = handleGoogleSignIn;
+window.handleResetPassword = handleResetPassword;
+window.switchAuthTab = switchAuthTab;
+window.handleSignOut = handleSignOut;
+window.openAccount = openAccount;
+
+const initAuth = () => {
+  initAuthControls();
+  openModal();
+};
+
+window.addEventListener('load', () => {
+  initAuthControls();
+});
+
 function openLesson(topic){
 const content=lessonContent[topic];
 if(!content)return;
@@ -5309,34 +5575,84 @@ function initOcNuplChart() {
 }
 
 document.addEventListener('click',e=>{if(!e.target.closest('.srt'))document.getElementById('srtM').classList.remove('open');});
+
+function safeInit(name, fn) {
+    try {
+        const result = fn();
+        if (result instanceof Promise) {
+            result.catch(e => console.error('Init failed:', name, e));
+        }
+    } catch (e) {
+        console.error('Init failed:', name, e);
+    }
+}
+
+function exposeGlobal(name, fn) {
+    if (typeof fn === 'function') {
+        window[name] = fn;
+    }
+}
+
+if (typeof showView === 'function') window.showView = showView;
+if (typeof sortList === 'function') window.sortList = sortList;
+if (typeof filterBy === 'function') window.filterBy = filterBy;
+if (typeof toggleRow === 'function') window.toggleRow = toggleRow;
+if (typeof renderTopPerformers === 'function') window.renderTopPerformers = renderTopPerformers;
+if (typeof updateBtcChart === 'function') window.updateBtcChart = updateBtcChart;
+if (typeof calcFV === 'function') window.calcFV = calcFV;
+if (typeof calcDCF === 'function') window.calcDCF = calcDCF;
+if (typeof updateWeights === 'function') window.updateWeights = updateWeights;
+if (typeof openApiSettings === 'function') window.openApiSettings = openApiSettings;
+if (typeof closeApiSettings === 'function') window.closeApiSettings = closeApiSettings;
+if (typeof saveAndConnectApi === 'function') window.saveAndConnectApi = saveAndConnectApi;
+if (typeof fetchLiveDataNow === 'function') window.fetchLiveDataNow = fetchLiveDataNow;
+if (typeof filterNewsBySource === 'function') window.filterNewsBySource = filterNewsBySource;
+if (typeof selectTopSubnets === 'function') window.selectTopSubnets = selectTopSubnets;
+if (typeof updatePortfolioAnalytics === 'function') window.updatePortfolioAnalytics = updatePortfolioAnalytics;
+if (typeof optimizeAllocation === 'function') window.optimizeAllocation = optimizeAllocation;
+if (typeof updateStakingChart === 'function') window.updateStakingChart = updateStakingChart;
+if (typeof runOptimization === 'function') window.runOptimization = runOptimization;
+if (typeof selectObjective === 'function') window.selectObjective = selectObjective;
+if (typeof updateRiskSlider === 'function') window.updateRiskSlider = updateRiskSlider;
+if (typeof setProjectionScenario === 'function') window.setProjectionScenario = setProjectionScenario;
+if (typeof applyRecalibratedWeights === 'function') window.applyRecalibratedWeights = applyRecalibratedWeights;
+if (typeof calcRelativeValue === 'function') window.calcRelativeValue = calcRelativeValue;
+if (typeof openLesson === 'function') window.openLesson = openLesson;
+if (typeof closeLesson === 'function') window.closeLesson = closeLesson;
+if (typeof openResearch === 'function') window.openResearch = openResearch;
+if (typeof closeResearch === 'function') window.closeResearch = closeResearch;
+if (typeof openModal === 'function') window.openModal = openModal;
+if (typeof closeModal === 'function') window.closeModal = closeModal;
+if (typeof handleLogin === 'function') window.handleLogin = handleLogin;
+if (typeof updatePerfChart === 'function') window.updatePerfChart = updatePerfChart;
+if (typeof renderTaoFlowTable === 'function') window.renderTaoFlowTable = renderTaoFlowTable;
+
 function initDashboard() {
-try {
-updateTs();
-initLiveData();
-setInterval(updateTs,1000);
-setInterval(updatePrices,5000);
-renderPills();
-renderList();
-renderNews();
-renderRes();
-renderTopPerformers();
-initCharts();
-updateKPIs();
-calcFV();
-calcDCF();
-updateWeights();
-initTicker();
-initPriceCharts();
-calcPortfolio();
-initTaoFlow();
-initInstitutionalCharts();
-initOnChainCharts();
-initICChart();
-// Portfolio tabs initialization
-initSubnetSelector();
-updatePortfolioAnalytics();
-renderSignals();
-runOptimization();
-} catch(e) { console.error('Init error:', e); }
+    safeInit('updateTs', updateTs);
+    safeInit('initLiveData', initLiveData);
+    setInterval(updateTs,1000);
+    setInterval(updatePrices,5000);
+    safeInit('renderPills', renderPills);
+    safeInit('renderList', renderList);
+    safeInit('renderNews', renderNews);
+    safeInit('renderRes', renderRes);
+    safeInit('renderTopPerformers', renderTopPerformers);
+    safeInit('initCharts', initCharts);
+    safeInit('updateKPIs', updateKPIs);
+    safeInit('calcFV', calcFV);
+    safeInit('calcDCF', calcDCF);
+    safeInit('updateWeights', updateWeights);
+    safeInit('initTicker', initTicker);
+    safeInit('initPriceCharts', initPriceCharts);
+    safeInit('calcPortfolio', calcPortfolio);
+    safeInit('initTaoFlow', initTaoFlow);
+    safeInit('initInstitutionalCharts', initInstitutionalCharts);
+    safeInit('initOnChainCharts', initOnChainCharts);
+    safeInit('initICChart', initICChart);
+    // Portfolio tabs initialization
+    safeInit('initSubnetSelector', initSubnetSelector);
+    safeInit('updatePortfolioAnalytics', updatePortfolioAnalytics);
+    safeInit('renderSignals', renderSignals);
+    safeInit('runOptimization', runOptimization);
 }
 setTimeout(() => { if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initDashboard); } else { initDashboard(); } }, 50);

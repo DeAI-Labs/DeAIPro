@@ -1,6 +1,15 @@
 // frontend/lib/firebase.ts
 import { initializeApp, getApps, getApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut,
+} from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,5 +23,16 @@ const firebaseConfig = {
 // Prevent duplicate app initialization (Next.js hot reload)
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig)
 const auth = getAuth(app)
+const googleProvider = new GoogleAuthProvider()
 
-export { app, auth }
+export {
+  app,
+  auth,
+  googleProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signInWithPopup,
+  onAuthStateChanged,
+  signOut,
+}
