@@ -49,8 +49,17 @@ for (let v = 15; v <= 80; v++) {
 }
 
 export const LandingPage: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) => {
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || '';
   const [period, setPeriod] = useState<keyof typeof RATIO_DATA>('7D');
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestEmail, setRequestEmail] = useState('');
+  const [requestMessage, setRequestMessage] = useState('');
+  const [requestError, setRequestError] = useState('');
+  const [reportGeneratedAt, setReportGeneratedAt] = useState<string>(new Date().toISOString());
+  const [reportStatus, setReportStatus] = useState('Ready');
+  const [reportInfo, setReportInfo] = useState('Last generated with live subnet and market data.');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const analyticsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -73,6 +82,116 @@ export const LandingPage: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =>
     gradient.addColorStop(1, endColor);
     return gradient;
   };
+
+  const openRequestModal = () => {
+    setRequestMessage('');
+    setRequestError('');
+    setShowRequestModal(true);
+  };
+
+  const closeRequestModal = () => {
+    setShowRequestModal(false);
+    setRequestEmail('');
+  };
+
+  const handleViewDemo = () => {
+    analyticsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleRequestAccess = async () => {
+    setRequestError('');
+    setRequestMessage('');
+
+    const email = requestEmail.trim();
+    if (!email) {
+      setRequestError('Please enter your institutional email address.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${apiBase}/api/request-access`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setRequestError(data.detail || data.message || 'Request failed. Please try again.');
+        return;
+      }
+      setRequestMessage(data.message || `Access request submitted for ${email}.`);
+      setRequestError('');
+    } catch (error: any) {
+      setRequestError(error?.message || 'Unable to submit access request.');
+    }
+  };
+
+  const exportPdf = async () => {
+    try {
+      setReportStatus('Downloading...');
+      const response = await fetch(`${apiBase}/api/reports/simple`);
+      if (!response.ok) {
+        throw new Error('Unable to generate report');
+      }
+      const blob = await response.blob();
+      const filename = `DeAIPro_Report_${new Date().toISOString().slice(0,19).replace(/[:T]/g, '-')}.pdf`;
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      setReportStatus('Report downloaded');
+      setReportGeneratedAt(new Date().toISOString());
+      setReportInfo('Report downloaded successfully.');
+    } catch (err: any) {
+      setReportStatus('Failed to download report');
+      setReportInfo(err?.message || 'Something went wrong while generating the PDF.');
+    }
+  };
+
+  const shareReport = async () => {
+    const shareUrl = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'DeAIPro Report', text: 'View the latest DeAIPro institutional report.', url: shareUrl });
+        setReportInfo('Share dialog opened.');
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setReportInfo('Report link copied to clipboard.');
+      }
+    } catch (error: any) {
+      setReportInfo(error?.message || 'Unable to share this report.');
+    }
+  };
+
+  const regenerateReport = async () => {
+    try {
+      setReportStatus('Regenerating...');
+      const response = await fetch(`${apiBase}/api/reports/regenerate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || data.message || 'Regeneration failed');
+      }
+      setReportGeneratedAt(data.timestamp || new Date().toISOString());
+      setReportStatus('Report refreshed');
+      setReportInfo(data.message || 'Report content refreshed with live data.');
+    } catch (error: any) {
+      setReportStatus('Refresh failed');
+      setReportInfo(error?.message || 'Unable to refresh report content.');
+    }
+  };
+
+  const handleSignalClick = (headline: string) => {
+    window.alert(`Signal details: ${headline}`);
+  };
+
+  const formattedReportTime = new Date(reportGeneratedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="landing-page" ref={scrollRef}>
