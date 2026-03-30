@@ -1,5 +1,10 @@
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useRouter } from 'next/navigation';
+import LandingPage from '@/src/pages/LandingPage';
 
 export default function Home() {
-  redirect('/dashboard');
+  const router = useRouter();
+
+  return <LandingPage onSignIn={() => router.push('/login')} />;
 }

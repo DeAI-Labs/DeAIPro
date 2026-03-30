@@ -88,13 +88,37 @@ logger = structlog.get_logger(__name__)
 # Firebase Admin
 try:
     if not firebase_admin._apps:
-        cred_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "serviceAccountKey.json")
-        if os.path.exists(cred_path):
-            cred = credentials.Certificate(cred_path)
+        cred = None
+        service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+
+        if service_account_json:
+            try:
+                cred_payload = _agent_json.loads(service_account_json)
+                cred = credentials.Certificate(cred_payload)
+                logger.info("Firebase Admin initialized from FIREBASE_SERVICE_ACCOUNT_JSON")
+            except Exception as e:
+                logger.warning(f"Invalid FIREBASE_SERVICE_ACCOUNT_JSON payload: {e}")
+
+        if cred is None:
+            cred_path = os.getenv(
+                "GOOGLE_APPLICATION_CREDENTIALS",
+                os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH", "serviceAccountKey.json")
+            )
+            if cred_path and os.path.exists(cred_path):
+                cred = credentials.Certificate(cred_path)
+                logger.info(f"Firebase Admin initialized from file path: {cred_path}")
+            elif cred_path:
+                try:
+                    cred_payload = _agent_json.loads(cred_path)
+                    cred = credentials.Certificate(cred_payload)
+                    logger.info("Firebase Admin initialized from GOOGLE_APPLICATION_CREDENTIALS JSON payload")
+                except Exception:
+                    logger.warning(f"Firebase credentials not found or invalid at {cred_path}")
+
+        if cred:
             firebase_admin.initialize_app(cred)
-            logger.info("Firebase Admin initialized")
         else:
-            logger.warning(f"Firebase credentials not found at {cred_path}")
+            logger.warning("Firebase credentials not found; Firebase auth disabled")
 except Exception as e:
     logger.error(f"Firebase initialization failed: {e}")
 
@@ -106,16 +130,21 @@ app = FastAPI(
 )
 
 # CORS
+cors_origins = [origin.strip() for origin in settings.backend_cors_origins.split(",") if origin.strip()]
+extra_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://deai-zeta.vercel.app",
+    "https://de-ai-pro.vercel.app",
+    "https://deai-nexus-pro.vercel.app",
+    "https://deai-nexus.vercel.app",
+]
+allow_origins = list(dict.fromkeys(cors_origins + extra_origins))
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://deai-zeta.vercel.app",
-        "https://de-ai-pro.vercel.app",
-    ],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

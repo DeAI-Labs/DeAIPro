@@ -6,6 +6,8 @@ import structlog
 from bs4 import BeautifulSoup
 import os
 
+from config.settings import settings
+
 # Import cache
 from cache import get_cache, set_cache
 
@@ -13,8 +15,9 @@ logger = structlog.get_logger(__name__)
 
 # API Keys & Constants
 
-TAOSTATS_API_KEY = os.getenv("TAOSTATS_API_KEY", "")
-TAOSTATS_BASE = "https://api.taostats.io/api"
+taostats_api_key = settings.taostats_api_key or os.getenv("TAOSTATS_API_KEY", "")
+TAOSTATS_API_KEY = taostats_api_key.strip()
+TAOSTATS_BASE = settings.taostats_api_url.rstrip("/") if settings.taostats_api_url else os.getenv("TAOSTATS_API_URL", "https://api.taostats.io").rstrip("/")
 
 TAO_DAILY_URL = "https://taodaily.io"
 GITHUB_API_BASE = "https://api.github.com"
@@ -104,15 +107,20 @@ async def fetch_subnets_from_taostats() -> Optional[Dict[int, Dict[str, Any]]]:
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.get(
-                f"{TAOSTATS_BASE}/subnet/latest/v1",
-                params={"limit": 256, "order": "emission desc"},
-                headers=headers
+                f"{TAOSTATS_BASE}/api/v1/subnets",
+                params={"limit": 256},
+                headers=headers,
             )
             resp.raise_for_status()
             raw = resp.json()
-            subnets_raw = raw.get("data", raw) if isinstance(raw, dict) else raw
+            subnets_raw = raw.get("subnets") or raw.get("data") or raw if isinstance(raw, (list, dict)) else []
+            if isinstance(subnets_raw, dict):
+                subnets_raw = subnets_raw.get("subnets") or subnets_raw.get("data") or []
+
             result = {}
             for s in subnets_raw:
+                if not isinstance(s, dict):
+                    continue
                 netuid = s.get("netuid") or s.get("net_uid")
                 if netuid is None:
                     continue
@@ -133,6 +141,76 @@ async def fetch_subnets_from_taostats() -> Optional[Dict[int, Dict[str, Any]]]:
     except Exception as e:
         logger.error(f"TaoStats fetch failed: {e}")
         return None
+
+
+def _parse_taostats_price(raw: Any) -> Optional[Dict[str, Any]]:
+    if not raw:
+        return None
+    if isinstance(raw, dict):
+        data = raw.get("data") or raw
+        if isinstance(data, dict):
+            usd = data.get("tao_price") or data.get("price_usd") or data.get("usd") or data.get("price")
+            btc = data.get("tao_price_btc") or data.get("price_btc") or data.get("btc")
+            market_cap = data.get("market_cap") or data.get("market_cap_usd") or data.get("usd_market_cap")
+            volume_24h = data.get("volume_24h") or data.get("volume_24h_usd") or data.get("usd_24h_vol")
+            change_pct = data.get("tao_price_change_24h") or data.get("change_24h_percent") or data.get("price_change_24h")
+            if usd is not None:
+                return {
+                    "tao_price": float(usd),
+                    "tao_price_btc": float(btc or 0),
+                    "market_cap": float(market_cap or 0),
+                    "volume_24h": float(volume_24h or 0),
+                    "tao_price_change_24h": float(change_pct or 0),
+                    "source": "taostats",
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+    return None
+
+
+async def fetch_tao_price() -> Optional[Dict[str, Any]]:
+    """Fetch current TAO price from TaoStats server-side.
+
+    This function uses the configured TaoStats API key and cache. If no key
+    is available, it returns None and upstream callers fall back to a safe
+    default price.
+    """
+    cache = await get_cache("tao_price", max_age_mins=2)
+    if cache:
+        return cache
+
+    if not TAOSTATS_API_KEY:
+        logger.warning("TaoStats API key not set; live price fetch skipped")
+        return None
+
+    candidate_paths = [
+        "/api/v1/price",
+        "/price",
+        "/price/latest/v1",
+        "/api/v1/market/price",
+        "/v1/market/price",
+    ]
+    headers = {"Authorization": f"Bearer {TAOSTATS_API_KEY}"}
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            for path in candidate_paths:
+                url = f"{TAOSTATS_BASE.rstrip('/')}/{path.lstrip('/')}"
+                try:
+                    resp = await client.get(url, headers=headers)
+                    if resp.status_code != 200:
+                        continue
+                    raw = resp.json()
+                    parsed = _parse_taostats_price(raw)
+                    if parsed:
+                        await set_cache("tao_price", parsed, ttl_mins=2, source="taostats")
+                        return parsed
+                except Exception as e:
+                    logger.debug(f"TaoStats price endpoint failed ({url}): {e}")
+                    continue
+    except Exception as e:
+        logger.error(f"TaoStats price fetch failed: {e}")
+
+    return None
 
 
 # BeautifulSoup: TAO Daily News Scraping
@@ -237,15 +315,3 @@ async def fetch_all_news() -> List[Dict[str, Any]]:
     return news
 
 
-async def fetch_tao_price() -> Optional[Dict[str, Any]]:
-    """Fetch live TAO/USD price from CoinGecko via the price service.
-
-    Re-exported here for backwards compatibility (main.py imports from dynamic).
-    """
-    try:
-        from services.price import PriceService
-        service = PriceService()
-        return await service._fetch_current_price()
-    except Exception as e:
-        logger.warning(f"fetch_tao_price failed: {e}")
-        return None
