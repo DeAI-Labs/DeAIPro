@@ -20,10 +20,24 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-// Prevent duplicate app initialization (Next.js hot reload)
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig)
-const auth = getAuth(app)
-const googleProvider = new GoogleAuthProvider()
+const isBrowser = typeof window !== 'undefined'
+const hasFirebaseConfig =
+  !!firebaseConfig.apiKey &&
+  !!firebaseConfig.authDomain &&
+  !!firebaseConfig.projectId &&
+  !!firebaseConfig.storageBucket &&
+  !!firebaseConfig.messagingSenderId &&
+  !!firebaseConfig.appId
+
+let app
+let auth
+let googleProvider
+
+if (isBrowser && hasFirebaseConfig) {
+  app = getApps().length ? getApp() : initializeApp(firebaseConfig)
+  auth = getAuth(app)
+  googleProvider = new GoogleAuthProvider()
+}
 
 export {
   app,

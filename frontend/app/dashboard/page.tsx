@@ -9,7 +9,7 @@ export default function NexusProDashboard() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    ;(window as any).__DEAI_FIREBASE_CONFIG__ = {
+    const firebaseConfig = {
       apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
       authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
@@ -17,6 +17,10 @@ export default function NexusProDashboard() {
       messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
       appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     };
+
+    if (!firebaseConfig.apiKey) return;
+
+    ;(window as any).__DEAI_FIREBASE_CONFIG__ = firebaseConfig;
     setMounted(true);
   }, []);
 
@@ -28,7 +32,7 @@ export default function NexusProDashboard() {
         suppressHydrationWarning 
       />
       {mounted && (
-        <Script src="/dashboard-script.js" strategy="afterInteractive" type="module" />
+        <Script src="/dashboard-script.js" strategy="afterInteractive" />
       )}
     </>
   );

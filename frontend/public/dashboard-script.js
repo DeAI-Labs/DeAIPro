@@ -1296,18 +1296,6 @@ function updateSubnetsFromTaostats(apiData) {
 // PRICE DATA
 // ============================================
 
-// Use calibrated/fallback price data
-function useFallbackPriceData() {
-    const price = 191.43;
-    const change24h = 2.4;
-    const marketCap = 1.84e9;
-    const volume24h = 92.7e6;
-    
-    currentTaoPrice = price;
-    updateAllPriceDisplays(price, change24h, marketCap, volume24h);
-    return { price, change24h, marketCap, volume24h };
-}
-
 // Fetch BTC price (returns fallback)
 async function fetchBtcPrice() {
     return 97000;
@@ -1380,20 +1368,6 @@ function updateHeaderStatus() {
 // Legacy function for compatibility
 async function fetchTaoLiveData() {
     return fetchAllLiveData();
-}
-
-// Initialize live data on load
-async function initLiveData() {
-    // Load saved API key
-    taostatsApiKey = localStorage.getItem('taostats_api_key') || '';
-    
-    // Fetch initial data
-    await fetchAllLiveData();
-    
-    // Set up auto-refresh if API key exists (every 5 minutes by default)
-    if (taostatsApiKey) {
-        apiRefreshInterval = setInterval(fetchAllLiveData, 300000);
-    }
 }
 
 // Update all price-related displays
@@ -1984,38 +1958,6 @@ function updateEfficientFrontier(portfolio, portReturn, portVol) {
             }
         }
     });
-}
-
-// Apply recalibrated weights
-function applyRecalibratedWeights() {
-    scoreWeights = {
-        econ: 25,
-        net: 10,
-        fund: 25,
-        liq: 18,
-        mom: 7,
-        qual: 12,
-        val: 3
-    };
-    
-    // Update sliders if they exist
-    const updateSlider = (id, val) => {
-        const el = document.getElementById(id);
-        if (el) { el.value = val; }
-    };
-    updateSlider('s-econ', 25);
-    updateSlider('s-net', 10);
-    updateSlider('s-fund', 25);
-    updateSlider('s-liq', 18);
-    updateSlider('s-mom', 7);
-    updateSlider('s-qual', 12);
-    updateSlider('s-val', 3);
-    
-    updateWeights();
-    renderList();
-    
-    // Show confirmation
-    alert('Recalibrated weights applied! Economic: 25%, Network: 10%, Fundamental: 25%, Liquidity: 18%, Momentum: 7%, Quality: 12%, Valuation: 3%');
 }
 
 // Relative Value Calculator

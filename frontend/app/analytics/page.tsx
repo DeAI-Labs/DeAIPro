@@ -41,15 +41,15 @@ function AnalyticsContent() {
   const topSubnets = (subnets?.data || [])
     .slice(0, 5)
     .map((s) => ({
-      name: s.name,
-      market_cap_millions: s.market_cap_millions || 0,
+      name: s.n,
+      market_cap_millions: s.mc || 0,
     }));
 
   // Count subnets by category
   const categoryCounts = new Map<string, number>();
   (subnets?.data || []).forEach((s) => {
-    const count = categoryCounts.get(s.category) || 0;
-    categoryCounts.set(s.category, count + 1);
+    const count = categoryCounts.get(s.cat) || 0;
+    categoryCounts.set(s.cat, count + 1);
   });
 
   const categories = Array.from(categoryCounts, ([name, count]) => ({

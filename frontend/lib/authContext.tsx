@@ -64,6 +64,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!auth) {
+      setLoading(false)
+      return
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
       setUser(nextUser)
       setLoading(false)
@@ -71,7 +76,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return unsubscribe
   }, [])
 
+  const authNotConfiguredMessage =
+    'Authentication is not configured. Please set Firebase environment variables.'
+
   const signIn = async (email: string, password: string) => {
+    if (!auth) return authNotConfiguredMessage
+
     try {
       await signInWithEmailAndPassword(auth, email, password)
       return null
@@ -81,6 +91,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string) => {
+    if (!auth) return authNotConfiguredMessage
+
     try {
       await createUserWithEmailAndPassword(auth, email, password)
       return null
@@ -90,6 +102,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signInWithGoogle = async () => {
+    if (!auth || !googleProvider) return authNotConfiguredMessage
+
     try {
       await signInWithPopup(auth, googleProvider)
       return null
@@ -99,6 +113,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const resetPassword = async (email: string) => {
+    if (!auth) return authNotConfiguredMessage
+
     try {
       await sendPasswordResetEmail(auth, email)
       return 'Reset email sent'
@@ -108,6 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    if (!auth) return
     await firebaseSignOut(auth)
   }
 
