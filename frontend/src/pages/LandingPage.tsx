@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -49,12 +50,9 @@ for (let v = 15; v <= 80; v++) {
 }
 
 export const LandingPage: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) => {
+  const router = useRouter();
   const apiBase = process.env.NEXT_PUBLIC_API_URL || '';
   const [period, setPeriod] = useState<keyof typeof RATIO_DATA>('7D');
-  const [showRequestModal, setShowRequestModal] = useState(false);
-  const [requestEmail, setRequestEmail] = useState('');
-  const [requestMessage, setRequestMessage] = useState('');
-  const [requestError, setRequestError] = useState('');
   const [reportGeneratedAt, setReportGeneratedAt] = useState<string>(new Date().toISOString());
   const [reportStatus, setReportStatus] = useState('Ready');
   const [reportInfo, setReportInfo] = useState('Last generated with live subnet and market data.');
@@ -83,48 +81,14 @@ export const LandingPage: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =>
     return gradient;
   };
 
-  const openRequestModal = () => {
-    setRequestMessage('');
-    setRequestError('');
-    setShowRequestModal(true);
-  };
-
-  const closeRequestModal = () => {
-    setShowRequestModal(false);
-    setRequestEmail('');
+  const requestAccess = () => {
+    router.push('/access-request');
   };
 
   const handleViewDemo = () => {
     analyticsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleRequestAccess = async () => {
-    setRequestError('');
-    setRequestMessage('');
-
-    const email = requestEmail.trim();
-    if (!email) {
-      setRequestError('Please enter your institutional email address.');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${apiBase}/api/request-access`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        setRequestError(data.detail || data.message || 'Request failed. Please try again.');
-        return;
-      }
-      setRequestMessage(data.message || `Access request submitted for ${email}.`);
-      setRequestError('');
-    } catch (error: any) {
-      setRequestError(error?.message || 'Unable to submit access request.');
-    }
-  };
 
   const exportPdf = async () => {
     try {
@@ -248,8 +212,8 @@ export const LandingPage: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =>
             <h1 className="fi d2">The Private Terminal<br />for the <em>Decentralized<br />AI Economy.</em></h1>
             <p className="hero-sub fi d3">Institutional-grade intelligence for allocating capital across Bittensor subnets. Real-time feeds, portfolio analytics, and AI-generated research — all in one regulated platform.</p>
             <div className="hero-cta fi d4">
-              <button className="btn-primary btn-lg" onClick={onSignIn}>Request Institutional Access</button>
-              <button className="btn-ghost btn-lg">View Demo</button>
+              <button className="btn-primary btn-lg" onClick={requestAccess}>Request Institutional Access</button>
+              <button className="btn-ghost btn-lg" onClick={handleViewDemo}>View Demo</button>
             </div>
             <div className="hero-stats fi d4">
               <div><div className="hs-val">$482M</div><div className="hs-label">TVL Deployed</div></div>
@@ -519,7 +483,7 @@ export const LandingPage: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =>
       <hr className="divider" />
 
       {/* LIVE NEWS */}
-      <div className="sec fi">
+      <div className="sec fi" ref={analyticsRef}>
         <div style={{ marginBottom: 44 }}>
           <div className="sec-eye">Intelligence Feed</div>
           <div className="sec-title">Up to the minute.<br />Always on.</div>
@@ -643,8 +607,8 @@ export const LandingPage: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) =>
           <div className="cta-title">The edge is<br /><em>already live.</em></div>
           <p className="cta-sub">Join institutions allocating intelligently in the decentralized AI economy. Request full platform access.</p>
           <div className="cta-btns">
-            <button className="btn-primary btn-lg" onClick={onSignIn}>Request Institutional Access</button>
-            <button className="btn-ghost btn-lg">Schedule a Demo</button>
+            <button className="btn-primary btn-lg" onClick={requestAccess}>Request Institutional Access</button>
+            <button className="btn-ghost btn-lg" onClick={handleViewDemo}>Schedule a Demo</button>
           </div>
         </div>
       </div>

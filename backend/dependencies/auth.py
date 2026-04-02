@@ -12,12 +12,15 @@ the uvicorn event loop.
 
 import asyncio
 import logging
+from datetime import datetime
 from functools import partial
 from typing import Optional
 
 from fastapi import Depends, Header, HTTPException, status
 from firebase_admin import auth as firebase_auth
 from pydantic import BaseModel
+
+from models import TemporaryAccess
 
 logger = logging.getLogger(__name__)
 
@@ -38,25 +41,43 @@ class CurrentUser(BaseModel):
         return self.email.lower().endswith(STAFF_DOMAIN)
 
 
-async def verify_token(token: str) -> Optional[dict]:
-    """Verify a Firebase ID token asynchronously.
+async def verify_temporary_access_token(token: str) -> Optional[dict]:
+    """Verify a TemporaryAccess token from MongoDB."""
+    try:
+        temp_access = await TemporaryAccess.find_one(
+            TemporaryAccess.token == token,
+            TemporaryAccess.revoked == False,
+            TemporaryAccess.expires_at > datetime.utcnow(),
+        )
+        if not temp_access:
+            return None
 
-    The Firebase Admin SDK calls `requests.get` to fetch Google's public keys
-    on cache-misses, which is a synchronous blocking I/O operation.  We run it
-    in the default thread-pool executor so the event loop is never stalled.
-    """
+        temp_access.accessed_at = datetime.utcnow()
+        temp_access.request_count = (temp_access.request_count or 0) + 1
+        await temp_access.save()
+
+        return {
+            "uid": f"temp:{temp_access.token}",
+            "email": temp_access.email,
+            "email_verified": False,
+            "admin": False,
+        }
+    except Exception as e:
+        logger.error(f"Temporary access verification failed: {e}")
+        return None
+
+
+async def verify_token(token: str) -> Optional[dict]:
+    """Verify a Firebase ID token asynchronously, or fall back to TemporaryAccess."""
     loop = asyncio.get_event_loop()
     try:
         decoded_token = await loop.run_in_executor(
             None, partial(firebase_auth.verify_id_token, token)
         )
         return decoded_token
-    except firebase_auth.InvalidIdTokenError:
-        logger.warning("Token verification failed: invalid ID token")
-        return None
-    except firebase_auth.ExpiredIdTokenError:
-        logger.warning("Token verification failed: expired ID token")
-        return None
+    except (firebase_auth.InvalidIdTokenError, firebase_auth.ExpiredIdTokenError):
+        logger.info("Firebase token invalid or expired; attempting temporary access token lookup")
+        return await verify_temporary_access_token(token)
     except Exception as e:
         logger.error(f"Token verification error: {e}")
         return None
@@ -147,11 +168,7 @@ async def require_admin(
 async def get_or_create_temp_access(
     token: Optional[str] = None,
 ) -> Optional[CurrentUser]:
-    """Allow either Firebase auth or a temporary 24-hour access token.
-
-    Phase 3 will replace the Firebase fallback with proper DB-backed
-    temporary token validation.
-    """
+    """Allow either Firebase auth or a temporary 24-hour access token."""
     if not token:
         return None
     try:
